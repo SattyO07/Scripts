@@ -10,7 +10,7 @@ local Find_Required = API_Check()
 
 if Find_Required == "No" then
     game:GetService("StarterGui"):SetCore("SendNotification",{
-        Title = "Exunys Developer";
+        Title = "SatBox";
         Text = "Boxes script could not be loaded because your exploit is unsupported.";
         Duration = math.huge;
         Button1 = "OK"
