@@ -1,51 +1,117 @@
-local ESP = loadstring(game:HttpGet("https://kiriot22.com/releases/ESP.lua"))()
+local dwEntities = game:GetService("Players")
+local dwLocalPlayer = dwEntities.LocalPlayer 
+local dwRunService = game:GetService("RunService")
 
-local Modules
-for i,v in pairs(getgc()) do
-    if type(v) == "function" and islclosure(v) and not is_synapse_function(v) then
-        local up = getupvalues(v)
-        for i,v in pairs(up) do
-            if type(v) == "table" and rawget(v, "Kitty") then
-                local f = getrawmetatable(v).__index
-                Modules = getupvalue(f, 1)
-                break
+function destroy_chams(char)
+
+    for k,v in next, char:GetChildren() do 
+
+        if v:IsA("BasePart") and v.Transparency ~= 1 then
+
+            if v:FindFirstChild("Glow") and 
+            v:FindFirstChild("Chams") then
+
+                v.Glow:Destroy()
+                v.Chams:Destroy() 
+
+            end 
+
+        end 
+
+    end 
+
+end
+
+dwRunService.Heartbeat:Connect(function()
+
+    if settings_tbl.ESP_Enabled then
+
+        for k,v in next, dwEntities:GetPlayers() do 
+
+            if v ~= dwLocalPlayer then
+
+                if v.Character and
+                v.Character:FindFirstChild("HumanoidRootPart") and 
+                v.Character:FindFirstChild("Humanoid") and 
+                v.Character:FindFirstChild("Humanoid").Health ~= 0 then
+
+                    if settings_tbl.ESP_TeamCheck == false then
+
+                        local char = v.Character 
+
+                        for k,b in next, char:GetChildren() do 
+
+                            if b:IsA("BasePart") and 
+                            b.Transparency ~= 1 then
+                                
+                                if settings_tbl.Chams then
+
+                                    if not b:FindFirstChild("Glow") and
+                                    not b:FindFirstChild("Chams") then
+
+                                        local chams_box = Instance.new("BoxHandleAdornment", b)
+                                        chams_box.Name = "Chams"
+                                        chams_box.AlwaysOnTop = true 
+                                        chams_box.ZIndex = 4 
+                                        chams_box.Adornee = b 
+                                        chams_box.Color3 = settings_tbl.Chams_Color
+                                        chams_box.Transparency = settings_tbl.Chams_Transparency
+                                        chams_box.Size = b.Size + Vector3.new(0.02, 0.02, 0.02)
+
+                                        local glow_box = Instance.new("BoxHandleAdornment", b)
+                                        glow_box.Name = "Glow"
+                                        glow_box.AlwaysOnTop = false 
+                                        glow_box.ZIndex = 3 
+                                        glow_box.Adornee = b 
+                                        glow_box.Color3 = settings_tbl.Chams_Glow_Color
+                                        glow_box.Size = chams_box.Size + Vector3.new(0.13, 0.13, 0.13)
+
+                                    end
+
+                                else
+
+                                    destroy_chams(char)
+
+                                end
+                            
+                            end
+
+                        end
+
+                    else
+
+                        if v.Team == dwLocalPlayer.Team then
+                            destroy_chams(v.Character)
+                        end
+
+                    end
+
+                else
+
+                    destroy_chams(v.Character)
+
+                end
+
             end
+
         end
-    end
-end
 
-ESP.Overrides.GetTeam = function(p)
-    return game.Teams:FindFirstChild(Modules.Teams:GetPlayerTeam(p))
-end
+    else 
 
-ESP.Overrides.GetPlrFromChar = function(char)
-    return Modules.Characters:GetPlayerFromCharacter(char)
-end
+        for k,v in next, dwEntities:GetPlayers() do 
 
-ESP.Overrides.GetColor = function(char)
-    local p = ESP:GetPlrFromChar(char)
-    if p then
-        local team = ESP:GetTeam(p)
-        if team then
-            return team.Color.Value
+            if v ~= dwLocalPlayer and 
+            v.Character and 
+            v.Character:FindFirstChild("HumanoidRootPart") and 
+            v.Character:FindFirstChild("Humanoid") and 
+            v.Character:FindFirstChild("Humanoid").Health ~= 0 then
+                
+                destroy_chams(v.Character)
+
+            end
+
         end
-    end
-    return nil
-end
 
-local function CharAdded(char)
-    local p = game.Players:FindFirstChild(char.Name) or ESP:GetPlrFromChar(char)
-    if not p or p == game.Players.LocalPlayer then
-        return
     end
 
-    ESP:Add(char, {
-        Name = p.Name,
-        Player = p,
-        PrimaryPart = char.PrimaryPart or char:WaitForChild("Root")
-    })
-end
-workspace.Characters.ChildAdded:Connect(CharAdded)
-for i,v in pairs(workspace.Characters:GetChildren()) do
-    coroutine.wrap(CharAdded)(v)
-end
+end)
