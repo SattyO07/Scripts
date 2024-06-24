@@ -156,6 +156,14 @@ Tab2:AddButton({
     end    
 })
 
+Tab2:AddButton({
+    Name = "StreamSnipper",
+    Callback = function() 
+loadstring(game:HttpGet("https://raw.githubusercontent.com/FFJ1/Roblox-Exploits/main/scripts/Sniper.lua"))()
+    end    
+})
+
+
 local Nogui = Tab2:AddSection({
     Name = "No Gui:"
 })
