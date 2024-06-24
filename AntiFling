@@ -32,8 +32,8 @@ local function PlayerAdded(Player)
             if PrimaryPart.AssemblyAngularVelocity.Magnitude > 50 or PrimaryPart.AssemblyLinearVelocity.Magnitude > 100 then
                 if Detected == false then
                     local Notification = Instance.new("Notification")
-                    Notification.Title = "Suspicious Activity Detected"
-                    Notification.Text = "Player: ".. tostring(Player).. " has been detected with suspicious movement."
+                    Notification.Title = "AntiFling"
+                    Notification.Text = "tostring(Player).. " has been detect or Flung."
                     Notification.Duration = 5
                     Notification.Parent = LocalPlayer.PlayerGui
                 end
