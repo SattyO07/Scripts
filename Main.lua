@@ -1,9 +1,8 @@
 -- Values
 local plrs = game.Players
 local playerNames = {}
-local UserInputService = game:GetService("UserInputService")
-local GameName = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
 local RunService = game:GetService("RunService")
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/Unknownkellymc1/Orion/main/source')))()
 
 -- Function to update player names
 local function updatePlayerNames()
@@ -26,124 +25,14 @@ RunService.RenderStepped:Connect(function()
     UpdateFps = math.floor(1 / DeltaTime)
 end)
 
--- Update player count
-local PlayerCount = "0/0"
-local function updatePlayerCount()
-    local currentPlayerCount = #plrs:GetPlayers()
-    local maxPlayerCount = game.Players.MaxPlayers
-
-    PlayerCount = currentPlayerCount .. "/" .. maxPlayerCount
-end
-
--- Library
-local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/Unknownkellymc1/Orion/main/source')))()
-
 -- Window
+local GameName = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
 local Window = OrionLib:MakeWindow({Name = "MoonLight : [" .. GameName .. "]", HidePremium = false, SaveConfig = false, ConfigFolder = "ReaperSaved"})
 
--- Tabs
-local Tab1 = Window:MakeTab({Name = "Universal", Icon = "rbxassetid://7733954760", PremiumOnly = false})
-local Tab2 = Window:MakeTab({Name = "Scripts", Icon = "rbxassetid://7733774602", PremiumOnly = false})
-local Tab3 = Window:MakeTab({Name = "Info", Icon = "rbxassetid://7733964719", PremiumOnly = false})
-
 -- [Universal]--
-local Character = Tab1:AddSection({Name = "Character:"})
+local Tab1 = Window:MakeTab({Name = "Universal", Icon = "rbxassetid://7733954760", PremiumOnly = false})
 
-local speedSlider
-local speedToggle
-
-speedSlider = Tab1:AddSlider({
-    Name = "Set Speed",
-    Min = 0,
-    Max = 1000,
-    Default = 16,
-    Color = Color3.fromRGB(255, 255, 255),
-    Increment = 1,
-    ValueName = "Value",
-    Callback = function(speed)
-        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = speed
-    end
-})
-
-speedToggle = Tab1:AddToggle({
-    Name = "Enable Speed",
-    Default = false,
-    Callback = function(enabled)
-        speedSlider:SetEnabled(enabled)
-        if not enabled then
-            game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16 
-        end
-    end
-})
-
-local jumpPowerSlider
-local jumpPowerToggle
-
-jumpPowerSlider = Tab1:AddSlider({
-    Name = "Set Jump Power",
-    Min = 0,
-    Max = 500,
-    Default = 50,
-    Color = Color3.fromRGB(255, 255, 255),
-    Increment = 1,
-    ValueName = "Value",
-    Callback = function(jumpPower)
-        game.Players.LocalPlayer.Character.Humanoid.JumpPower = jumpPower
-    end
-})
-
-jumpPowerToggle = Tab1:AddToggle({
-    Name = "Enable Jump Power",
-    Default = false,
-    Callback = function(enabled)
-        jumpPowerSlider:SetEnabled(enabled)
-        if not enabled then
-            game.Players.LocalPlayer.Character.Humanoid.JumpPower = 50 
-        end
-    end
-})
-
-local fovSlider
-local fovToggle
-
-fovSlider = Tab1:AddSlider({
-    Name = "Set FOV",
-    Min = 70,
-    Max = 120,
-    Default = 70, -- Default FOV value
-    Color = Color3.fromRGB(255, 255, 255),
-    Increment = 1,
-    ValueName = "Value",
-    Callback = function(fov)
-        game.Workspace.CurrentCamera.FieldOfView = fov
-    end
-})
-
-fovToggle = Tab1:AddToggle({
-    Name = "Enable FOV",
-    Default = false,
-    Callback = function(enabled)
-        fovSlider:SetEnabled(enabled)
-        if not enabled then
-            game.Workspace.CurrentCamera.FieldOfView = 70 -- Default FOV
-        end
-    end
-})
-
-Tab1:AddButton({
-    Name = "Reset Character",
-    Callback = function()
-        local player = game.Players.LocalPlayer
-        local character = player.Character
-
-        if character then
-            character:BreakJoints()
-        end
-    end
-})
-
-updatePlayerNames()
-local players = Tab1:AddSection({Name = "Players:"})
+Tab1:AddParagraph("Player Selections", "Use DropDown to choose a Target player")
 
 local selectedPlayer
 local selectPlayers = Tab1:AddDropdown({
@@ -155,8 +44,15 @@ local selectPlayers = Tab1:AddDropdown({
     end
 })
 
-local teleportButton 
-teleportButton = Tab1:AddButton({
+local function refreshPlayerDropdown()
+    updatePlayerNames()
+    selectPlayers:Refresh(playerNames, true)
+end
+
+plrs.PlayerAdded:Connect(refreshPlayerDropdown)
+plrs.PlayerRemoving:Connect(refreshPlayerDropdown)
+
+local teleportButton = Tab1:AddButton({
     Name = "Teleport",
     Enabled = false,
     Callback = function()
@@ -167,24 +63,6 @@ teleportButton = Tab1:AddButton({
             if localPlayerRoot then
                 localPlayerRoot.CFrame = CFrame.new(targetPosition)
             end
-        end
-    end
-})
-
-Tab1:AddButton({
-    Name = "Copy Username",
-    Callback = function()
-        if selectedPlayer then
-            setclipboard(selectedPlayer.Name)
-        end
-    end
-})
-
-Tab1:AddButton({
-    Name = "Copy User ID",
-    Callback = function()
-        if selectedPlayer then
-            setclipboard(tostring(selectedPlayer.UserId))
         end
     end
 })
@@ -208,13 +86,12 @@ local function stopSpectating()
     end
 end
 
-local spectateToggle 
-spectateToggle = Tab1:AddToggle({
+local spectateToggle = Tab1:AddToggle({
     Name = "Spectate",
     Default = false,
-    Callback = function(Value)
+    Callback = function(enabled)
         if selectedPlayer then
-            if Value then
+            if enabled then
                 spectatePlayer(selectedPlayer)
             else
                 stopSpectating()
@@ -223,7 +100,36 @@ spectateToggle = Tab1:AddToggle({
     end
 })
 
-Tab1:AddButton({
+local function gplr(String)
+    local Found = {}
+    local strl = String:lower()
+    if strl == "all" then
+        for i,v in pairs(game.Players:GetPlayers()) do
+            table.insert(Found,v)
+        end
+    elseif strl == "others" then
+        for i,v in pairs(game.Players:GetPlayers()) do
+            if v.Name ~= lp.Name then
+                table.insert(Found,v)
+            end
+        end 
+    elseif strl == "me" then
+        for i,v in pairs(game.Players:GetPlayers()) do
+            if v.Name == lp.Name then
+                table.insert(Found,v)
+            end
+        end 
+    else
+        for i,v in pairs(game.Players:GetPlayers()) do
+            if v.Name:lower():sub(1, #String) == String:lower() then
+                table.insert(Found,v)
+            end
+        end 
+    end
+    return Found 
+end
+
+local flingButton = Tab1:AddButton({
     Name = "Fling",
     Callback = function()
         if selectedPlayer == game.Players.LocalPlayer then
@@ -238,43 +144,6 @@ Tab1:AddButton({
 
         local lp = game.Players.LocalPlayer
 
-        local function gplr(String)
-            local Found = {}
-            local strl = String:lower()
-            if strl == "all" then
-                for i,v in pairs(game.Players:GetPlayers()) do
-                    table.insert(Found,v)
-                end
-            elseif strl == "others" then
-                for i,v in pairs(game.Players:GetPlayers()) do
-                    if v.Name ~= lp.Name then
-                        table.insert(Found,v)
-                    end
-                end 
-            elseif strl == "me" then
-                for i,v in pairs(game.Players:GetPlayers()) do
-                    if v.Name == lp.Name then
-                        table.insert(Found,v)
-                    end
-                end 
-            else
-                for i,v in pairs(game.Players:GetPlayers()) do
-                    if v.Name:lower():sub(1, #String) == String:lower() then
-                        table.insert(Found,v)
-                    end
-                end 
-            end
-            return Found 
-        end
-
-        local function notif(str, dur)
-            game.StarterGui:SetCore("SendNotification", {
-                Title = "Fling Gui",
-                Text = str,
-                Duration = dur or 3
-            })
-        end
-
         local Target = gplr(selectedPlayer.Name)
         if Target[1] then
             Target = Target[1]
@@ -288,58 +157,164 @@ Tab1:AddButton({
                 game:GetService("RunService").Heartbeat:wait()
             until not Target.Character:FindFirstChild("Head")
         else
-            notif("Invalid player")
+            OrionLib:MakeNotification({
+                Name = "Invalid Player",
+                Content = "The selected player is invalid",
+                Image = "rbxassetid://4483345998",
+                Time = 3
+            })
         end
     end
 })
 
--- [Scripts]--
-local ToolGui = Tab2:AddSection({Name = "Tools Gui:"})
+Tab1:AddButton({
+    Name = "Copy Username",
+    Callback = function()
+        if selectedPlayer then
+            setclipboard(selectedPlayer.Name)
+        end
+    end
+})
+
+Tab1:AddButton({
+    Name = "Copy User ID",
+    Callback = function()
+        if selectedPlayer then
+            setclipboard(tostring(selectedPlayer.UserId))
+        end
+    end
+})
+
+local Text1 = Tab1:AddParagraph("Self Config","Adjust your Some Available Info use Int ex: (10)")
+
+Tab1:AddTextbox({
+    Name = "Walk Speed",
+    Default = "16",
+    TextDisappear = false,
+    Callback = function(value)
+        local speed = tonumber(value)
+        if speed then
+            plrs.LocalPlayer.Character.Humanoid.WalkSpeed = speed
+        end
+    end
+})
+
+Tab1:AddButton({
+    Name = "Apply Walk Speed",
+    Callback = function()
+        local speed = tonumber(Tab1:GetTextbox("Walk Speed").Value)
+        if speed then
+            plrs.LocalPlayer.Character.Humanoid.WalkSpeed = speed
+        end
+    end
+})
+
+Tab1:AddTextbox({
+    Name = "Jump Power",
+    Default = "50",
+    TextDisappear = false,
+    Callback = function(value)
+        local jumpPower = tonumber(value)
+        if jumpPower then
+            plrs.LocalPlayer.Character.Humanoid.JumpPower = jumpPower
+        end
+    end
+})
+
+Tab1:AddButton({
+    Name = "Apply Jump Power",
+    Callback = function()
+        local jumpPower = tonumber(Tab1:GetTextbox("Jump Power").Value)
+        if jumpPower then
+            plrs.LocalPlayer.Character.Humanoid.JumpPower = jumpPower
+        end
+    end
+})
+
+Tab1:AddTextbox({
+    Name = "Field of View",
+    Default = "70",
+    TextDisappear = false,
+    Callback = function(value)
+        local fov = tonumber(value)
+        if fov then
+            game.Workspace.CurrentCamera.FieldOfView = fov
+        end
+    end
+})
+
+Tab1:AddButton({
+    Name = "Apply Field of View",
+    Callback = function()
+        local fov = tonumber(Tab1:GetTextbox("Field of View").Value)
+        if fov then
+            game.Workspace.CurrentCamera.FieldOfView = fov
+        end
+    end
+})
+
+-- [Scripts] --
+local Tab2 = Window:MakeTab({Name = "Scripts", Icon = "rbxassetid://7733774602", PremiumOnly = false})
+
+Tab2:AddParagraph("Tools Scripting", "Easy to build a script")
 
 Tab2:AddButton({
     Name = "Infinite Yield",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
-    end    
+    end
 })
 
 Tab2:AddButton({
     Name = "Dex v4",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/peyton2465/Dex/master/out.lua"))()
-    end    
+    end
 })
 
 Tab2:AddButton({
     Name = "Simple Spy",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/exxtremestuffs/SimpleSpySource/master/SimpleSpy.lua"))()
-    end    
-})
-
-Tab2:AddButton({
-    Name = "Dark Dex",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/SpaceYes/Lua/Main/DarkDex.lua"))()
-    end    
+    end
 })
 
 Tab2:AddButton({
     Name = "DomainX",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/DomainX/main/source", true))()
-    end    
+    end
 })
 
--- [Info]--
+local text2 = Tab2:AddParagraph("Scripts","Useful Scripts to avoid Exploiters.")
+
+Tab2:AddButton({
+    Name = "AntiBang",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/SattyO07/Scripts/main/AntiBang", true))()
+    end
+})
+
+Tab2:AddButton({
+    Name = "AntiFling",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/SattyO07/Scripts/main/AntiFling", true))()
+    end
+})
+
+
+-- [Info] --
+local Tab3 = Window:MakeTab({Name = "Info", Icon = "rbxassetid://7733964719", PremiumOnly = false})
+
 Tab3:AddLabel("MoonLight Hub")
 
-Tab3:AddLabel("Player Count: " .. PlayerCount)
-RunService.RenderStepped:Connect(updatePlayerCount)
+local playerCountLabel = Tab3:AddLabel("Player Count: " .. #plrs:GetPlayers() .. "/" .. game.Players.MaxPlayers)
+local fpsLabel = Tab3:AddLabel("Current FPS: " .. UpdateFps)
 
-Tab3:AddLabel("Current FPS: ")
 RunService.RenderStepped:Connect(function()
-    Tab3:UpdateLabel("Current FPS: " .. UpdateFps)
+    playerCountLabel:Set("Player Count: " .. #plrs:GetPlayers() .. "/" .. game.Players.MaxPlayers)
+    fpsLabel:Set("Current FPS: " .. UpdateFps)
 end)
 
+-- Initialize the library
 OrionLib:Init()
