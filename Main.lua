@@ -302,6 +302,13 @@ Tab2:AddButton({
     end
 })
 
+Tab2:AddButton({
+    Name = "Yarhm Hub",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Joystickplays/psychic-octo-invention/main/yarhm.lua", false))()
+    end
+})
+
 
 -- [Info] --
 local Tab3 = Window:MakeTab({Name = "Info", Icon = "rbxassetid://7733964719", PremiumOnly = false})
