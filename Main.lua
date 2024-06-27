@@ -253,6 +253,15 @@ Tab1:AddButton({
     end
 })
 
+Tab1:AddParagraph("Dev Console", "Check output Developer console")
+
+Tab1:AddButton({
+    Name = "Dev Console",
+    Callback = function()
+        game.StarterGui:SetCore("DevConsoleVisible", true)
+    end
+})
+
 -- [Scripts] --
 local Tab2 = Window:MakeTab({Name = "Scripts", Icon = "rbxassetid://7733774602", PremiumOnly = false})
 
