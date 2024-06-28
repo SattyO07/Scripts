@@ -91,51 +91,47 @@ local function shootMurderer()
 })
     end
 end
--- Update UI creation and removal functions
+-- Function to create UI elements
 local function createUI()
     local player = game.Players.LocalPlayer
     local playerGui = player:WaitForChild("PlayerGui")
 
+    -- Check if ScreenGui already exists
     local screenGui = playerGui:FindFirstChild("MyScreenGui")
     if not screenGui then
         screenGui = Instance.new("ScreenGui")
         screenGui.Name = "MyScreenGui"
-        screenGui.ResetOnSpawn = true
+        screenGui.ResetOnSpawn = false -- Prevents ScreenGui from resetting on character respawn
         screenGui.Parent = playerGui
     end
 
+    -- Check if frame already exists
     local frame = screenGui:FindFirstChild("MyFrame")
     if not frame then
         frame = Instance.new("Frame")
         frame.Name = "MyFrame"
-        frame.Size = UDim2.new(0.1, 0, 0.1, 0)
-        frame.Position = UDim2.new(0.5, 0, 0.5, 0)
+        frame.Size = UDim2.new(0.1, 0, 0.1, 0) -- Size of the frame
+        frame.Position = UDim2.new(0.5, 0, 0.5, 0) -- Center of the screen
         frame.AnchorPoint = Vector2.new(0.5, 0.5)
-        frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+        frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Semi-transparent black background
         frame.BackgroundTransparency = 0.5
-        frame.BorderSizePixel = 1
-        frame.BorderColor3 = Color3.fromRGB(0, 162, 255)
-        frame.ClipsDescendants = true
+        frame.BorderSizePixel = 1 -- Thin outline
+        frame.BorderColor3 = Color3.fromRGB(0, 162, 255) -- Blue outline color
+        frame.ClipsDescendants = true -- Clip children within the frame
         frame.Parent = screenGui
     end
 
+    -- Check if button already exists
     local button = frame:FindFirstChild("MyButton")
     if not button then
         button = Instance.new("ImageButton")
         button.Name = "MyButton"
-        button.Size = UDim2.new(0, 40, 0, 40)
+        button.Size = UDim2.new(0, 40, 0, 40) -- Size of the button (40x40)
         button.AnchorPoint = Vector2.new(0.5, 0.5)
         button.Position = UDim2.new(0.5, 0, 0.5, 0)
+        button.BackgroundTransparency = 1 -- Fully transparent background
         button.Image = "rbxassetid://7733765307"
-        button.BackgroundTransparency = 1
-        button.ScaleType = Enum.ScaleType.Fit
         button.Parent = frame
-
-        local function onButtonClick()
-            shootMurderer()
-        end
-
-        button.Activated:Connect(onButtonClick)
     end
 
     local dragging = false
@@ -173,27 +169,32 @@ local function createUI()
             update(input)
         end
     end)
+
+    local function onButtonClick()
+        shootMurderer()
+        -- Add any action here
+    end
+
+    -- Connect the button click event
+    button.MouseButton1Click:Once(onButtonClick)
+
+    -- Mobile support for touch input
+    if game:GetService("UserInputService").TouchEnabled then
+        button.TouchTap:Connect(onButtonClick)
+    end
 end
 
 local function removeUI()
-    local player = game.Players.LocalPlayer
-    local playerGui = player:WaitForChild("PlayerGui")
-
+    local playerGui = game.Players.LocalPlayer:WaitForChild("PlayerGui")
     local screenGui = playerGui:FindFirstChild("MyScreenGui")
     if screenGui then
         screenGui:Destroy()
     end
 end
 
--- CharacterAdded event connection to manage UI on respawn
 game.Players.LocalPlayer.CharacterAdded:Connect(function(character)
-    if G_AimButton then
-        createUI()
-    else
-        removeUI()
-    end
+    createUI()
 end)
-
 -- Function Fps
 local UpdateFps = 0
 local LastTime = tick()
@@ -210,11 +211,7 @@ local GameName = game:GetService("MarketplaceService"):GetProductInfo(game.Place
 local Window = OrionLib:MakeWindow({Name = "MoonLight : [" .. GameName .. "]", HidePremium = false, SaveConfig = false, ConfigFolder = "ReaperSaved"})
 
 -- [Universal]--
--- ...
-
 local Tab1 = Window:MakeTab({Name = "Universal", Icon = "rbxassetid://8997387937", PremiumOnly = false})
-
--- ...
 
 local selectPlayers = Tab1:AddDropdown({
     Name = "Players",
@@ -413,13 +410,6 @@ Tab1:AddTextbox({
         if fov then
             game.Workspace.CurrentCamera.FieldOfView = fov
         end
-    end
-})
-
-Tab1:AddButton({
-    Name = "Dev Console",
-    Callback = function()
-        game.StarterGui:SetCore("DevConsoleVisible", true)
     end
 })
 
