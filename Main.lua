@@ -100,7 +100,7 @@ local function createUI()
     if not screenGui then
         screenGui = Instance.new("ScreenGui")
         screenGui.Name = "MyScreenGui"
-        screenGui.ResetOnSpawn = false
+        screenGui.ResetOnSpawn = true
         screenGui.Parent = playerGui
     end
 
