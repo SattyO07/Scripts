@@ -91,6 +91,9 @@ local function shootMurderer()
 })
     end
 end
+-- Create a table to store the UI position
+local uiPosition = {}
+
 -- Function to create UI elements
 local function createUI()
     local player = game.Players.LocalPlayer
@@ -98,41 +101,53 @@ local function createUI()
 
     -- Check if ScreenGui already exists
     local screenGui = playerGui:FindFirstChild("MyScreenGui")
-    if not screenGui then
-        screenGui = Instance.new("ScreenGui")
-        screenGui.Name = "MyScreenGui"
-        screenGui.ResetOnSpawn = false -- Prevents ScreenGui from resetting on character respawn
-        screenGui.Parent = playerGui
+    if screenGui then
+        screenGui:Destroy()
     end
+
+    screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "MyScreenGui"
+    screenGui.ResetOnSpawn = false -- Prevents ScreenGui from resetting on character respawn
+    screenGui.Parent = playerGui
 
     -- Check if frame already exists
     local frame = screenGui:FindFirstChild("MyFrame")
-    if not frame then
-        frame = Instance.new("Frame")
-        frame.Name = "MyFrame"
-        frame.Size = UDim2.new(0.1, 0, 0.1, 0) -- Size of the frame
+    if frame then
+        frame:Destroy()
+    end
+
+    frame = Instance.new("Frame")
+    frame.Name = "MyFrame"
+    frame.Size = UDim2.new(0.1, 0, 0.1, 0) -- Size of the frame
+    frame.AnchorPoint = Vector2.new(0.5, 0.5)
+    frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Semi-transparent black background
+    frame.BackgroundTransparency = 0.5
+    frame.BorderSizePixel = 1 -- Thin outline
+    frame.BorderColor3 = Color3.fromRGB(0, 162, 255) -- Blue outline color
+    frame.ClipsDescendants = true -- Clip children within the frame
+    frame.Parent = screenGui
+
+    -- Load the saved UI position
+    if uiPosition.x and uiPosition.y then
+        frame.Position = UDim2.new(0, uiPosition.x, 0, uiPosition.y)
+    else
         frame.Position = UDim2.new(0.5, 0, 0.5, 0) -- Center of the screen
-        frame.AnchorPoint = Vector2.new(0.5, 0.5)
-        frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Semi-transparent black background
-        frame.BackgroundTransparency = 0.5
-        frame.BorderSizePixel = 1 -- Thin outline
-        frame.BorderColor3 = Color3.fromRGB(0, 162, 255) -- Blue outline color
-        frame.ClipsDescendants = true -- Clip children within the frame
-        frame.Parent = screenGui
     end
 
     -- Check if button already exists
     local button = frame:FindFirstChild("MyButton")
-    if not button then
-        button = Instance.new("ImageButton")
-        button.Name = "MyButton"
-        button.Size = UDim2.new(0, 40, 0, 40) -- Size of the button (40x40)
-        button.AnchorPoint = Vector2.new(0.5, 0.5)
-        button.Position = UDim2.new(0.5, 0, 0.5, 0)
-        button.BackgroundTransparency = 1 -- Fully transparent background
-        button.Image = "rbxassetid://7733765307"
-        button.Parent = frame
+    if button then
+        button:Destroy()
     end
+
+    button = Instance.new("ImageButton")
+    button.Name = "MyButton"
+    button.Size = UDim2.new(0, 40, 0, 40) -- Size of the button (40x40)
+    button.AnchorPoint = Vector2.new(0.5, 0.5)
+    button.Position = UDim2.new(0.5, 0, 0.5, 0)
+    button.BackgroundTransparency = 1 -- Fully transparent background
+    button.Image = "rbxassetid://7733765307"
+    button.Parent = frame
 
     local dragging = false
     local dragInput
@@ -141,7 +156,18 @@ local function createUI()
 
     local function update(input)
         local delta = input.Position - dragStart
-        frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        local newX = startPos.X.Offset + delta.X
+        local newY = startPos.Y.Offset + delta.Y
+
+        -- Prevent the button from being dragged outside the screen
+        if newX < 0 then newX = 0 end
+        if newX > game:GetService("GuiService"):GetScreenResolution().X - frame.Size.X.Offset then newX = game:GetService("GuiService"):GetScreenResolution().X - frame.Size.X.Offset end
+        if newY < 0 then newY = 0 end
+        if newY > game:GetService("GuiService"):GetScreenResolution().Y - frame.Size.Y.Offset then newY = game:GetService("GuiService"):GetScreenResolution().Y - frame.Size.Y.Offset end
+
+        frame.Position = UDim2.new(0, newX, 0, newY)
+        uiPosition.x = newX
+        uiPosition.y = newY
     end
 
     button.InputBegan:Connect(function(input)
@@ -171,17 +197,16 @@ local function createUI()
     end)
 
     local function onButtonClick()
-        shootMurderer()
-        -- Add any action here
-    end
+    shootMurderer()
+    -- Add any action here
+end
 
-    -- Connect the button click event
-    button.MouseButton1Click:Once(onButtonClick)
+-- Connect the button click event
+button.MouseButton1Click:Once(onButtonClick)
 
-    -- Mobile support for touch input
-    if game:GetService("UserInputService").TouchEnabled then
-        button.TouchTap:Connect(onButtonClick)
-    end
+if game:GetService("UserInputService").TouchEnabled then
+    button.TouchTap:Connect(onButtonClick)
+end
 end
 
 local function removeUI()
@@ -456,9 +481,6 @@ Tab2:AddButton({
 })
 
 -- [[Mm2]] -
-local targetGameId = 142823291
-if game.PlaceId == targetGameId then
-
     local Tab3 = Window:MakeTab({
     Name = "Murder Mystery 2",
     Icon = "rbxassetid://7733799795",
@@ -496,10 +518,6 @@ local AimOffset = Tab3:AddTextbox({
 		shootOffset = tonumber(Value)
 	end	  
 })
-
-else
-print("Mm2 not loaded")
-end
 
 -- [Info] --
 local InfoT = Window:MakeTab({Name = "Info", Icon = "rbxassetid://7733964719", PremiumOnly = false})
