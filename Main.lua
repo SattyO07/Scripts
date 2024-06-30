@@ -91,135 +91,115 @@ local function shootMurderer()
 })
     end
 end
--- Create a table to store the UI position
-local uiPosition = {}
+-- Create ScreenGui
+local player = game.Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
 
--- Function to create UI elements
-local function createUI()
-    local player = game.Players.LocalPlayer
-    local playerGui = player:WaitForChild("PlayerGui")
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "CrosshairGui"
+screenGui.Parent = playerGui
 
-    -- Check if ScreenGui already exists
-    local screenGui = playerGui:FindFirstChild("MyScreenGui")
-    if screenGui then
-        screenGui:Destroy()
-    end
+-- Create frame
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 150, 0, 60)
+frame.Position = UDim2.new(0.5, -75, 0.5, -30) -- adjusted position to center the frame
+frame.AnchorPoint = Vector2.new(0.5, 0.5)
+frame.BackgroundColor3 = Color3.fromRGB(0, 0, 255) -- blue color
+frame.BorderSizePixel = 1 -- thin outline
+frame.BorderColor3 = Color3.fromRGB(0, 0, 255) -- blue color
+frame.BackgroundTransparency = 0.8 -- 80% transparent
+frame.Parent = screenGui
 
-    screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "MyScreenGui"
-    screenGui.ResetOnSpawn = false -- Prevents ScreenGui from resetting on character respawn
-    screenGui.Parent = playerGui
+-- Create cornered outline
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 10)
+corner.Parent = frame
 
-    -- Check if frame already exists
-    local frame = screenGui:FindFirstChild("MyFrame")
-    if frame then
-        frame:Destroy()
-    end
+-- Create inner frame with black transparent background
+local innerFrame = Instance.new("Frame")
+innerFrame.Size = UDim2.new(1, -4, 1, -4) -- adjusted size to fit inside the outline
+innerFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+innerFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+innerFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- black color
+innerFrame.BackgroundTransparency = 0.8 -- 80% transparent
+innerFrame.Parent = frame
 
-    frame = Instance.new("Frame")
-    frame.Name = "MyFrame"
-    frame.Size = UDim2.new(0.1, 0, 0.1, 0) -- Size of the frame
-    frame.AnchorPoint = Vector2.new(0.5, 0.5)
-    frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Semi-transparent black background
-    frame.BackgroundTransparency = 0.5
-    frame.BorderSizePixel = 1 -- Thin outline
-    frame.BorderColor3 = Color3.fromRGB(0, 162, 255) -- Blue outline color
-    frame.ClipsDescendants = true -- Clip children within the frame
-    frame.Parent = screenGui
+-- Create cornered inner frame
+local innerCorner = Instance.new("UICorner")
+innerCorner.CornerRadius = UDim.new(0, 10)
+innerCorner.Parent = innerFrame
 
-    -- Load the saved UI position
-    if uiPosition.x and uiPosition.y then
-        frame.Position = UDim2.new(0, uiPosition.x, 0, uiPosition.y)
-    else
-        frame.Position = UDim2.new(0.5, 0, 0.5, 0) -- Center of the screen
-    end
+-- Create image label
+local imageLabel = Instance.new("ImageLabel")
+imageLabel.Size = UDim2.new(0, 50, 0, 50)
+imageLabel.Image = "rbxassetid://7733765307"
+imageLabel.BackgroundTransparency = 1 -- transparent background
+imageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+imageLabel.Position = UDim2.new(0.5, 0, 0.5, 0) -- center the image label
+imageLabel.Parent = innerFrame
 
-    -- Check if button already exists
-    local button = frame:FindFirstChild("MyButton")
-    if button then
-        button:Destroy()
-    end
+-- Create button
+local button = Instance.new("ImageButton")
+button.Size = UDim2.new(1, 0, 1, 0) -- changed size to fit the inner frame
+button.Position = UDim2.new(0, 0, 0, 0)
+button.AnchorPoint = Vector2.new(0, 0)
+button.BackgroundTransparency = 1
+button.Parent = innerFrame
 
-    button = Instance.new("ImageButton")
-    button.Name = "MyButton"
-    button.Size = UDim2.new(0, 40, 0, 40) -- Size of the button (40x40)
-    button.AnchorPoint = Vector2.new(0.5, 0.5)
-    button.Position = UDim2.new(0.5, 0, 0.5, 0)
-    button.BackgroundTransparency = 1 -- Fully transparent background
-    button.Image = "rbxassetid://7733765307"
-    button.Parent = frame
+-- Variables for dragging
+local dragging
+local dragInput
+local dragStart
+local startPos
+local enabled = true
 
-    local dragging = false
-    local dragInput
-    local dragStart
-    local startPos
+local UserInputService = game:GetService("UserInputService")
 
-    local function update(input)
-        local delta = input.Position - dragStart
-        local newX = startPos.X.Offset + delta.X
-        local newY = startPos.Y.Offset + delta.Y
-
-        -- Prevent the button from being dragged outside the screen
-        if newX < 0 then newX = 0 end
-        if newX > game:GetService("GuiService"):GetScreenResolution().X - frame.Size.X.Offset then newX = game:GetService("GuiService"):GetScreenResolution().X - frame.Size.X.Offset end
-        if newY < 0 then newY = 0 end
-        if newY > game:GetService("GuiService"):GetScreenResolution().Y - frame.Size.Y.Offset then newY = game:GetService("GuiService"):GetScreenResolution().Y - frame.Size.Y.Offset end
-
-        frame.Position = UDim2.new(0, newX, 0, newY)
-        uiPosition.x = newX
-        uiPosition.y = newY
-    end
-
-    button.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            dragStart = input.Position
-            startPos = frame.Position
-
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragging = false
-                end
-            end)
-        end
-    end)
-
-    button.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-            dragInput = input
-        end
-    end)
-
-    game:GetService("UserInputService").InputChanged:Connect(function(input)
-        if input == dragInput and dragging then
-            update(input)
-        end
-    end)
-
-    local function onButtonClick()
-    shootMurderer()
-    -- Add any action here
+local function update(input)
+    local delta = input.Position - dragStart
+    frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
 end
 
--- Connect the button click event
-button.MouseButton1Click:Once(onButtonClick)
+button.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        if not enabled then return end
+        dragging = true
+        dragStart = input.Position
+        startPos = frame.Position
 
-if game:GetService("UserInputService").TouchEnabled then
-    button.TouchTap:Connect(onButtonClick)
-end
-end
-
-local function removeUI()
-    local playerGui = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-    local screenGui = playerGui:FindFirstChild("MyScreenGui")
-    if screenGui then
-        screenGui:Destroy()
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
     end
-end
-
-game.Players.LocalPlayer.CharacterAdded:Connect(function(character)
-    createUI()
 end)
+
+button.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and input == dragInput then
+        update(input)
+    end
+end)
+
+-- Function to enable or disable the button
+local function toggleButton(state)
+    enabled = state
+    frame.Visible = state
+end
+
+toggleButton(false)
+
+-- Connect the click event to print "Clicked"
+button.Activated:Connect(function()
+    shootMurderer()
+end)
+
 -- Function Fps
 local UpdateFps = 0
 local LastTime = tick()
@@ -493,11 +473,7 @@ local AimUiToggle = Tab3:AddToggle({
     Name = "Shoot Ui",
     Default = false,
     Callback = function(value)
-        if value then
-            createUI()
-        else
-            removeUI()
-        end
+        toggleButton(value) 
     end
 })
 
