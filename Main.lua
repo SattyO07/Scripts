@@ -98,6 +98,7 @@ local playerGui = player:WaitForChild("PlayerGui")
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "CrosshairGui"
 screenGui.Parent = playerGui
+screenGui.ResetOnSpawn = false
 
 -- Create frame
 local frame = Instance.new("Frame")
