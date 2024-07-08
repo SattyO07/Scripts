@@ -91,6 +91,7 @@ local function findSheriff()
 end
 
 -- Function to apply highlighting to players
+local toggleEspM = false
 local function applyPlayerHighlighting()
     if workspace:FindFirstChild("Normal") then
         -- Check if "Normal" map is present
