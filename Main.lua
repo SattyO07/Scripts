@@ -105,6 +105,13 @@ local function updateESP()
     end
 end
 
+for _, child in pairs(workspace:GetDescendants()) do
+    if child:IsA("Part") and child.Name == "Normal" then
+        updateESP()
+        break
+    end
+end
+
 game.Workspace.DescendantAdded:Connect(function(child)
     if child:IsA("Part") and child.Name == "Normal" then
         updateESP()
