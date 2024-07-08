@@ -138,27 +138,6 @@ workspace.ChildRemoved:Connect(function(ch)
         updatePlayerESP()
     end
 end)
-
-local function togglePlayerESP(value)
-    playerESP = value
-    if value then
-        OrionLib:MakeNotification({
-            Name = "Esp",
-            Content = "Locate: Enable",
-            Image = "rbxassetid://4483345998",
-            Time = 3
-        })
-        updatePlayerESP()
-    else
-        OrionLib:MakeNotification({
-            Name = "Esp",
-            Content = "Locate Disable",
-            Image = "rbxassetid://4483345998",
-            Time = 3
-        })
-        updatePlayerESP()
-    end
-end
 -- ShootOffset
 local function getPredictedPosition(player, shootOffset)
 	pcall(function()
@@ -709,7 +688,24 @@ local EspToggleM = Tab3:AddToggle({
     Name = "Esp",
     Default = false,
     Callback = function(value)
-        togglePlayerESP(value)
+        playerESP = value
+    if value then
+        OrionLib:MakeNotification({
+            Name = "Esp",
+            Content = "Locate: Enable",
+            Image = "rbxassetid://4483345998",
+            Time = 3
+        })
+        updatePlayerESP()
+    else
+        OrionLib:MakeNotification({
+            Name = "Esp",
+            Content = "Locate Disable",
+            Image = "rbxassetid://4483345998",
+            Time = 3
+        })
+        updatePlayerESP()
+    end
     end
 })
 -- [Info] --
