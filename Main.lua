@@ -59,14 +59,58 @@ local function findSheriff()
 end
 -- Esp
 local function updatePlayerESP()
-    -- Check if workspace and other necessary objects exist
-    if game.Workspace:FindFirstChild("Normal") and toggleEspM then
+    local normalMap = workspace:FindFirstChild("Normal")
+    
+    if not normalMap then
+        toggleEspM = false
+        OrionLib:MakeNotification({
+            Name = "Esp: Map Change",
+            Content = "Normal map not found. Disabling ESP.",
+            Image = "rbxassetid://4483345998",
+            Time = 3
+        })
+        
+        -- Remove all ESP highlights
+        for _, player in ipairs(game.Players:GetPlayers()) do
+            if player.Character then
+                local character = player.Character
+                local adornment = character:FindFirstChild("PlayerESP")
+                if adornment and adornment:IsA("BoxHandleAdornment") then
+                    adornment:Destroy()
+                end
+            end
+        end
+        
+        return
+    end
+    
+    if toggleEspM then
         OrionLib:MakeNotification({
             Name = "Esp: Starting",
             Content = "Waiting for roles to load.",
             Image = "rbxassetid://4483345998",
             Time = 3
         })
+
+        -- Function to find the murderer
+        local function findMurderer()
+            for _, player in ipairs(game.Players:GetPlayers()) do
+                if player.Backpack:FindFirstChild("Knife") or (player.Character and player.Character:FindFirstChild("Knife")) then
+                    return player
+                end
+            end
+            return nil
+        end
+
+        -- Function to find the sheriff
+        local function findSheriff()
+            for _, player in ipairs(game.Players:GetPlayers()) do
+                if player.Backpack:FindFirstChild("Gun") or (player.Character and player.Character:FindFirstChild("Gun")) then
+                    return player
+                end
+            end
+            return nil
+        end
 
         repeat
             task.wait(1)
@@ -80,8 +124,8 @@ local function updatePlayerESP()
                 if humanoidRootPart then
                     local highlight = Instance.new("BoxHandleAdornment")
                     highlight.Name = "PlayerESP"
-                    highlight.Size = humanoidRootPart.Size * 1.1
-                    highlight.Adornee = humanoidRootPart
+                    highlight.Size = character:GetExtentsSize() * 1.1  -- Extends the highlight around the entire character
+                    highlight.Adornee = character
                     highlight.AlwaysOnTop = true
                     highlight.ZIndex = 5
                     highlight.Transparency = 0.5
@@ -94,7 +138,7 @@ local function updatePlayerESP()
                         highlight.Color3 = Color3.fromRGB(0, 255, 0)
                     end
 
-                    highlight.Parent = humanoidRootPart
+                    highlight.Parent = character
                 end
             end
         end
