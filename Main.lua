@@ -111,7 +111,7 @@ game.Workspace.DescendantAdded:Connect(function(child)
     end
 end)
 
-game.Workspace.DescendantRemoved:Connect(function(child)
+game.Workspace.ChildRemoved:Connect(function(child)
     if child:IsA("Part") and child.Name == "Normal" then
         updateESP()
     end
