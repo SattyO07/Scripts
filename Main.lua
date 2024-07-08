@@ -60,68 +60,47 @@ end
 -- Esp
 local playerESP = false
 
-local function updateESP()
-    if playerESP then
-        local listplayers = game.Players:GetChildren()
-        for _, player in ipairs(listplayers) do
-            if player and player.Character then
-                local character = player.Character
-                if character and character:FindFirstChild("Normal") then
-                    if not character:FindFirstChild("PlayerESP") then
-                        if script.Parent then
-                            if player == findMurderer() then
-                                local mbgui = script.Parent.MurdererBGUI:Clone()
-                                mbgui.Parent = character
-                                mbgui.Name = "PlayerESP"
-                            elseif player == findSheriff() then
-                                local sbgui = script.Parent.SheriffBGUI:Clone()
-                                sbgui.Parent = character
-                                sbgui.Name = "PlayerESP"
-                            else
-                                local pguigui = script.Parent.PlayerGUI:Clone()
-                                pguigui.Parent = character
-                                pguigui.Name = "PlayerESP"
-                            end
-                        end
-                    end
-                else
-                    local esp = character:FindFirstChild("PlayerESP")
-                    if esp then
-                        esp:Destroy()
-                    end
-                end
-            end
-        end
-    else
-        for _, player in ipairs(game.Players:GetChildren()) do
-            if player and player.Character then
-                local character = player.Character
-                local esp = character:FindFirstChild("PlayerESP")
-                if esp then
-                    esp:Destroy()
-                end
-            end
-        end
-    end
-end
+local playerData = {}
 
-for _, child in pairs(workspace:GetDescendants()) do
-    if child:IsA("Part") and child.Name == "Normal" then
-        updateESP()
-        break
-    end
-end
-
-game.Workspace.DescendantAdded:Connect(function(child)
-    if child:IsA("Part") and child.Name == "Normal" then
-        updateESP()
-    end
+workspace.ChildAdded:Connect(function(ch)
+	if ch.Name == "Normal" and playerESP then
+		OrionLib:MakeNotification({
+			Name = "Map has loaded, waiting for roles...",
+			Content = "Please wait for roles to be assigned.",
+			Image = "rbxassetid://4483345998",
+			Time = 5
+		})
+		wait(5)
+		for _, v in ipairs(workspace:GetDescendants()) do
+			if v:IsA("Model") and v:FindFirstChild("Humanoid") then
+				local player = game:GetService("Players"):GetPlayerFromCharacter(v)
+				if player then
+					playerData[player.UserId] = v
+					local highlight = Instance.new("Highlight")
+					highlight.Parent = script.Parent
+					highlight.Name = "PlayerESP"
+					highlight.Adornee = v
+					highlight.FillColor = Color3.new(1, 0, 0)
+					highlight.OutlineColor = Color3.new(1, 1, 1)
+					highlight.FillTransparency = 0.5
+					highlight.OutlineWidth = 2
+				end
+			end
+		end
+	end
 end)
 
-game.Workspace.ChildRemoved:Connect(function(child)
-    if child:IsA("Part") and child.Name == "Normal" then
-        updateESP()
-    end
+workspace.ChildRemoved:Connect(function(ch)
+	if ch.Name == "Normal" and playerESP then
+		OrionLib:MakeNotification({
+			Name = "Game ended, removing Player ESPs.",
+			Content = "Player ESP has been removed.",
+			Image = "rbxassetid://4483345998",
+			Time = 5
+		})
+		playerData = {}
+		for _, v in ipairs(script.Parent:GetChildren()) do if v.Name == "PlayerESP" then v:Destroy() end end
+	end
 end)
 -- ShootOffset
 local function getPredictedPosition(player, shootOffset)
@@ -674,7 +653,6 @@ local EspM = Tab3:AddToggle({
     Default = false,
     Callback = function(value)
         playerESP = value
-        updateESP()
     end
 })
 -- [Info] --
