@@ -60,103 +60,61 @@ end
 -- Esp
 local playerESP = false
 
--- Function to update ESP
 local function updateESP()
-	if playerESP then
-		OrionLib:MakeNotification({
-	Name = "Esp: Starting",
-	Content = "Waiting to load a roles.",
-	Image = "rbxassetid://4483345998",
-	Time = 3
-})
-		repeat
-			task.wait(1)
-		until findSheriff() or findMurderer()
-		 local listplayers = game.Players:GetChildren()
+    if playerESP then
+        local listplayers = game.Players:GetChildren()
         for _, player in ipairs(listplayers) do
             if player and player.Character then
                 local character = player.Character
-                if not character:FindFirstChild("PlayerESP") then
-					local a = Instance.new("Highlight", script.Parent)
-					a.Name = "PlayerESP"
-					a.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-					a.Adornee = character
-					a.FillColor = Color3.fromRGB(255, 255, 255)
-
-					task.spawn(function()
-						if player == findMurderer() then
-							local mbgui = script.Parent.MurdererBGUI:Clone()
-							mbgui.Enabled = true
-							mbgui.Name = "AppliedMurdererBGUI"
-							mbgui.Parent = script.Parent
-							mbgui.Adornee = character
-							a.FillColor = Color3.fromRGB(255, 0, 0)
-						elseif player == findSheriff() then
-							a.FillColor = Color3.fromRGB(0, 150, 255)
-						else
-							a.FillColor = Color3.fromRGB(0, 255, 0)
-						end
-
-						if a and player then
-							a.Adornee = player.Character or player.CharacterAdded:Wait()
-						end
-					end)
-				end
-			end
-		end
-		OrionLib:MakeNotification({
-	Name = "Esp: Sucess",
-	Content = "Loaded.",
-	Image = "rbxassetid://4483345998",
-	Time = 3
-})
-	else
-		OrionLib:MakeNotification({
-	Name = "Esp: Remove",
-	Content = "Deactivated",
-	Image = "rbxassetid://4483345998",
-	Time = 3
-})
-		local appliedMurdererBGUI = script.Parent:FindFirstChild("AppliedMurdererBGUI")
-		if appliedMurdererBGUI then
-			appliedMurdererBGUI:Destroy()
-		end
-
-		local dgbguiClone = script.Parent:FindFirstChild("DGBGUIClone")
-		if dgbguiClone then
-			dgbguiClone:Destroy()
-		end
-
-		for _, v in ipairs(script.Parent:GetChildren()) do
-			if v.Name == "PlayerESP" then
-				v:Destroy()
-			end
-		end
-	end
+                if character and character:FindFirstChild("Normal") then
+                    if not character:FindFirstChild("PlayerESP") then
+                        if script.Parent then
+                            if player == findMurderer() then
+                                local mbgui = script.Parent.MurdererBGUI:Clone()
+                                mbgui.Parent = character
+                                mbgui.Name = "PlayerESP"
+                            elseif player == findSheriff() then
+                                local sbgui = script.Parent.SheriffBGUI:Clone()
+                                sbgui.Parent = character
+                                sbgui.Name = "PlayerESP"
+                            else
+                                local pguigui = script.Parent.PlayerGUI:Clone()
+                                pguigui.Parent = character
+                                pguigui.Name = "PlayerESP"
+                            end
+                        end
+                    end
+                else
+                    local esp = character:FindFirstChild("PlayerESP")
+                    if esp then
+                        esp:Destroy()
+                    end
+                end
+            end
+        end
+    else
+        for _, player in ipairs(game.Players:GetChildren()) do
+            if player and player.Character then
+                local character = player.Character
+                local esp = character:FindFirstChild("PlayerESP")
+                if esp then
+                    esp:Destroy()
+                end
+            end
+        end
+    end
 end
--- Workspace ChildAdded and ChildRemoved connections
-workspace.ChildAdded:Connect(function(ch)
-	if ch.Name == "Normal" then
-		OrionLib:MakeNotification({
-	Name = "Esp: Loading",
-	Content = "Waiting to load a roles.",
-	Image = "rbxassetid://4483345998",
-	Time = 3
-})
-		updateESP()
-	end
+
+game.Workspace.DescendantAdded:Connect(function(child)
+    if child:IsA("Part") and child.Name == "Normal" then
+        updateESP()
+    end
 end)
 
-workspace.ChildRemoved:Connect(function(ch)
-	if ch.Name == "Normal" then
-		OrionLib:MakeNotification({
-	Name = "Esp: GameEnd",
-	Content = "Round Ended, Disabling Esp.",
-	Image = "rbxassetid://4483345998",
-	Time = 3
-})
-		updateESP()
-	end
+game.Workspace.DescendantRemoved:Connect(function(child)
+    if child:IsA("Part") and child.Name == "Normal" then
+        updateESP()
+    end
 end)
 -- ShootOffset
 local function getPredictedPosition(player, shootOffset)
