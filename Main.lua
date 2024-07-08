@@ -58,67 +58,58 @@ local function findSheriff()
 	return nil
 end
 -- Esp
-local playerESP = false
-
+local toggleEspM = false
 local function updatePlayerESP()
-    if playerESP then
+    if workspace:FindFirstChild("Normal") and toggleEspM then
         OrionLib:MakeNotification({
-	Name = "Esp: Starting",
-	Content = "Waiting For roles to load.",
-	Image = "rbxassetid://4483345998",
-	Time = 3
-})
+            Name = "Esp: Starting",
+            Content = "Waiting for roles to load.",
+            Image = "rbxassetid://4483345998",
+            Time = 3
+        })
 
         repeat
             task.wait(1)
         until findMurderer() or findSheriff()
 
         local listPlayers = game.Players:GetChildren()
-
         for _, player in ipairs(listPlayers) do
             if player.Character then
                 local character = player.Character
-
                 if not character:FindFirstChild("PlayerESP") then
-                    local highlight = Instance.new("Highlight", script.Parent)
+                    local highlight = Instance.new("Highlight")
                     highlight.Name = "PlayerESP"
                     highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
                     highlight.Adornee = character
-                    highlight.FillColor = Color3.fromRGB(255, 255, 255)
+                    highlight.FillColor = Color3.fromRGB(0, 255, 0)
 
                     task.spawn(function()
                         if player == findMurderer() then
                             highlight.FillColor = Color3.fromRGB(255, 0, 0)
                         elseif player == findSheriff() then
                             highlight.FillColor = Color3.fromRGB(0, 150, 255)
-                        else
-                            highlight.FillColor = Color3.fromRGB(0, 255, 0)
-                        end
-
-                        -- Update Adornee in case it wasn't set correctly
-                        if highlight and not player then
-                            highlight.Adornee = player.Character or player.CharacterAdded:Wait()
                         end
                     end)
+
+                    highlight.Parent = script.Parent
                 end
             end
         end
 
         OrionLib:MakeNotification({
-	Name = "Esp: Reload",
-	Content = "Staring Esp.",
-	Image = "rbxassetid://4483345998",
-	Time = 3
-})
-
+            Name = "Esp: Reload",
+            Content = "ESP started.",
+            Image = "rbxassetid://4483345998",
+            Time = 3
+        })
     else
         OrionLib:MakeNotification({
-	Name = "Esp: Game End",
-	Content = "Removing Esp.",
-	Image = "rbxassetid://4483345998",
-	Time = 3
-})
-        
+            Name = "Esp: Game Ended",
+            Content = "Removing ESP.",
+            Image = "rbxassetid://4483345998",
+            Time = 3
+        })
+
         for _, v in ipairs(script.Parent:GetChildren()) do
             if v.Name == "PlayerESP" and v:IsA("Highlight") then
                 v:Destroy()
@@ -126,18 +117,6 @@ local function updatePlayerESP()
         end
     end
 end
-
-workspace.ChildAdded:Connect(function(ch)
-    if ch.Name == "Normal" then
-        updatePlayerESP()
-    end
-end)
-
-workspace.ChildRemoved:Connect(function(ch)
-    if ch.Name == "Normal" then
-        updatePlayerESP()
-    end
-end)
 -- ShootOffset
 local function getPredictedPosition(player, shootOffset)
 	pcall(function()
@@ -684,28 +663,12 @@ OrionLib:MakeNotification({
 
 local text4 = Tab3:AddParagraph("Esp:", "Locate a players")
 
-local EspToggleM = Tab3:AddToggle({
+local EspM = Tab3:AddToggle({
     Name = "Esp",
     Default = false,
     Callback = function(value)
-        playerESP = value
-        if value then
-            OrionLib:MakeNotification({
-                Name = "Esp",
-                Content = "Locate: Enable",
-                Image = "rbxassetid://4483345998",
-                Time = 3
-            })
-            updatePlayerESP()
-        else
-            OrionLib:MakeNotification({
-                Name = "Esp",
-                Content = "Locate Disable",
-                Image = "rbxassetid://4483345998",
-                Time = 3
-            })
-            updatePlayerESP()
-        end
+        toggleEspM = value
+        updatePlayerESP()
     end
 })
 -- [Info] --
