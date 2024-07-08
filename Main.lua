@@ -58,33 +58,42 @@ local function findSheriff()
 	return nil
 end
 -- Esp
-local function updatePlayerESP()
-    local normalMap = workspace:FindFirstChild("Normal")
-    
-    if not normalMap then
-        toggleEspM = false
-        OrionLib:MakeNotification({
-            Name = "Esp: Map Change",
-            Content = "Normal map not found. Disabling ESP.",
-            Image = "rbxassetid://4483345998",
-            Time = 3
-        })
-        
-        -- Remove all ESP highlights
-        for _, player in ipairs(game.Players:GetPlayers()) do
-            if player.Character then
-                local character = player.Character
-                local adornment = character:FindFirstChild("PlayerESP")
-                if adornment and adornment:IsA("BoxHandleAdornment") then
-                    adornment:Destroy()
-                end
-            end
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/Unknownkellymc1/Orion/main/source')))()
+
+-- Function to find the "Murderer" player
+local function findMurderer()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player.Backpack:FindFirstChild("Knife") then
+            return player
         end
-        
-        return
+
+        if player.Character and player.Character:FindFirstChild("Knife") then
+            return player
+        end
     end
-    
-    if toggleEspM then
+    return nil
+end
+
+-- Function to find the "Sheriff" player
+local function findSheriff()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player.Backpack:FindFirstChild("Gun") then
+            return player
+        end
+
+        if player.Character and player.Character:FindFirstChild("Gun") then
+            return player
+        end
+    end
+    return nil
+end
+
+-- Function to apply highlighting to players
+local function applyPlayerHighlighting()
+    if workspace:FindFirstChild("Normal") then
+        -- Check if "Normal" map is present
         OrionLib:MakeNotification({
             Name = "Esp: Starting",
             Content = "Waiting for roles to load.",
@@ -92,53 +101,24 @@ local function updatePlayerESP()
             Time = 3
         })
 
-        -- Function to find the murderer
-        local function findMurderer()
-            for _, player in ipairs(game.Players:GetPlayers()) do
-                if player.Backpack:FindFirstChild("Knife") or (player.Character and player.Character:FindFirstChild("Knife")) then
-                    return player
-                end
-            end
-            return nil
-        end
-
-        -- Function to find the sheriff
-        local function findSheriff()
-            for _, player in ipairs(game.Players:GetPlayers()) do
-                if player.Backpack:FindFirstChild("Gun") or (player.Character and player.Character:FindFirstChild("Gun")) then
-                    return player
-                end
-            end
-            return nil
-        end
-
+        -- Find the murderer and sheriff
         repeat
             task.wait(1)
         until findMurderer() or findSheriff()
 
-        -- Iterate through players to highlight
-        for _, player in ipairs(game.Players:GetPlayers()) do
+        -- Highlight players based on their role
+        for _, player in ipairs(Players:GetPlayers()) do
             if player.Character then
                 local character = player.Character
-                local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-                if humanoidRootPart then
-                    local highlight = Instance.new("BoxHandleAdornment")
-                    highlight.Name = "PlayerESP"
-                    highlight.Size = character:GetExtentsSize() * 1.1  -- Extends the highlight around the entire character
-                    highlight.Adornee = character
-                    highlight.AlwaysOnTop = true
-                    highlight.ZIndex = 5
-                    highlight.Transparency = 0.5
-
-                    if player == findMurderer() then
-                        highlight.Color3 = Color3.fromRGB(255, 0, 0)
-                    elseif player == findSheriff() then
-                        highlight.Color3 = Color3.fromRGB(0, 150, 255)
-                    else
-                        highlight.Color3 = Color3.fromRGB(0, 255, 0)
+                -- Example: Apply highlight to the player's character model
+                for _, part in ipairs(character:GetChildren()) do
+                    if part:IsA("BasePart") then
+                        if player == findMurderer() then
+                            part.Color = Color3.fromRGB(255, 0, 0)  -- Red for murderer
+                        elseif player == findSheriff() then
+                            part.Color = Color3.fromRGB(0, 150, 255)  -- Blue for sheriff
+                        end
                     end
-
-                    highlight.Parent = character
                 end
             end
         end
@@ -150,6 +130,9 @@ local function updatePlayerESP()
             Time = 3
         })
     else
+        -- If "Normal" map is not present
+        toggleEspM = false  -- Disable ESP
+
         OrionLib:MakeNotification({
             Name = "Esp: Game Ended",
             Content = "Removing ESP.",
@@ -157,16 +140,25 @@ local function updatePlayerESP()
             Time = 3
         })
 
-        -- Clean up ESP highlights
-        for _, player in ipairs(game.Players:GetPlayers()) do
+        -- Remove highlight from all players
+        for _, player in ipairs(Players:GetPlayers()) do
             if player.Character then
                 local character = player.Character
-                local adornment = character:FindFirstChild("PlayerESP")
-                if adornment and adornment:IsA("BoxHandleAdornment") then
-                    adornment:Destroy()
+                for _, part in ipairs(character:GetChildren()) do
+                    if part:IsA("BasePart") then
+                        part.Color = Color3.fromRGB(255, 255, 255)  -- Restore original color
+                    end
                 end
             end
         end
+    end
+end
+
+-- Function to update ESP periodically
+local function updateESP()
+    while true do
+        applyPlayerHighlighting()
+        task.wait(5)  -- Check every 5 seconds
     end
 end
 -- ShootOffset
@@ -733,6 +725,7 @@ RunService.RenderStepped:Connect(function()
     playerCountLabel:Set("Player Count: " .. #plrs:GetPlayers() .. "/" .. game.Players.MaxPlayers)
     fpsLabel:Set("Current FPS: " .. UpdateFps)
     refreshPlayerDropdown()
+    task.spawn(updateESP)
 end)
 
 -- Initialize the library
