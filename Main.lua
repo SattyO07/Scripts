@@ -138,23 +138,24 @@ workspace.ChildRemoved:Connect(function(ch)
         updatePlayerESP()
     end
 end)
+
 local function togglePlayerESP(value)
     playerESP = value
     if value then
         OrionLib:MakeNotification({
-	Name = "Esp",
-	Content = "Locate: Enable",
-	Image = "rbxassetid://4483345998",
-	Time = 3
-})
+            Name = "Esp",
+            Content = "Locate: Enable",
+            Image = "rbxassetid://4483345998",
+            Time = 3
+        })
         updatePlayerESP()
     else
         OrionLib:MakeNotification({
-	Name = "Esp",
-	Content = "Locate Disable",
-	Image = "rbxassetid://4483345998",
-	Time = 3
-})
+            Name = "Esp",
+            Content = "Locate Disable",
+            Image = "rbxassetid://4483345998",
+            Time = 3
+        })
         updatePlayerESP()
     end
 end
@@ -704,10 +705,12 @@ OrionLib:MakeNotification({
 
 local text4 = Tab3:AddParagraph("Esp:", "Locate a players")
 
-local EspToggleM =Tab3:AddToggle({
-	Name = "Esp",
-	Default = false,
-	Callback = togglePlayerESP    
+local EspToggleM = Tab3:AddToggle({
+    Name = "Esp",
+    Default = false,
+    Callback = function(value)
+        togglePlayerESP(value)
+    end
 })
 -- [Info] --
 local InfoT = Window:MakeTab({Name = "Info", Icon = "rbxassetid://7733964719", PremiumOnly = false})
