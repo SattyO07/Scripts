@@ -59,8 +59,9 @@ local function findSheriff()
 end
 -- Esp
 local toggleEspM = false
+
 local function updatePlayerESP()
-    if workspace:FindFirstChild("Normal") and toggleEspM then
+    if game.Workspace:FindFirstChild("Normal") and toggleEspM then
         OrionLib:MakeNotification({
             Name = "Esp: Starting",
             Content = "Waiting for roles to load.",
@@ -68,30 +69,52 @@ local function updatePlayerESP()
             Time = 3
         })
 
+        -- Function to find the murderer
+        local function findMurderer()
+            for _, player in ipairs(game.Players:GetPlayers()) do
+                if player.Backpack:FindFirstChild("Knife") or (player.Character and player.Character:FindFirstChild("Knife")) then
+                    return player
+                end
+            end
+            return nil
+        end
+
+        -- Function to find the sheriff
+        local function findSheriff()
+            for _, player in ipairs(game.Players:GetPlayers()) do
+                if player.Backpack:FindFirstChild("Gun") or (player.Character and player.Character:FindFirstChild("Gun")) then
+                    return player
+                end
+            end
+            return nil
+        end
+
         repeat
             task.wait(1)
         until findMurderer() or findSheriff()
 
-        local listPlayers = game.Players:GetChildren()
+        local listPlayers = game.Players:GetPlayers()
         for _, player in ipairs(listPlayers) do
             if player.Character then
                 local character = player.Character
                 if not character:FindFirstChild("PlayerESP") then
-                    local highlight = Instance.new("Highlight")
+                    local highlight = Instance.new("BoxHandleAdornment")
                     highlight.Name = "PlayerESP"
-                    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-                    highlight.Adornee = character
-                    highlight.FillColor = Color3.fromRGB(0, 255, 0)
+                    highlight.Size = character.HumanoidRootPart.Size * 1.1
+                    highlight.Adornee = character.HumanoidRootPart
+                    highlight.AlwaysOnTop = true
+                    highlight.ZIndex = 5
+                    highlight.Color3 = Color3.fromRGB(0, 255, 0)
+                    highlight.Transparency = 0.5
+                    highlight.Parent = character.HumanoidRootPart
 
                     task.spawn(function()
                         if player == findMurderer() then
-                            highlight.FillColor = Color3.fromRGB(255, 0, 0)
+                            highlight.Color3 = Color3.fromRGB(255, 0, 0)
                         elseif player == findSheriff() then
-                            highlight.FillColor = Color3.fromRGB(0, 150, 255)
+                            highlight.Color3 = Color3.fromRGB(0, 150, 255)
                         end
                     end)
-
-                    highlight.Parent = script.Parent
                 end
             end
         end
@@ -110,9 +133,13 @@ local function updatePlayerESP()
             Time = 3
         })
 
-        for _, v in ipairs(script.Parent:GetChildren()) do
-            if v.Name == "PlayerESP" and v:IsA("Highlight") then
-                v:Destroy()
+        for _, player in ipairs(game.Players:GetPlayers()) do
+            local character = player.Character
+            if character then
+                local adornment = character:FindFirstChild("PlayerESP")
+                if adornment and adornment:IsA("BoxHandleAdornment") then
+                    adornment:Destroy()
+                end
             end
         end
     end
