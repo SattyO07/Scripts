@@ -72,12 +72,11 @@ local function updateESP()
 		repeat
 			task.wait(1)
 		until findSheriff() or findMurderer()
-
-		local listplayers = game.Players:GetChildren()
-		for _, player in ipairs(listplayers) do
-			if player and player.Character then
-				local character = player.Character
-				if not character:FindFirstChild("PlayerESP") then
+		 local listplayers = game.Players:GetChildren()
+        for _, player in ipairs(listplayers) do
+            if player and player.Character then
+                local character = player.Character
+                if not character:FindFirstChild("PlayerESP") then
 					local a = Instance.new("Highlight", script.Parent)
 					a.Name = "PlayerESP"
 					a.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
