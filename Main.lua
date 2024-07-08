@@ -705,13 +705,13 @@ OrionLib:MakeNotification({
 
 local text4 = Tab3:AddParagraph("Esp:", "Locate a players")
 
-local EspM = 3Tab:AddToggle({
-	Name = "Esp",
-	Default = false,
-	Callback = function(Value)
-		playerESP = Value
-		updateESP()
-	end    
+local EspM = Tab3:AddToggle({
+    Name = "Esp",
+    Default = false,
+    Callback = function(value)
+        playerESP = value
+        updateESP()
+    end
 })
 -- [Info] --
 local InfoT = Window:MakeTab({Name = "Info", Icon = "rbxassetid://7733964719", PremiumOnly = false})
