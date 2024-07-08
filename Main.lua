@@ -4,97 +4,258 @@ local plrs = game.Players
 local playerNames = {}
 local RunService = game:GetService("RunService")
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/Unknownkellymc1/Orion/main/source')))()
-
--- Function to update player names
-local function updatePlayerNames()
-    playerNames = {}
-    for _, player in ipairs(plrs:GetPlayers()) do
-        table.insert(playerNames, player.DisplayName.. " (@".. player.Name.. ")")
-    end
-end
-
-spawn(updatePlayerNames)
-
--- Function Assist aim
-local shootOffset = 3.5
-
+-- Mm2 Functions --
+-- Find Players
 local function findMurderer()
-    for _, player in ipairs(game.Players:GetPlayers()) do
-        if player.Backpack:FindFirstChild("Knife") or (player.Character and player.Character:FindFirstChild("Knife")) then
-            return player
-        end
-    end
-    return nil
+	for _, player in ipairs(game.Players:GetPlayers()) do
+		if player.Backpack:FindFirstChild("Knife") then
+			return player
+		end
+
+		if player.Character then
+			if player.Character:FindFirstChild("Knife") then
+				return player
+			end
+		end
+	end
+
+	if playerData then
+		for playerName, data in pairs(playerData) do
+			if data.Role == "Murderer" then
+				local targetPlayer = game.Players:FindFirstChild(playerName)
+				if targetPlayer then
+					return targetPlayer
+				end
+			end
+		end
+	end
+	return nil
 end
 
 local function findSheriff()
-    for _, player in ipairs(game.Players:GetPlayers()) do
-        if player.Backpack:FindFirstChild("Gun") or (player.Character and player.Character:FindFirstChild("Gun")) then
-            return player
-        end
-    end
-    return nil
+	for _, player in ipairs(game.Players:GetPlayers()) do
+		if player.Backpack:FindFirstChild("Gun") then
+			return player
+		end
+
+		if player.Character then
+			if player.Character:FindFirstChild("Gun") then
+				return player
+			end
+		end
+	end
+
+	if playerData then
+		for playerName, data in pairs(playerData) do
+			if data.Role == "Sheriff" then
+				local targetPlayer = game.Players:FindFirstChild(playerName)
+				if targetPlayer then
+					return targetPlayer
+				end
+			end
+		end
+	end
+	return nil
 end
+-- Esp
+local playerESP = false
 
-local function shootMurderer()
-    local localPlayer = game.Players.LocalPlayer
-    if findSheriff() ~= localPlayer then
+local function updatePlayerESP()
+    if playerESP then
         OrionLib:MakeNotification({
-	Name = "Silent Aim",
-	Content = "You need Gun first",
+	Name = "Esp: Starting",
+	Content = "Waiting For roles to load.",
 	Image = "rbxassetid://4483345998",
 	Time = 3
 })
-        return
-    end
 
-    local murderer = findMurderer()
-    if not murderer then
-        OrionLib:MakeNotification({
-	Name = "Silent Aim",
-	Content = "No Muderer.",
-	Image = "rbxassetid://4483345998",
-	Time = 3
-})
-        return
-    end
+        repeat
+            task.wait(1)
+        until findMurderer() or findSheriff()
 
-    if not localPlayer.Character:FindFirstChild("Gun") then
-        if localPlayer.Backpack:FindFirstChild("Gun") then
-            localPlayer.Character:FindFirstChildOfClass("Humanoid"):EquipTool(localPlayer.Backpack:FindFirstChild("Gun"))
-        else
-            OrionLib:MakeNotification({
-	Name = "Silent Aim",
-	Content = "You don't have a Gun.",
-	Image = "rbxassetid://4483345998",
-	Time = 3
-})
-            return
+        local listPlayers = game.Players:GetChildren()
+
+        for _, player in ipairs(listPlayers) do
+            if player.Character then
+                local character = player.Character
+
+                if not character:FindFirstChild("PlayerESP") then
+                    local highlight = Instance.new("Highlight", script.Parent)
+                    highlight.Name = "PlayerESP"
+                    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                    highlight.Adornee = character
+                    highlight.FillColor = Color3.fromRGB(255, 255, 255)
+
+                    task.spawn(function()
+                        if player == findMurderer() then
+                            highlight.FillColor = Color3.fromRGB(255, 0, 0)
+                        elseif player == findSheriff() then
+                            highlight.FillColor = Color3.fromRGB(0, 150, 255)
+                        else
+                            highlight.FillColor = Color3.fromRGB(0, 255, 0)
+                        end
+
+                        -- Update Adornee in case it wasn't set correctly
+                        if highlight and not player then
+                            highlight.Adornee = player.Character or player.CharacterAdded:Wait()
+                        end
+                    end)
+                end
+            end
         end
-    end
 
-    local args = {
-        [1] = 1,
-        [2] = murderer.Character:FindFirstChild("HumanoidRootPart").Position + murderer.Character:FindFirstChild("Humanoid").MoveDirection * shootOffset,
-        [3] = "AH"
-    }
+        OrionLib:MakeNotification({
+	Name = "Esp: Reload",
+	Content = "Staring Esp.",
+	Image = "rbxassetid://4483345998",
+	Time = 3
+})
 
-    local gun = localPlayer.Character:FindFirstChild("Gun")
-    if gun and gun:FindFirstChild("KnifeServer") then
-        gun.KnifeServer.ShootGun:InvokeServer(unpack(args))
     else
         OrionLib:MakeNotification({
-	Name = "Error",
-	Content = "Unable to find the gun or server.",
+	Name = "Esp: Game End",
+	Content = "Removing Esp.",
 	Image = "rbxassetid://4483345998",
-	Time = 5
+	Time = 3
 })
+        
+        for _, v in ipairs(script.Parent:GetChildren()) do
+            if v.Name == "PlayerESP" and v:IsA("Highlight") then
+                v:Destroy()
+            end
+        end
     end
 end
--- Create ScreenGui
+
+workspace.ChildAdded:Connect(function(ch)
+    if ch.Name == "Normal" then
+        updatePlayerESP()
+    end
+end)
+
+workspace.ChildRemoved:Connect(function(ch)
+    if ch.Name == "Normal" then
+        updatePlayerESP()
+    end
+end)
+local function togglePlayerESP(value)
+    playerESP = value
+    if value then
+        OrionLib:MakeNotification({
+	Name = "Esp",
+	Content = "Locate: Enable",
+	Image = "rbxassetid://4483345998",
+	Time = 3
+})
+        updatePlayerESP()
+    else
+        OrionLib:MakeNotification({
+	Name = "Esp",
+	Content = "Locate Disable",
+	Image = "rbxassetid://4483345998",
+	Time = 3
+})
+        updatePlayerESP()
+    end
+end
+-- ShootOffset
+local function getPredictedPosition(player, shootOffset)
+	pcall(function()
+		if not player.Character then
+			OrionLib:MakeNotification({
+	Name = "AimOffset",
+	Content = "No murderer to predict position.",
+	Image = "rbxassetid://4483345998",
+	Time = 3
+})
+			return Vector3.new(0, 0, 0)
+		end
+	end)
+
+	local playerHRP = player.Character:FindFirstChild("UpperTorso")
+	local playerHum = player.Character:FindFirstChild("Humanoid")
+
+	if not playerHRP or not playerHum then
+		return Vector3.new(0, 0, 0), "Could not find the player's HumanoidRootPart."
+	end
+
+	local playerPosition = playerHRP.Position
+	local velocity = playerHRP.AssemblyLinearVelocity
+	local playerMoveDirection = playerHum.MoveDirection
+	local playerLookVec = playerHRP.CFrame.LookVector
+	local yVelFactor = (velocity.Y > 0 and -1) or 0.5
+
+	local predictedPosition = playerHRP.Position + ((velocity * Vector3.new(0, 0.5, 0))) * (shootOffset / 15) + playerMoveDirection * shootOffset
+
+	return predictedPosition
+end
+
+function isLocalPlayerSheriff()
+	local localPlayer = game.Players.LocalPlayer
+	local sheriff = findSheriff()
+
+	return localPlayer == sheriff
+end
+
+local shootOffset = 2.8
+-- AimShot
+local function shoot()
+	if not isLocalPlayerSheriff() then
+		OrionLib:MakeNotification({
+	Name = "AimBot",
+	Content = "You're not sheriff/hero.",
+	Image = "rbxassetid://4483345998",
+	Time = 3
+})
+		return
+	end
+
+	local murderer = findMurderer()
+	if not murderer then
+		OrionLib:MakeNotification({
+	Name = "AimBot",
+	Content = "No Murder to Shoot",
+	Image = "rbxassetid://4483345998",
+	Time = 3
+})
+
+		return
+	end
+
+	if not game.Players.LocalPlayer.Character:FindFirstChild("Gun") then
+		local hum = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
+		if game.Players.LocalPlayer.Backpack:FindFirstChild("Gun") then
+			hum:EquipTool(game.Players.LocalPlayer.Backpack:FindFirstChild("Gun"))
+		else
+			OrionLib:MakeNotification({
+	Name = "AimBot",
+	Content = " Chill out pal",
+	Image = "rbxassetid://4483345998",
+	Time = 3
+})
+			return
+		end
+	end
+
+	local murdererHRP = murderer.Character:FindFirstChild("HumanoidRootPart")
+
+	if not murdererHRP then
+		print("Could not find the murderer's HumanoidRootPart.")
+		return
+	end
+
+	local predictedPosition = getPredictedPosition(murderer, shootOffset)
+
+	local args = {
+		[1] = 1,
+		[2] = predictedPosition,
+		[3] = "AH2"
+	}
+	game.Players.LocalPlayer.Character.Gun.KnifeLocal.CreateBeam.RemoteFunction:InvokeServer(unpack(args))
+end
+-- Create ButtonUi
 local player = game.Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
-
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "CrosshairGui"
 screenGui.Parent = playerGui
@@ -103,12 +264,12 @@ screenGui.ResetOnSpawn = false
 -- Create frame
 local frame = Instance.new("Frame")
 frame.Size = UDim2.new(0, 150, 0, 60)
-frame.Position = UDim2.new(0.5, -75, 0.5, -30) -- adjusted position to center the frame
+frame.Position = UDim2.new(0.5, -75, 0.5, -30)
 frame.AnchorPoint = Vector2.new(0.5, 0.5)
-frame.BackgroundColor3 = Color3.fromRGB(0, 0, 255) -- blue color
-frame.BorderSizePixel = 1 -- thin outline
-frame.BorderColor3 = Color3.fromRGB(0, 0, 255) -- blue color
-frame.BackgroundTransparency = 0.8 -- 80% transparent
+frame.BackgroundColor3 = Color3.fromRGB(0, 0, 255)
+frame.BorderSizePixel = 1
+frame.BorderColor3 = Color3.fromRGB(0, 0, 255)
+frame.BackgroundTransparency = 0.8
 frame.Parent = screenGui
 
 -- Create cornered outline
@@ -118,11 +279,11 @@ corner.Parent = frame
 
 -- Create inner frame with black transparent background
 local innerFrame = Instance.new("Frame")
-innerFrame.Size = UDim2.new(1, -4, 1, -4) -- adjusted size to fit inside the outline
+innerFrame.Size = UDim2.new(1, -4, 1, -4) 
 innerFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 innerFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-innerFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- black color
-innerFrame.BackgroundTransparency = 0.8 -- 80% transparent
+innerFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0) 
+innerFrame.BackgroundTransparency = 0.8
 innerFrame.Parent = frame
 
 -- Create cornered inner frame
@@ -134,14 +295,14 @@ innerCorner.Parent = innerFrame
 local imageLabel = Instance.new("ImageLabel")
 imageLabel.Size = UDim2.new(0, 50, 0, 50)
 imageLabel.Image = "rbxassetid://7733765307"
-imageLabel.BackgroundTransparency = 1 -- transparent background
+imageLabel.BackgroundTransparency = 1
 imageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-imageLabel.Position = UDim2.new(0.5, 0, 0.5, 0) -- center the image label
+imageLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
 imageLabel.Parent = innerFrame
 
 -- Create button
 local button = Instance.new("ImageButton")
-button.Size = UDim2.new(1, 0, 1, 0) -- changed size to fit the inner frame
+button.Size = UDim2.new(1, 0, 1, 0)
 button.Position = UDim2.new(0, 0, 0, 0)
 button.AnchorPoint = Vector2.new(0, 0)
 button.BackgroundTransparency = 1
@@ -195,10 +356,20 @@ local function toggleButton(state)
 end
 
 toggleButton(false)
+-- Universal --
+-- Function to update player names
+local function updatePlayerNames()
+    playerNames = {}
+    for _, player in ipairs(plrs:GetPlayers()) do
+        table.insert(playerNames, player.DisplayName.. " (@".. player.Name.. ")")
+    end
+end
+
+spawn(updatePlayerNames)
 
 -- Connect the click event to print "Clicked"
 button.Activated:Connect(function()
-    shootMurderer()
+    shoot()
 end)
 
 -- Function Fps
@@ -461,14 +632,14 @@ Tab2:AddButton({
     end
 })
 
--- [[Mm2]] -
+-- [[Mm2]] --
     local Tab3 = Window:MakeTab({
     Name = "Murder Mystery 2",
     Icon = "rbxassetid://7733799795",
     PremiumOnly = false,
 })
 
-local text3 = Tab3:AddParagraph(" Silent Aim", "Offset 3.5 default i recomended 2 for better Aiming")
+local text3 = Tab3:AddParagraph("Silent Aim:", "Offset 2.8 default")
 
 local AimUiToggle = Tab3:AddToggle({
     Name = "Shoot Ui",
@@ -483,19 +654,62 @@ local AimKeybind = Tab3:AddBind({
 	Default = Enum.KeyCode.Q,
 	Hold = false,
 	Callback = function()
-		shootMurderer()
+		shoot()
 	end    
 })
 
 local AimOffset = Tab3:AddTextbox({
-	Name = "Aim Offset",
-	Default = "3.5",
-	TextDisappear = false,
-	Callback = function(Value)
-		shootOffset = tonumber(Value)
-	end	  
+    Name = "Aim Offset",
+    Default = "2.8",
+    TextDisappear = true
+,
+    Callback = function(text)
+        if not tonumber(text) then
+            OrionLib:MakeNotification({
+	Name = "AimBot",
+	Content = "Not a valid number.",
+	Image = "rbxassetid://4483345998",
+	Time = 3
+})
+            return
+        end
+        
+        local offset = tonumber(text)
+        
+        if offset > 5 then
+            OrionLib:MakeNotification({
+	Name = "AimBot",
+	Content = "An offset with a multiplier of 5 might not at all shoot the murderer!",
+	Image = "rbxassetid://4483345998",
+	Time = 3
+})
+        elseif offset < 0 then
+OrionLib:MakeNotification({
+	Name = "AimBot",
+	Content = "An offset with a negative multiplier will make a shot BEHIND the murderer's walk direction.",
+	Image = "rbxassetid://4483345998",
+	Time = 3
+})
+        else
+            shootOffset = offset
+OrionLib:MakeNotification({
+	Name = "AimBot",
+	Content = "Offset has been set to " .. offset,
+	Image = "rbxassetid://4483345998",
+	Time = 3
+})
+        end
+    end
 })
 
+local text4 = Tab3:AddParagraph("Esp:", "Locate a players")
+
+local EspToggleM =Tab:AddToggle({
+	Name = "Esp",
+	Default = false,
+	Callback = togglePlayerESP
+	end    
+})
 -- [Info] --
 local InfoT = Window:MakeTab({Name = "Info", Icon = "rbxassetid://7733964719", PremiumOnly = false})
 
