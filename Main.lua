@@ -713,7 +713,7 @@ local EspM = Tab3:AddToggle({
     Default = false,
     Callback = function(value)
         toggleEspM = value
-        updatePlayerESP()
+        updateESP() -- Call updateESP() instead of updatePlayerESP()
     end
 })
 -- [Info] --
