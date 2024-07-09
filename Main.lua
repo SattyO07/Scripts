@@ -59,48 +59,72 @@ local function findSheriff()
 end
 -- Esp
 local playerESP = false
+local GUIContainer = script.Parent.Parent
 
-local playerData = {}
+local function createHighlight(character, color, transparency)
+    local highlight = Instance.new("Highlight")
+    highlight.Parent = character
+    highlight.Name = "PlayerESP"
+    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    highlight.Adornee = character
+    highlight.FillColor = color
+    highlight.FillTransparency = transparency
+    return highlight
+end
 
-workspace.ChildAdded:Connect(function(ch)
-	if ch.Name == "Normal" and playerESP then
-		OrionLib:MakeNotification({
-			Name = "Map has loaded, waiting for roles...",
-			Content = "Please wait for roles to be assigned.",
-			Image = "rbxassetid://4483345998",
-			Time = 5
+if ch.Name == "Normal" and playerESP then
+    OrionLib:MakeNotification({
+	Name = "Esp: Loading",
+	Content = "Map has loaded, waiting for roles.",
+	Image = "rbxassetid://4483345998",
+	Time = 3
 		})
-		wait(5)
-		for _, v in ipairs(workspace:GetDescendants()) do
-			if v:IsA("Model") and v:FindFirstChild("Humanoid") then
-				local player = game:GetService("Players"):GetPlayerFromCharacter(v)
-				if player then
-					playerData[player.UserId] = v
-					local highlight = Instance.new("Highlight")
-					highlight.Parent = script.Parent
-					highlight.Name = "PlayerESP"
-					highlight.Adornee = v
-					highlight.FillColor = Color3.new(1, 0, 0)
-					highlight.OutlineColor = Color3.new(1, 1, 1)
-					highlight.FillTransparency = 0.5
-					highlight.OutlineWidth = 2
-				end
-			end
-		end
-	end
-end)
+    repeat
+        task.wait(1)
+    until findMurderer()
+    local listplayers = game.Players:GetChildren()
+    for _, player in ipairs(listplayers) do
+        if  player.Character ~= nil then
+            local character = player.Character
+            if not character:FindFirstChild("PlayerESP") then
+                local highlight
+                if player == findMurderer() then
+                    highlight = createHighlight(character, Color3.fromRGB(255, 0, 0), 0.5)
+                elseif player == findSheriff() then
+                    highlight = createHighlight(character, Color3.fromRGB(0, 150, 255), 0.5)
+                else
+                    highlight = createHighlight(character, Color3.fromRGB(0, 255, 0), 0.5)
+                end
+                task.spawn(function()
+                    if highlight then
+                        if not player then return end
+                        highlight.Adornee = player.Character or player.CharacterAdded:Wait()
+                    end
+                end)
+            end
+        end
+    end
+    OrionLib:MakeNotification({
+	Name = "Esp: Loaded",
+	Content = "Player Esp is Ready",
+	Image = "rbxassetid://4483345998",
+	Time = 3
+})
+end
 
 workspace.ChildRemoved:Connect(function(ch)
-	if ch.Name == "Normal" and playerESP then
-		OrionLib:MakeNotification({
-			Name = "Game ended, removing Player ESPs.",
-			Content = "Player ESP has been removed.",
-			Image = "rbxassetid://4483345998",
-			Time = 5
-		})
-		playerData = {}
-		for _, v in ipairs(script.Parent:GetChildren()) do if v.Name == "PlayerESP" then v:Destroy() end end
-	end
+    if ch.Name == "Normal" and playerESP then
+        OrionLib:MakeNotification({
+	Name = "Esp: Removing",
+	Content = "Game Ended removing Esp.",
+	Image = "rbxassetid://4483345998",
+	Time = 3
+})
+        playerData = {}
+        if GUIContainer:FindFirstChild("AppliedMurdererBGUI") then GUIContainer:FindFirstChild("AppliedMurdererBGUI"):Destroy() end
+        if GUIContainer:FindFirstChild("DGBGUIClone") then GUIContainer:FindFirstChild("DGBGUIClone"):Destroy() end
+        for _, v in ipairs(script.Parent:GetChildren()) do if v.Name == "PlayerESP" then v:Destroy() end end
+    end
 end)
 -- ShootOffset
 local function getPredictedPosition(player, shootOffset)
@@ -654,6 +678,19 @@ local EspM = Tab3:AddToggle({
     Callback = function(value)
         playerESP = value
     end
+})
+
+local EspTM = 3Tab:AddSlider({
+	Name = "Transparency",
+	Min = 0,
+	Max = 1,
+	Default = 0.50,
+	Color = Color3.fromRGB(255,255,255),
+	Increment = 0.10,
+	ValueName = "%",
+	Callback = function(Value)
+		transparency = tonumber(Value)
+	end    
 })
 -- [Info] --
 local InfoT = Window:MakeTab({Name = "Info", Icon = "rbxassetid://7733964719", PremiumOnly = false})
