@@ -671,6 +671,109 @@ OrionLib:MakeNotification({
 })
 
 local text4 = Tab3:AddParagraph("Esp:", "Locate a players")
+
+local EspMToggle = 3Tab:AddToggle({
+    Name = "Player ESP",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            if not findMurderer() or not findSheriff() then
+                OrionLib:MakeNotification({
+               	Name = "Esp",
+               	Content = "Waiting For roles.",
+               	Image = "rbxassetid://4483345998",
+              	Time = 3})
+                repeat
+                    task.wait(1)
+                until findSheriff() or findMurderer()
+            end
+            local listplayers = game.Players:GetChildren()
+            for _, player in ipairs(listplayers) do
+                if  player.Character ~= nil then
+                    local character = player.Character
+                    if not character:FindFirstChild("PlayerESP") then
+                        local a = Instance.new("Highlight", script.Parent)
+                        a.Name = "PlayerESP"
+                        a.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                        a.Adornee = character
+                        a.FillColor = Color3.fromRGB(255, 255, 255)
+                        task.spawn(function()
+                            if player == findMurderer() then
+                                a.FillColor = Color3.fromRGB(255,0,0)
+                            elseif player == findSheriff() then
+                                a.FillColor = Color3.fromRGB(0, 150, 255)
+                            else
+                                a.FillColor = Color3.fromRGB(0,255,0)
+                            end
+                            if a then
+                                if not player then return end
+                                a.Adornee = player.Character or player.CharacterAdded:Wait()
+                            end
+                        end)
+                    end
+                end
+            end
+        else
+            for _, v in ipairs(script.Parent:GetChildren()) do if v.Name == "PlayerESP" then v:Destroy() end end
+        end
+    end
+})
+
+-- Function EspM
+workspace.ChildAdded:Connect(function(ch)
+    if ch.Name == "Normal" and EspMToggle.Value then
+        OrionLib:MakeNotification({
+               	Name = "Esp: Reloading",
+               	Content = "Map is Loaded, Waiting For roles.",
+               	Image = "rbxassetid://4483345998",
+              	Time = 3})
+        repeat
+            task.wait(1)
+        until findMurderer()
+        local listplayers = game.Players:GetChildren()
+        for _, player in ipairs(listplayers) do
+            if  player.Character ~= nil then
+                local character = player.Character
+                if not character:FindFirstChild("PlayerESP") then
+                    local a = Instance.new("Highlight", script.Parent)
+                    a.Name = "PlayerESP"
+                    a.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                    a.Adornee = character
+                    a.FillColor = Color3.fromRGB(255, 255, 255)
+                    task.spawn(function()
+                        if player == findMurderer() then
+                            a.FillColor = Color3.fromRGB(255,0,0)
+                        elseif player == findSheriff() then
+                            a.FillColor = Color3.fromRGB(0, 150, 255)
+                        else
+                            a.FillColor = Color3.fromRGB(0,255,0)
+                        end
+                        if a then
+                            if not player then return end
+                            a.Adornee = player.Character or player.CharacterAdded:Wait()
+                        end
+                    end)
+                end
+            end
+        end
+        OrionLib:MakeNotification({
+               	Name = "Esp: Loaded",
+               	Content = "Successful to load.",
+               	Image = "rbxassetid://4483345998",
+              	Time = 3})
+    end
+end)
+
+workspace.ChildRemoved:Connect(function(ch)
+    if ch.Name == "Normal" and EspMToggle.Value then
+        OrionLib:MakeNotification({
+               	Name = "Esp: GameEnd",
+               	Content = "Waiting Map to load.",
+               	Image = "rbxassetid://4483345998",
+              	Time = 3})
+        for _, v in ipairs(script.Parent:GetChildren()) do if v.Name == "PlayerESP" then v:Destroy() end end
+    end
+end)
 -- [Info] --
 local InfoT = Window:MakeTab({Name = "Info", Icon = "rbxassetid://7733964719", PremiumOnly = false})
 
