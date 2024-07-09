@@ -58,7 +58,7 @@ local function findSheriff()
 	return nil
 end
 -- Esp
-local playerESP = false
+local playerESP = true
 local GUIContainer = script.Parent.Parent
 
 local function createHighlight(character, color, transparency)
@@ -671,14 +671,6 @@ OrionLib:MakeNotification({
 })
 
 local text4 = Tab3:AddParagraph("Esp:", "Locate a players")
-
-local EspM = Tab3:AddToggle({
-    Name = "Esp",
-    Default = false,
-    Callback = function(value)
-        playerESP = value
-    end
-})
 -- [Info] --
 local InfoT = Window:MakeTab({Name = "Info", Icon = "rbxassetid://7733964719", PremiumOnly = false})
 
