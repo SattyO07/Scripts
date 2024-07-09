@@ -542,10 +542,6 @@ Tab2:AddButton({
     PremiumOnly = false,
 })
 
-local parroles = Tab3:AddParagraph("Current Roles:", "Who is murderer and Sheriff")
-Local ParMurder = Tab3:AddParagraph("Murderer:", "Null")
-Local ParSheriff = Tab3:AddParagraph("Sheriff:", "Null")
-
 local parsilentaim = Tab3:AddParagraph("Silent Aim:", "Offset 2.8 default")
 
 local AimUiToggle = Tab3:AddToggle({
@@ -623,20 +619,6 @@ RunService.RenderStepped:Connect(function()
     ParMurder:AddParagraph("Murder:", findSheriff())
     ParSheriff:AddParagraph("Sheriff:", findSheriff())
     refreshPlayerDropdown()
-    local currentMurderer = findMurderer()
-    local currentSheriff = findSheriff()
-    
-    if currentMurderer then
-        ParMurder:Set("Murderer: " .. currentMurderer.DisplayName)
-    else
-        ParMurder:Set("Murderer: Null")
-    end
-    
-    if currentSheriff then
-        ParSheriff:Set("Sheriff: " .. currentSheriff.DisplayName)
-    else
-        ParSheriff:Set("Sheriff: Null")
-		end
 end)
 
 -- Initialize the library
