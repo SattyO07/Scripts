@@ -541,8 +541,9 @@ Tab2:AddButton({
     Icon = "rbxassetid://7733799795",
     PremiumOnly = false,
 })
+
 Tab3:AddParagraph("Current Roles:", "Who is murderer and Sheriff")
-Local ParMurder = Tab3:AddParagraph("Murder", "Null")
+Local ParMurder = Tab3:AddParagraph("Murderer:", "Null")
 Local ParSheriff = Tab3:AddParagraph("Sheriff:", "Null")
 
 Tab3:AddParagraph("Silent Aim:", "Offset 2.8 default")
@@ -610,13 +611,6 @@ OrionLib:MakeNotification({
 
 Tab3:AddParagraph("Esp:", "Locate a players (Fixing)")
 
-
--- Function to regularly update the murderer and sheriff
-RunService.RenderStepped:Connect(function()
-    currentMurderer = findMurderer()
-    currentSheriff = findSheriff()
-end)
-
 -- [Info] --
 local InfoT = Window:MakeTab({Name = "Info", Icon = "rbxassetid://7733964719", PremiumOnly = false})
 
@@ -629,6 +623,20 @@ RunService.RenderStepped:Connect(function()
     ParMurder:AddParagraph("Murder:", findSheriff())
     ParSheriff:AddParagraph("Sheriff:", findSheriff())
     refreshPlayerDropdown()
+    local currentMurderer = findMurderer()
+    local currentSheriff = findSheriff()
+    
+    if currentMurderer then
+        ParMurder:Set("Murderer: " .. currentMurderer.DisplayName)
+    else
+        ParMurder:Set("Murderer: Null")
+    end
+    
+    if currentSheriff then
+        ParSheriff:Set("Sheriff: " .. currentSheriff.DisplayName)
+    else
+        ParSheriff:Set("Sheriff: Null")
+		end
 end)
 
 -- Initialize the library
