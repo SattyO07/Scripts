@@ -679,19 +679,6 @@ local EspM = Tab3:AddToggle({
         playerESP = value
     end
 })
-
-local EspTM = 3Tab:AddSlider({
-	Name = "Transparency",
-	Min = 0,
-	Max = 1,
-	Default = 0.50,
-	Color = Color3.fromRGB(255,255,255),
-	Increment = 0.10,
-	ValueName = "%",
-	Callback = function(Value)
-		transparency = tonumber(Value)
-	end    
-})
 -- [Info] --
 local InfoT = Window:MakeTab({Name = "Info", Icon = "rbxassetid://7733964719", PremiumOnly = false})
 
