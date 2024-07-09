@@ -607,10 +607,9 @@ OrionLib:MakeNotification({
 
 local text4 = Tab3:AddParagraph("Esp:", "Locate a players")
 
--- Create a folder to hold ESP billboards
-local ESPFolder = Instance.new("Folder")
-ESPFolder.Name = "ESP Holder"
-ESPFolder.Parent = game.CoreGui
+    -- Define global variables for the murderer and sheriff
+local currentMurderer = nil
+local currentSheriff = nil
 
 -- Function to add ESP billboard for a player
 local function AddBillboard(player)
@@ -632,16 +631,16 @@ local function AddBillboard(player)
     TextLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
     TextLabel.Parent = Billboard
 
-    repeat
-        wait()
+    -- Update ESP based on the role
+    local function updateESP()
         pcall(function()
-            Billboard.Adornee = player.Character.Head
-            if player.Character:FindFirstChild("Knife") or player.Backpack:FindFirstChild("Knife") then
+            Billboard.Adornee = player.Character and player.Character:FindFirstChild("Head") or nil
+            if player == currentMurderer then
                 TextLabel.TextColor3 = Color3.new(1, 0, 0) -- Red for Murderers
                 if getgenv().MurderEsp then
                     Billboard.Enabled = true
                 end
-            elseif player.Character:FindFirstChild("Gun") or player.Backpack:FindFirstChild("Gun") then
+            elseif player == currentSheriff then
                 TextLabel.TextColor3 = Color3.new(0, 0, 1) -- Blue for Sheriffs
                 if getgenv().SheriffEsp then
                     Billboard.Enabled = true
@@ -653,7 +652,18 @@ local function AddBillboard(player)
                 end
             end
         end)
-    until not player.Parent
+    end
+
+    -- Regularly update ESP
+    local updateConnection
+    updateConnection = RunService.RenderStepped:Connect(function()
+        if not player.Parent then
+            updateConnection:Disconnect()
+            Billboard:Destroy()
+        else
+            updateESP()
+        end
+    end)
 end
 
 -- Function to handle player addition and removal
@@ -677,36 +687,40 @@ game.Players.PlayerRemoving:Connect(function(player)
     end
 end)
 
+-- Global variables for ESP toggles
 getgenv().AllEsp = false
-getgenv().MurderEspget = false
-genv().SheriffEsp = false
+getgenv().MurderEsp = false
+getgenv().SheriffEsp = false
 
-local EspAll = 3Tab:AddToggle({
-	Name = "All",
-	Default = false,
-	Callback = function(Value)
+local EspAll = Tab3:AddToggle({
+    Name = "All",
+    Default = false,
+    Callback = function(Value)
         getgenv().AllEsp = Value
-	end    
+    end    
 })
 
-local EspMurderer = 3Tab:AddToggle({
-	Name = "Murderer",
-	Default = false,
-	Callback = function(Value)
+local EspMurderer = Tab3:AddToggle({
+    Name = "Murderer",
+    Default = false,
+    Callback = function(Value)
         getgenv().MurderEsp = Value
-	end    
+    end    
 })
 
-local EspAAheriff = 3Tab:AddToggle({
-	Name = "Sheriff",
-	Default = false,
-	Callback = function(Value)
+local EspSheriff = Tab3:AddToggle({
+    Name = "Sheriff",
+    Default = false,
+    Callback = function(Value)
         getgenv().SheriffEsp = Value
-	end    
+    end    
 })
 
-
- -- Set default state
+-- Function to regularly update the murderer and sheriff
+RunService.RenderStepped:Connect(function()
+    currentMurderer = findMurderer()
+    currentSheriff = findSheriff()
+end)
 
 -- [Info] --
 local InfoT = Window:MakeTab({Name = "Info", Icon = "rbxassetid://7733964719", PremiumOnly = false})
