@@ -542,11 +542,11 @@ Tab2:AddButton({
     PremiumOnly = false,
 })
 
-Tab3:AddParagraph("Current Roles:", "Who is murderer and Sheriff")
+local parroles = Tab3:AddParagraph("Current Roles:", "Who is murderer and Sheriff")
 Local ParMurder = Tab3:AddParagraph("Murderer:", "Null")
 Local ParSheriff = Tab3:AddParagraph("Sheriff:", "Null")
 
-Tab3:AddParagraph("Silent Aim:", "Offset 2.8 default")
+local parsilentaim = Tab3:AddParagraph("Silent Aim:", "Offset 2.8 default")
 
 local AimUiToggle = Tab3:AddToggle({
     Name = "Shoot Ui",
@@ -609,7 +609,7 @@ OrionLib:MakeNotification({
     end
 })
 
-Tab3:AddParagraph("Esp:", "Locate a players (Fixing)")
+local ParEsp = Tab3:AddParagraph("Esp:", "Locate a players (Fixing)")
 
 -- [Info] --
 local InfoT = Window:MakeTab({Name = "Info", Icon = "rbxassetid://7733964719", PremiumOnly = false})
