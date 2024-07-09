@@ -139,7 +139,11 @@ local function shoot()
 	local murdererHRP = murderer.Character:FindFirstChild("HumanoidRootPart")
 
 	if not murdererHRP then
-		print("Could not find the murderer's HumanoidRootPart.")
+		OrionLib:MakeNotification({
+	Name = "Aimbot",
+	Content = "Could not find the murderer's",
+	Image = "rbxassetid://4483345998",
+	Time = 5})
 		return
 	end
 
@@ -287,7 +291,7 @@ local GameName = game:GetService("MarketplaceService"):GetProductInfo(game.Place
 local Window = OrionLib:MakeWindow({Name = "MoonLight : [" .. GameName .. "]", HidePremium = false, SaveConfig = false, ConfigFolder = "ReaperSaved"})
 
 -- [Universal]--
-local Tab1 = Window:MakeTab({Name = "Universal", Icon = "rbxassetid://8997387937", PremiumOnly = false})
+local Tab1 = Window:MakeTab({Name = "Universal", Icon = "rbxassetid://7733954760", PremiumOnly = false})
 
 local selectPlayers = Tab1:AddDropdown({
     Name = "Players",
@@ -490,7 +494,7 @@ Tab1:AddTextbox({
 })
 
 -- [Scripts] --
-local Tab2 = Window:MakeTab({Name = "Scripts", Icon = "rbxassetid://8997388036", PremiumOnly = false})
+local Tab2 = Window:MakeTab({Name = "Scripts", Icon = "rbxassetid://7734111084", PremiumOnly = false})
 
 Tab2:AddParagraph("Tools Scripting", "Easy to build a script")
 
