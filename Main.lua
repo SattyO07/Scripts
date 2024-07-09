@@ -606,13 +606,16 @@ OrionLib:MakeNotification({
 })
 
 local text4 = Tab3:AddParagraph("Esp:", "Locate a players")
+
+-- Create a folder to hold ESP billboards
 local ESPFolder = Instance.new("Folder")
 ESPFolder.Name = "ESP Holder"
 ESPFolder.Parent = game.CoreGui
 
+-- Function to add ESP billboard for a player
 local function AddBillboard(player)
     local Billboard = Instance.new("BillboardGui")
-    Billboard.Name = player.Name.. "Billboard"
+    Billboard.Name = player.Name .. "Billboard"
     Billboard.AlwaysOnTop = true
     Billboard.Size = UDim2.new(0, 200, 0, 50)
     Billboard.ExtentsOffset = Vector3.new(0, 3, 0)
@@ -634,17 +637,17 @@ local function AddBillboard(player)
         pcall(function()
             Billboard.Adornee = player.Character.Head
             if player.Character:FindFirstChild("Knife") or player.Backpack:FindFirstChild("Knife") then
-                TextLabel.TextColor3 = Color3.new(1, 0, 0)
+                TextLabel.TextColor3 = Color3.new(1, 0, 0) -- Red for Murderers
                 if getgenv().MurderEsp then
                     Billboard.Enabled = true
                 end
             elseif player.Character:FindFirstChild("Gun") or player.Backpack:FindFirstChild("Gun") then
-                TextLabel.TextColor3 = Color3.new(0, 0, 1)
+                TextLabel.TextColor3 = Color3.new(0, 0, 1) -- Blue for Sheriffs
                 if getgenv().SheriffEsp then
                     Billboard.Enabled = true
                 end
             else
-                TextLabel.TextColor3 = Color3.new(0, 1, 0)
+                TextLabel.TextColor3 = Color3.new(0, 1, 0) -- Green for other players
                 if getgenv().AllEsp then
                     Billboard.Enabled = true
                 end
@@ -653,79 +656,58 @@ local function AddBillboard(player)
     until not player.Parent
 end
 
-for _, player in pairs(game.Players:GetPlayers()) do
+-- Function to handle player addition and removal
+local function HandlePlayer(player)
     if player ~= game.Players.LocalPlayer then
         coroutine.wrap(AddBillboard)(player)
     end
 end
 
-game.Players.PlayerAdded:Connect(function(player)
-    if player ~= game.Players.LocalPlayer then
-        coroutine.wrap(AddBillboard)(player)
-    end
-end)
+-- Initial setup for existing players
+for _, player in pairs(game.Players:GetPlayers()) do
+    HandlePlayer(player)
+end
 
+-- Event listeners for player joining and leaving
+game.Players.PlayerAdded:Connect(HandlePlayer)
 game.Players.PlayerRemoving:Connect(function(player)
-    local billboard = ESPFolder:FindFirstChild(player.Name.. "Billboard")
+    local billboard = ESPFolder:FindFirstChild(player.Name .. "Billboard")
     if billboard then
         billboard:Destroy()
     end
 end)
 
-local SEnable = 3Tab:AddToggle({
-    Name = "All",
-    Default = false,
-    Callback = function(Value)
+getgenv().AllEsp = false
+getgenv().MurderEspget = false
+genv().SheriffEsp = false
+
+local EspAll = 3Tab:AddToggle({
+	Name = "All",
+	Default = false,
+	Callback = function(Value)
         getgenv().AllEsp = Value
-        for _, billboard in ipairs(ESPFolder:GetChildren()) do
-            if billboard:IsA("BillboardGui") then
-                local playerName = billboard.Name:sub(1, -10)
-                local player = game.Players:FindFirstChild(playerName)
-                if player and player.Character then
-                    local hasKnife = player.Character:FindFirstChild("Knife") or player.Backpack:FindFirstChild("Knife")
-                    local hasGun = player.Character:FindFirstChild("Gun") or player.Backpack:FindFirstChild("Gun")
-                    if not (hasKnife or hasGun) then
-                        billboard.Enabled = Value
-                    end
-                end
-            end
-        end
-    end,
+	end    
 })
 
-local Enable = 3Tab:AddToggle({
-    Name = "Sheriff",
-    Default = false,
-    Callback = function(Value)
-        getgenv().SheriffEsp = Value
-        for _, billboard in ipairs(ESPFolder:GetChildren()) do
-            if billboard:IsA("BillboardGui") then
-                local playerName = billboard.Name:sub(1, -10)
-                local player = game.Players:FindFirstChild(playerName)
-                if player and (player.Character:FindFirstChild("Gun") or player.Backpack:FindFirstChild("Gun")) then
-                    billboard.Enabled = Value
-                end
-            end
-        end
-    end,
-})
-
-local MEnable = 3Tab:AddToggle({
-    Name = "Murderer",
-    Default = false,
-    Callback = function(Value)
+local EspMurderer = 3Tab:AddToggle({
+	Name = "Murderer",
+	Default = false,
+	Callback = function(Value)
         getgenv().MurderEsp = Value
-        for _, billboard in ipairs(ESPFolder:GetChildren()) do
-            if billboard:IsA("BillboardGui") then
-                local playerName = billboard.Name:sub(1, -10)
-                local player = game.Players:FindFirstChild(playerName)
-                if player and (player.Character:FindFirstChild("Knife") or player.Backpack:FindFirstChild("Knife")) then
-                    billboard.Enabled = Value
-                end
-            end
-        end
-    end,
+	end    
 })
+
+local EspAAheriff = 3Tab:AddToggle({
+	Name = "Sheriff",
+	Default = false,
+	Callback = function(Value)
+        getgenv().SheriffEsp = Value
+	end    
+})
+
+
+ -- Set default state
+
 -- [Info] --
 local InfoT = Window:MakeTab({Name = "Info", Icon = "rbxassetid://7733964719", PremiumOnly = false})
 
