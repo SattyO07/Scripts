@@ -541,8 +541,11 @@ Tab2:AddButton({
     Icon = "rbxassetid://7733799795",
     PremiumOnly = false,
 })
+Tab3:AddParagraph("Current Roles:", "Who is murderer and Sheriff")
+Local ParMurder = Tab3:AddParagraph("Murder", "Null")
+Local ParSheriff = Tab3:AddParagraph("Sheriff:", "Null")
 
-local text3 = Tab3:AddParagraph("Silent Aim:", "Offset 2.8 default")
+Tab3:AddParagraph("Silent Aim:", "Offset 2.8 default")
 
 local AimUiToggle = Tab3:AddToggle({
     Name = "Shoot Ui",
@@ -605,116 +608,8 @@ OrionLib:MakeNotification({
     end
 })
 
-local text4 = Tab3:AddParagraph("Esp:", "Locate a players")
+Tab3:AddParagraph("Esp:", "Locate a players (Fixing)")
 
-    -- Define global variables for the murderer and sheriff
-local currentMurderer = nil
-local currentSheriff = nil
-
--- Function to add ESP billboard for a player
-local function AddBillboard(player)
-    local Billboard = Instance.new("BillboardGui")
-    Billboard.Name = player.Name .. "Billboard"
-    Billboard.AlwaysOnTop = true
-    Billboard.Size = UDim2.new(0, 200, 0, 50)
-    Billboard.ExtentsOffset = Vector3.new(0, 3, 0)
-    Billboard.Enabled = false
-    Billboard.Parent = ESPFolder
-
-    local TextLabel = Instance.new("TextLabel")
-    TextLabel.TextSize = 20
-    TextLabel.Text = player.Name
-    TextLabel.Font = Enum.Font.FredokaOne
-    TextLabel.BackgroundTransparency = 1
-    TextLabel.Size = UDim2.new(1, 0, 1, 0)
-    TextLabel.TextStrokeTransparency = 0
-    TextLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
-    TextLabel.Parent = Billboard
-
-    -- Update ESP based on the role
-    local function updateESP()
-        pcall(function()
-            Billboard.Adornee = player.Character and player.Character:FindFirstChild("Head") or nil
-            if player == currentMurderer then
-                TextLabel.TextColor3 = Color3.new(1, 0, 0) -- Red for Murderers
-                if getgenv().MurderEsp then
-                    Billboard.Enabled = true
-                end
-            elseif player == currentSheriff then
-                TextLabel.TextColor3 = Color3.new(0, 0, 1) -- Blue for Sheriffs
-                if getgenv().SheriffEsp then
-                    Billboard.Enabled = true
-                end
-            else
-                TextLabel.TextColor3 = Color3.new(0, 1, 0) -- Green for other players
-                if getgenv().AllEsp then
-                    Billboard.Enabled = true
-                end
-            end
-        end)
-    end
-
-    -- Regularly update ESP
-    local updateConnection
-    updateConnection = RunService.RenderStepped:Connect(function()
-        if not player.Parent then
-            updateConnection:Disconnect()
-            Billboard:Destroy()
-        else
-            updateESP()
-        end
-    end)
-end
-
--- Function to handle player addition and removal
-local function HandlePlayer(player)
-    if player ~= game.Players.LocalPlayer then
-        coroutine.wrap(AddBillboard)(player)
-    end
-end
-
--- Initial setup for existing players
-for _, player in pairs(game.Players:GetPlayers()) do
-    HandlePlayer(player)
-end
-
--- Event listeners for player joining and leaving
-game.Players.PlayerAdded:Connect(HandlePlayer)
-game.Players.PlayerRemoving:Connect(function(player)
-    local billboard = ESPFolder:FindFirstChild(player.Name .. "Billboard")
-    if billboard then
-        billboard:Destroy()
-    end
-end)
-
--- Global variables for ESP toggles
-getgenv().AllEsp = false
-getgenv().MurderEsp = false
-getgenv().SheriffEsp = false
-
-local EspAll = Tab3:AddToggle({
-    Name = "All",
-    Default = false,
-    Callback = function(Value)
-        getgenv().AllEsp = Value
-    end    
-})
-
-local EspMurderer = Tab3:AddToggle({
-    Name = "Murderer",
-    Default = false,
-    Callback = function(Value)
-        getgenv().MurderEsp = Value
-    end    
-})
-
-local EspSheriff = Tab3:AddToggle({
-    Name = "Sheriff",
-    Default = false,
-    Callback = function(Value)
-        getgenv().SheriffEsp = Value
-    end    
-})
 
 -- Function to regularly update the murderer and sheriff
 RunService.RenderStepped:Connect(function()
@@ -731,6 +626,8 @@ local fpsLabel = InfoT:AddLabel("Current FPS: " .. UpdateFps)
 RunService.RenderStepped:Connect(function()
     playerCountLabel:Set("Player Count: " .. #plrs:GetPlayers() .. "/" .. game.Players.MaxPlayers)
     fpsLabel:Set("Current FPS: " .. UpdateFps)
+    ParMurder:AddParagraph("Murder:", findSheriff())
+    ParSheriff:AddParagraph("Sheriff:", findSheriff())
     refreshPlayerDropdown()
 end)
 
