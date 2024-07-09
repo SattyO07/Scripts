@@ -535,6 +535,20 @@ Tab2:AddButton({
     end
 })
 
+Tab2:AddButton({
+    Name = "Yarhm",
+    Callback = function()
+        loadstring(game:HttpGet("https://scriptblox.com/raw/Universal-Script-YARHM-12403"))()
+    end
+})
+
+Tab2:AddButton({
+    Name = "Console",
+    Callback = function()
+        game.StarterGui:SetCore("DevConsoleVisible", true)
+		end
+})
+
 -- [[Mm2]] --
     local Tab3 = Window:MakeTab({
     Name = "Murder Mystery 2",
