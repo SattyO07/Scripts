@@ -603,17 +603,17 @@ OrionLib:MakeNotification({
 
 local text4 = Tab3:AddParagraph("Esp:", "Locate a players")
 
-local EspMToggle = 3Tab:AddToggle({
+local EspMToggle = Tab3:AddToggle({
     Name = "Player ESP",
     Default = false,
     Callback = function(Value)
         if Value then
             if not findMurderer() or not findSheriff() then
                 OrionLib:MakeNotification({
-               	Name = "Esp",
-               	Content = "Waiting For roles.",
-               	Image = "rbxassetid://4483345998",
-              	Time = 3})
+                Name = "Esp",
+                Content = "Waiting For roles.",
+                Image = "rbxassetid://4483345998",
+                Time = 3})
                 repeat
                     task.wait(1)
                 until findSheriff() or findMurderer()
