@@ -482,8 +482,7 @@ local InfoT = Window:MakeTab({Name = "Info", Icon = "rbxassetid://7733964719", P
 local playerCountLabel = InfoT:AddLabel("Player Count: " .. #plrs:GetPlayers() .. "/" .. game.Players.MaxPlayers)
 local fpsLabel = InfoT:AddLabel("Current FPS: " .. UpdateFps)
 
--- Loops --	
--- Cooldown and Update Loop for Player Count and FPS
+-- Update loop for dropdown and cooldown
 local lastRefreshTime = 0
 RunService.RenderStepped:Connect(function()
     playerCountLabel:Set("Player Count: " .. #plrs:GetPlayers() .. "/" .. game.Players.MaxPlayers)
@@ -491,12 +490,18 @@ RunService.RenderStepped:Connect(function()
     
     if tick() - lastRefreshTime > 5 then
         playerOptions = {}
+        local addedPlayers = {}
+        
+        -- Update playerOptions with current players
         for _, player in ipairs(game.Players:GetPlayers()) do
             if player ~= game.Players.LocalPlayer then
-                table.insert(playerOptions, player.DisplayName .. " (@" .. player.Name .. ")")
+                local displayName = player.DisplayName .. " (@" .. player.Name .. ")"
+                if not addedPlayers[displayName] then
+                    table.insert(playerOptions, displayName)
+                    addedPlayers[displayName] = true
+                end
             end
-        end
-
+			end
         selectplayerdrop:Refresh(playerOptions)
         lastRefreshTime = tick()
     end
