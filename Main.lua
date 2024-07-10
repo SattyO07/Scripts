@@ -323,38 +323,34 @@ local spectateToggle = Tab1:AddToggle({
     Name = "Spectate",
     Default = false,
     Callback = function(Value)
-        if Value then
-            local selectedPlayerName = selectplayerdrop.Value
-            local selectedPlayer = nil
-            for _, player in ipairs(game.Players:GetPlayers()) do
-                if player.DisplayName .. " (@" .. player.Name .. ")" == selectedPlayerName then
-                    selectedPlayer = player
-                    break
-                end
+        local selectedPlayerName = selectplayerdrop.Value
+        local selectedPlayer = nil
+        for _, player in ipairs(game.Players:GetPlayers()) do
+            if player.DisplayName .. " (@" .. player.Name .. ")" == selectedPlayerName then
+                selectedPlayer = player
+                break
             end
-            if selectedPlayer then
-                local character = game.Players.LocalPlayer.Character
-                if character then
-                    character.HumanoidRootPart.Anchored = true
-                    character.HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
-                    character.HumanoidRootPart.CFrame = selectedPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
-                end
+        end
+        
+        if Value then
+            if selectedPlayer and selectedPlayer.Character and selectedPlayer.Character:FindFirstChild("Humanoid") then
+                local camera = workspace.CurrentCamera
+                camera.CameraSubject = selectedPlayer.Character.Humanoid  -- Set camera to follow the selected player's humanoid
             else
                 OrionLib:MakeNotification({
                     Name = "Warning",
-                    Content = "You need to select a player first.",
+                    Content = "You need to select a valid player first.",
                     Image = "rbxassetid://4483345998",
                     Time = 3
                 })
             end
         else
-            local character = game.Players.LocalPlayer.Character
-            if character then
-                character.HumanoidRootPart.Anchored = false
-            end
+            local camera = workspace.CurrentCamera
+            camera.CameraSubject = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")  -- Reset camera to local player
         end
     end
 })
+
 -- [Scripts] --
 local Tab2 = Window:MakeTab({Name = "Scripts", Icon = "rbxassetid://7734111084", PremiumOnly = false})
 
@@ -487,18 +483,23 @@ local playerCountLabel = InfoT:AddLabel("Player Count: " .. #plrs:GetPlayers() .
 local fpsLabel = InfoT:AddLabel("Current FPS: " .. UpdateFps)
 
 -- Loops --	
+-- Cooldown and Update Loop for Player Count and FPS
+local lastRefreshTime = 0
 RunService.RenderStepped:Connect(function()
     playerCountLabel:Set("Player Count: " .. #plrs:GetPlayers() .. "/" .. game.Players.MaxPlayers)
     fpsLabel:Set("Current FPS: " .. UpdateFps)
-
-    playerOptions = {}
-    for _, player in ipairs(game.Players:GetPlayers()) do
-        if player ~= game.Players.LocalPlayer then
-            table.insert(playerOptions, player.DisplayName .. " (@" .. player.Name .. ")")
+    
+    if tick() - lastRefreshTime > 5 then
+        playerOptions = {}
+        for _, player in ipairs(game.Players:GetPlayers()) do
+            if player ~= game.Players.LocalPlayer then
+                table.insert(playerOptions, player.DisplayName .. " (@" .. player.Name .. ")")
+            end
         end
-    end
 
-    selectplayerdrop:Refresh(playerOptions)
+        selectplayerdrop:Refresh(playerOptions)
+        lastRefreshTime = tick()
+    end
 end)
 
 -- Initialize the library
