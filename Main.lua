@@ -4,25 +4,6 @@ local plrs = game.Players
 local RunService = game:GetService("RunService")
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/Unknownkellymc1/Orion/main/source')))()
 -- Universal functions --
--- Dropdown
-local playerOptions = {}
-for _, player in ipairs(game.Players:GetPlayers()) do
-    if player ~= game.Players.LocalPlayer then
-        table.insert(playerOptions, player.DisplayName.. " (@".. player.Name.. ")")
-    end
-end
-
-while true do
-    wait(5)
-    playerOptions = {}
-    for _, player in ipairs(game.Players:GetPlayers()) do
-        if player ~= game.Players.LocalPlayer then
-            table.insert(playerOptions, player.DisplayName.. " (@".. player.Name.. ")")
-        end
-    end
-    selectplayerdrop.Options = playerOptions
-end
-
 -- Fling
 local SkidFling = function(TargetPlayer)
     local Character = game.Players.LocalPlayer.Character
@@ -474,7 +455,14 @@ local Window = OrionLib:MakeWindow({Name = "MoonLight : [" .. GameName .. "]", H
 -- [Universal] --
 local Tab1 = Window:MakeTab({Name = "Universal", Icon = "rbxassetid://7733954760", PremiumOnly = false})
 
-local selectplayerdrop = 1Tab:AddDropdown({
+local playerOptions = {}
+for _, player in ipairs(game.Players:GetPlayers()) do
+    if player ~= game.Players.LocalPlayer then
+        table.insert(playerOptions, player.DisplayName.. " (@".. player.Name.. ")")
+    end
+end
+
+local selectplayerdrop = Tab1:AddDropdown({
     Name = "Player Select",
     Default = "",
     Options = playerOptions,
@@ -482,7 +470,7 @@ local selectplayerdrop = 1Tab:AddDropdown({
     end
 })
 
-local teleportPlayer = 1Tab:AddButton({
+local teleportButton = Tab1:AddButton({
     Name = "Teleport",
     Callback = function()
         local selectedPlayer = game.Players:FindFirstChild(selectplayerdrop.Value)
@@ -493,16 +481,16 @@ local teleportPlayer = 1Tab:AddButton({
             end
         else
             OrionLib:MakeNotification({
-	Name = "Warning",
-	Content = "You need to select a player first.",
-	Image = "rbxassetid://4483345998",
-	Time = 3
-})
+                Name = "Warning",
+                Content = "You need to select a player first.",
+                Image = "rbxassetid://4483345998",
+                Time = 3
+            })
         end
     end
 })
 
-local flingButton = 1Tab:AddButton({
+local flingButton = Tab1:AddButton({
     Name = "Fling",
     Callback = function()
         local selectedPlayer = game.Players:FindFirstChild(selectplayerdrop.Value)
@@ -511,19 +499,19 @@ local flingButton = 1Tab:AddButton({
                 SkidFling(selectedPlayer)
             else
                 OrionLib:MakeNotification({
-	Name = "Warning",
-	Content = "You can't fling Yourself.",
-	Image = "rbxassetid://4483345998",
-	Time = 3
-})
+                    Name = "Warning",
+                    Content = "You can't fling Yourself.",
+                    Image = "rbxassetid://4483345998",
+                    Time = 3
+                })
             end
         else
             OrionLib:MakeNotification({
-	Name = "Warning",
-	Content = "You need to select a player first.",
-	Image = "rbxassetid://4483345998",
-	Time = 3
-})
+                Name = "Warning",
+                Content = "You need to select a player first.",
+                Image = "rbxassetid://4483345998",
+                Time = 3
+            })
         end
     end
 })
@@ -723,6 +711,19 @@ local InfoT = Window:MakeTab({Name = "Info", Icon = "rbxassetid://7733964719", P
 local playerCountLabel = InfoT:AddLabel("Player Count: " .. #plrs:GetPlayers() .. "/" .. game.Players.MaxPlayers)
 local fpsLabel = InfoT:AddLabel("Current FPS: " .. UpdateFps)
 
+
+-- Loops --
+while true do
+    wait(5)
+    playerOptions = {}
+    for _, player in ipairs(game.Players:GetPlayers()) do
+        if player ~= game.Players.LocalPlayer then
+            table.insert(playerOptions, player.DisplayName.. " (@".. player.Name.. ")")
+        end
+    end
+    selectplayerdrop.Options = playerOptions
+end
+		
 RunService.RenderStepped:Connect(function()
     playerCountLabel:Set("Player Count: " .. #plrs:GetPlayers() .. "/" .. game.Players.MaxPlayers)
     fpsLabel:Set("Current FPS: " .. UpdateFps)
