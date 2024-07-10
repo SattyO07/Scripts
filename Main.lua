@@ -462,6 +462,16 @@ for _, player in ipairs(game.Players:GetPlayers()) do
     end
 end
 
+-- Update the playerOptions table every frame
+RunService.Heartbeat:Connect(function()
+    playerOptions = {}
+    for _, player in ipairs(game.Players:GetPlayers()) do
+        if player ~= game.Players.LocalPlayer then
+            table.insert(playerOptions, player.DisplayName.. " (@".. player.Name.. ")")
+        end
+    end
+end)
+
 local selectplayerdrop = Tab1:AddDropdown({
     Name = "Player Select",
     Default = "",
@@ -712,18 +722,7 @@ local playerCountLabel = InfoT:AddLabel("Player Count: " .. #plrs:GetPlayers() .
 local fpsLabel = InfoT:AddLabel("Current FPS: " .. UpdateFps)
 
 
--- Loops --
-while true do
-    wait(5)
-    playerOptions = {}
-    for _, player in ipairs(game.Players:GetPlayers()) do
-        if player ~= game.Players.LocalPlayer then
-            table.insert(playerOptions, player.DisplayName.. " (@".. player.Name.. ")")
-        end
-    end
-    selectplayerdrop.Options = playerOptions
-end
-		
+-- Loops --	
 RunService.RenderStepped:Connect(function()
     playerCountLabel:Set("Player Count: " .. #plrs:GetPlayers() .. "/" .. game.Players.MaxPlayers)
     fpsLabel:Set("Current FPS: " .. UpdateFps)
