@@ -6,6 +6,16 @@ local RunService = game:GetService("RunService")
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/Unknownkellymc1/Orion/main/source')))()
 -- Universal functions --
 -- Dropdown
+-- Universal functions --
+-- Dropdown
+local playerOptions = {}
+for _, player in ipairs(game.Players:GetPlayers()) do
+    if player ~= game.Players.LocalPlayer then
+        table.insert(playerOptions, player.DisplayName.. " (@".. player.Name.. ")")
+    end
+end
+-- Universal functions --
+-- Dropdown
 local playerOptions = {}
 for _, player in ipairs(game.Players:GetPlayers()) do
     if player ~= game.Players.LocalPlayer then
@@ -486,7 +496,7 @@ local selectplayerdrop = 1Tab:AddDropdown({
 local teleportPlayer = 1Tab:AddButton({
     Name = "Teleport",
     Callback = function()
-        local selectedPlayer = game.Players:FindFirstChild(selectplayerdrop.Value:match("(.*)%s*@"))
+        local selectedPlayer = game.Players:FindFirstChild(selectplayerdrop.Value)
         if selectedPlayer then
             local character = game.Players.LocalPlayer.Character
             if character then
@@ -506,7 +516,7 @@ local teleportPlayer = 1Tab:AddButton({
 local flingButton = 1Tab:AddButton({
     Name = "Fling",
     Callback = function()
-        local selectedPlayer = game.Players:FindFirstChild(selectplayerdrop.Value:match("(.*)%s*@"))
+        local selectedPlayer = game.Players:FindFirstChild(selectplayerdrop.Value)
         if selectedPlayer then
             if selectedPlayer ~= game.Players.LocalPlayer then
                 SkidFling(selectedPlayer)
@@ -534,7 +544,7 @@ local spectateToggle = 1Tab:AddToggle({
     Default = false,
     Callback = function(Value)
         if Value then
-            local selectedPlayer = game.Players:FindFirstChild(selectplayerdrop.Value:match("(.*)%s*@"))
+            local selectedPlayer = game.Players:FindFirstChild(selectplayerdrop.Value)
             if selectedPlayer then
                 local character = game.Players.LocalPlayer.Character
                 if character then
@@ -549,15 +559,7 @@ local spectateToggle = 1Tab:AddToggle({
 	Image = "rbxassetid://4483345998",
 	Time = 3
 })
-            end
-        else
-            local character = game.Players.LocalPlayer.Character
-            if character then
-                character.HumanoidRootPart.Anchored = false
-            end
-        end
-    end
-})
+				end})
 
 local Text1 = Tab1:AddParagraph("Self Config","Adjust your Some Available Info use Int ex: (10)")
 
