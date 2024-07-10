@@ -1,19 +1,8 @@
 -- Values
 local Players = game:GetService("Players")
 local plrs = game.Players
-local playerNames = {}
 local RunService = game:GetService("RunService")
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/Unknownkellymc1/Orion/main/source')))()
--- Universal functions --
--- Dropdown
--- Universal functions --
--- Dropdown
-local playerOptions = {}
-for _, player in ipairs(game.Players:GetPlayers()) do
-    if player ~= game.Players.LocalPlayer then
-        table.insert(playerOptions, player.DisplayName.. " (@".. player.Name.. ")")
-    end
-end
 -- Universal functions --
 -- Dropdown
 local playerOptions = {}
@@ -482,7 +471,7 @@ end)
 local GameName = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
 local Window = OrionLib:MakeWindow({Name = "MoonLight : [" .. GameName .. "]", HidePremium = false, SaveConfig = false, ConfigFolder = "ReaperSaved"})
 
--- [Universal]--
+-- [Universal] --
 local Tab1 = Window:MakeTab({Name = "Universal", Icon = "rbxassetid://7733954760", PremiumOnly = false})
 
 local selectplayerdrop = 1Tab:AddDropdown({
@@ -559,7 +548,8 @@ local spectateToggle = 1Tab:AddToggle({
 	Image = "rbxassetid://4483345998",
 	Time = 3
 })
-				end})
+				end
+			})
 
 local Text1 = Tab1:AddParagraph("Self Config","Adjust your Some Available Info use Int ex: (10)")
 
