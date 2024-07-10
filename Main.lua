@@ -12,6 +12,7 @@ for _, player in ipairs(game.Players:GetPlayers()) do
     end
 end
 -- Mm2 Functions --
+local playerData = {}
 -- Find Players
 local function findMurderer()
 	for _, player in ipairs(game.Players:GetPlayers()) do
@@ -318,12 +319,19 @@ local teleportButton = Tab1:AddButton({
     end
 })
 
-local spectateToggle = 1Tab:AddToggle({
+local spectateToggle = Tab1:AddToggle({
     Name = "Spectate",
     Default = false,
     Callback = function(Value)
         if Value then
-            local selectedPlayer = game.Players:FindFirstChild(selectplayerdrop.Value)
+            local selectedPlayerName = selectplayerdrop.Value
+            local selectedPlayer = nil
+            for _, player in ipairs(game.Players:GetPlayers()) do
+                if player.DisplayName .. " (@" .. player.Name .. ")" == selectedPlayerName then
+                    selectedPlayer = player
+                    break
+                end
+            end
             if selectedPlayer then
                 local character = game.Players.LocalPlayer.Character
                 if character then
@@ -333,13 +341,20 @@ local spectateToggle = 1Tab:AddToggle({
                 end
             else
                 OrionLib:MakeNotification({
-	Name = "Warning",
-	Content = "You need to select a player first.",
-	Image = "rbxassetid://4483345998",
-	Time = 3
+                    Name = "Warning",
+                    Content = "You need to select a player first.",
+                    Image = "rbxassetid://4483345998",
+                    Time = 3
+                })
+            end
+        else
+            local character = game.Players.LocalPlayer.Character
+            if character then
+                character.HumanoidRootPart.Anchored = false
+            end
+        end
+    end
 })
-				end
-			})
 -- [Scripts] --
 local Tab2 = Window:MakeTab({Name = "Scripts", Icon = "rbxassetid://7734111084", PremiumOnly = false})
 
@@ -471,18 +486,19 @@ local InfoT = Window:MakeTab({Name = "Info", Icon = "rbxassetid://7733964719", P
 local playerCountLabel = InfoT:AddLabel("Player Count: " .. #plrs:GetPlayers() .. "/" .. game.Players.MaxPlayers)
 local fpsLabel = InfoT:AddLabel("Current FPS: " .. UpdateFps)
 
-
 -- Loops --	
 RunService.RenderStepped:Connect(function()
     playerCountLabel:Set("Player Count: " .. #plrs:GetPlayers() .. "/" .. game.Players.MaxPlayers)
     fpsLabel:Set("Current FPS: " .. UpdateFps)
 
-playerOptions = {}
+    playerOptions = {}
     for _, player in ipairs(game.Players:GetPlayers()) do
         if player ~= game.Players.LocalPlayer then
-            table.insert(playerOptions, player.DisplayName.. " (@".. player.Name.. ")")
+            table.insert(playerOptions, player.DisplayName .. " (@" .. player.Name .. ")")
         end
     end
+
+    selectplayerdrop:Refresh(playerOptions)
 end)
 
 -- Initialize the library
