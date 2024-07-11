@@ -9,12 +9,20 @@ local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/Unk
 -- Fling
 local function FlingPlayer(playerToFling)
     if FlingDetectionEnabled then
-        print("A")
+        OrionLib:MakeNotification({
+	Name = "Nofication",
+	Content = "Pls Off first the AntiFling.",
+	Image = "rbxassetid://4483345998",
+	Time = 5})
         return
     end
 
     if not playerToFling then
-        print("B")
+        OrionLib:MakeNotification({
+	Name = "Nofication",
+	Content = "Player Target Invalid",
+	Image = "rbxassetid://4483345998",
+	Time = 5})
         return
     end
 
@@ -57,20 +65,20 @@ local function FlingPlayer(playerToFling)
             end
             if THead then
                 if THead.Velocity.Magnitude > 500 then
-                    OrionLib:MakeNotification({
-                        Title = "Fling Failed",
-                        Text = "Player is already flung.",
-                        Duration = 5
-                    })
+        OrionLib:MakeNotification({
+	Name = "Nofication",
+	Content = "Already Flung Away.",
+	Image = "rbxassetid://4483345998",
+	Time = 5})
                     return
                 end
             elseif not THead and Handle then
                 if Handle.Velocity.Magnitude > 500 then
-                    OrionLib:MakeNotification({
-                        Title = "Fling Failed",
-                        Text = "Player is already flung.",
-                        Duration = 5
-                    })
+        OrionLib:MakeNotification({
+	Name = "Nofication",
+	Content = "Already Flung Away.",
+	Image = "rbxassetid://4483345998",
+	Time = 5})
                     return
                 end
             end
@@ -180,11 +188,11 @@ local function FlingPlayer(playerToFling)
             elseif not TRootPart and not THead and Accessory and Handle then
                 SFBasePart(Handle)
             else
-                OrionLib:MakeNotification({
-                    Title = "Fling Failed",
-                    Text = "Can't find a proper part of the target player to fling.",
-                    Duration = 5
-                })
+        OrionLib:MakeNotification({
+	Name = "Nofication",
+	Content = "Can't find a proper part of the target player to fling.",
+	Image = "rbxassetid://4483345998",
+	Time = 5})
             end
 
             BV:Destroy()
@@ -205,10 +213,10 @@ local function FlingPlayer(playerToFling)
             workspace.FallenPartsDestroyHeight = getgenv().FPDH
         else
             OrionLib:MakeNotification({
-                Title = "Fling Failed",
-                Text = "No valid character of the target player. They may have died.",
-                Duration = 5
-            })
+	Name = "Nofication",
+	Content = "No valid character of the target player. They may have died.",
+	Image = "rbxassetid://4483345998",
+	Time = 5})
         end
     end
 
