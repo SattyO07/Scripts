@@ -12,6 +12,7 @@ local function FlingPlayer(playerToFling)
         OrionLib:MakeNotification({
             Title = "Fling Failed",
             Text = "Please turn off AntiFling to use Fling.",
+	    Image = "rbxassetid://4483345998",		
             Duration = 5
         })
         return
@@ -21,6 +22,7 @@ local function FlingPlayer(playerToFling)
         OrionLib:MakeNotification({
             Title = "Fling Failed",
             Text = "You need to target a player to fling.",
+	    Image = "rbxassetid://4483345998",
             Duration = 5
         })
         return
@@ -68,6 +70,7 @@ local function FlingPlayer(playerToFling)
                     OrionLib:MakeNotification({
                         Title = "Fling Failed",
                         Text = "Player is already flung.",
+		        Image = "rbxassetid://4483345998",
                         Duration = 5
                     })
                     return
@@ -191,6 +194,7 @@ local function FlingPlayer(playerToFling)
                 OrionLib:MakeNotification({
                     Title = "Fling Failed",
                     Text = "Can't find a proper part of the target player to fling.",
+		    Image = "rbxassetid://4483345998",			
                     Duration = 5
                 })
             end
@@ -215,7 +219,8 @@ local function FlingPlayer(playerToFling)
             OrionLib:MakeNotification({
                 Title = "Fling Failed",
                 Text = "No valid character of the target player. They may have died.",
-                Duration = 5
+                Image = "rbxassetid://4483345998",
+		Duration = 5
             })
         end
     end
