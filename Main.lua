@@ -10,23 +10,23 @@ local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/Unk
 local function FlingPlayer(playerToFling)
     if FlingDetectionEnabled then
         OrionLib:MakeNotification({
-            Title = "Fling Failed",
-            Text = "Please turn off AntiFling to use Fling.",
-	    Image = "rbxassetid://4483345998",		
-            Duration = 5
+            Name = "Fling Failed ",
+            Content = "Please turn off AntiFling to use Fling.",
+            Image = "rbxassetid://4483345998",
+            Time = 5
         })
         return
     end
 
     if not playerToFling then
         OrionLib:MakeNotification({
-            Title = "Fling Failed",
-            Text = "You need to target a player to fling.",
-	    Image = "rbxassetid://4483345998",
-            Duration = 5
+            Name = "Fling Failed",
+            Content = You need to target a player to fling.",
+            Image = "rbxassetid://4483345998",
+            Time = 5
         })
         return
-    end
+	end
 
     local player = game.Players.LocalPlayer
     local Targets = {playerToFling}
