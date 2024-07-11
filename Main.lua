@@ -9,20 +9,12 @@ local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/Unk
 -- Fling
 local function FlingPlayer(playerToFling)
     if FlingDetectionEnabled then
-        OrionLib:MakeNotification({
-            Title = "Fling Failed",
-            Text = "Please turn off AntiFling to use Fling.",
-            Duration = 5
-        })
+        print("A")
         return
     end
 
     if not playerToFling then
-        OrionLib:MakeNotification({
-            Title = "Fling Failed",
-            Text = "You need to target a player to fling.",
-            Duration = 5
-        })
+        print("B")
         return
     end
 
