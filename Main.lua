@@ -613,7 +613,7 @@ Tab1:AddButton({
     Callback = function()
         if not selectedPlayer then
             OrionLib:MakeNotification({
-                Name = "Teleport Failed",
+                Name = "Notification",
                 Content = "No player selected.",
                 Image = "rbxassetid://4483345998",
                 Time = 5
@@ -625,12 +625,27 @@ Tab1:AddButton({
             LocalPlayer.Character.HumanoidRootPart.CFrame = selectedPlayer.Character.HumanoidRootPart.CFrame
         else
             OrionLib:MakeNotification({
-                Name = "Teleport Failed",
-                Content = "Target player does not exist or does not have a character.",
+                Name = "Notification",
+                Content = "No player selected.",
                 Image = "rbxassetid://4483345998",
                 Time = 5
             })
         end
+    end    
+})
+
+Tab1:AddButton({
+    Name = "Fling",
+    Callback = function()
+        if not selectedPlayer then
+        OrionLib:MakeNotification({
+	Name = "Notification",
+        Content = "No player selected.",
+	Image = "rbxassetid://4483345998",
+	Time = 5})
+            return
+        end
+        FlingPlayer(selectedPlayer)
     end    
 })
 
@@ -640,7 +655,7 @@ Tab1:AddToggle({
     Callback = function(Value)
         if not selectedPlayer then
             OrionLib:MakeNotification({
-                Name = "Spectate Failed",
+                Name = "Notification",
                 Content = "No player selected.",
                 Image = "rbxassetid://4483345998",
                 Time = 5
@@ -653,21 +668,6 @@ Tab1:AddToggle({
         else
             workspace.CurrentCamera.CameraSubject = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
         end
-    end    
-})
-
-Tab1:AddButton({
-    Name = "Fling",
-    Callback = function()
-        if not selectedPlayer then
-            OrionLib:MakeNotification({
-                Title = "Fling Failed",
-                Text = "Please select a player from the dropdown.",
-                Duration = 5
-            })
-            return
-        end
-        FlingPlayer(selectedPlayer)
     end    
 })
 
