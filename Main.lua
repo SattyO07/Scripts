@@ -690,7 +690,7 @@ Tab1:AddToggle({
 })
 
 Tab1:AddToggle({
-	Name = "This is a toggle!",
+	Name = "Anti AFK",
 	Default = false,
 	Callback = function(Value)
 		if Value then
