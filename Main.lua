@@ -8,14 +8,23 @@ local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/Unk
 -- Universal Functions --
 -- Fling
 local function FlingPlayer(playerToFling)
-    if not playerToFling then
+    if FlingDetectionEnabled then
         OrionLib:MakeNotification({
             Title = "Fling Failed",
-            Text = "No player selected to fling.",
+            Text = "Please turn off AntiFling to use Fling.",
             Duration = 5
         })
         return
-	end
+    end
+
+    if not playerToFling then
+        OrionLib:MakeNotification({
+            Title = "Fling Failed",
+            Text = "You need to target a player to fling.",
+            Duration = 5
+        })
+        return
+    end
 
     local player = game.Players.LocalPlayer
     local Targets = {playerToFling}
@@ -603,8 +612,25 @@ playerDropdown = Tab1:AddDropdown({
 Tab1:AddButton({
     Name = "Teleport",
     Callback = function()
+        if not selectedPlayer then
+            OrionLib:MakeNotification({
+                Name = "Teleport Failed",
+                Content = "No player selected.",
+                Image = "rbxassetid://4483345998",
+                Time = 5
+            })
+            return
+        end
+
         if selectedPlayer and selectedPlayer.Character and selectedPlayer.Character:FindFirstChild("HumanoidRootPart") then
             LocalPlayer.Character.HumanoidRootPart.CFrame = selectedPlayer.Character.HumanoidRootPart.CFrame
+        else
+            OrionLib:MakeNotification({
+                Name = "Teleport Failed",
+                Content = "Target player does not exist or does not have a character.",
+                Image = "rbxassetid://4483345998",
+                Time = 5
+            })
         end
     end    
 })
@@ -613,6 +639,16 @@ Tab1:AddToggle({
     Name = "Spectate",
     Default = false,
     Callback = function(Value)
+        if not selectedPlayer then
+            OrionLib:MakeNotification({
+                Name = "Spectate Failed",
+                Content = "No player selected.",
+                Image = "rbxassetid://4483345998",
+                Time = 5
+            })
+            return
+        end
+
         if Value and selectedPlayer then
             workspace.CurrentCamera.CameraSubject = selectedPlayer.Character:FindFirstChildOfClass("Humanoid")
         else
