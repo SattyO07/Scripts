@@ -8,22 +8,10 @@ local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/Unk
 -- Universal Functions --
 -- Fling
 local function FlingPlayer(playerToFling)
-    OrionLib:MakeNotification({
-	Name = "Title!",
-	Content = "Notification content... what will it say??",
-	Image = "rbxassetid://4483345998",
-	Time = 5
-})
         return
     end
 
     if not playerToFling then
-        OrionLib:MakeNotification({
-	Name = "Title!",
-	Content = "Notification content... what will it say??",
-	Image = "rbxassetid://4483345998",
-	Time = 5
-})
         return
     end
 
