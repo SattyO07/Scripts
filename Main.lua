@@ -290,7 +290,6 @@ RunService.Heartbeat:Connect(function()
         end
     end)
 end)
-
 -- Mm2 Functions --
 local playerData = {}
 
@@ -688,6 +687,20 @@ Tab1:AddToggle({
     Callback = function(Value)
         FlingDetectionEnabled = Value
     end    
+})
+
+Tab1:AddToggle({
+	Name = "This is a toggle!",
+	Default = false,
+	Callback = function(Value)
+		if Value then
+    local afk = game:service'VirtualUser'
+    game:service'Players'.LocalPlayer.Idled:connect(function()
+        afk:CaptureController()
+        afk:ClickButton2(Vector2.new())
+    end)
+			end
+	end    
 })
 
 -- [Scripts] --
