@@ -1,18 +1,350 @@
 -- Values
+local LocalPlayer = game:GetService("Players").LocalPlayer
 local Players = game:GetService("Players")
-local plrs = game.Players
-local RunService = game:GetService("RunService")
+local camera = game.Workspace.CurrentCamera
+local RunService = game.RunService
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/Unknownkellymc1/Orion/main/source')))()
+
 -- Universal Functions --
 -- Dropdown
-local playerOptions = {}
-for _, player in ipairs(game.Players:GetPlayers()) do
-    if player ~= game.Players.LocalPlayer then
-        table.insert(playerOptions, player.DisplayName.. " (@".. player.Name.. ")")
+local selectedPlayer = nil
+
+local function GetPlayers()
+    local playerNames = {}
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            table.insert(playerNames, player.DisplayName .. " (@" .. player.Name .. ")")
+        end
+    end
+    table.sort(playerNames)
+    return playerNames
+end
+
+local function FindPlayerByName(displayNameWithUsername)
+    for _, player in pairs(Players:GetPlayers()) do
+        if player.DisplayName .. " (@" .. player.Name .. ")" == displayNameWithUsername then
+            return player
+        end
+    end
+    return nil
+end
+
+local playerDropdown
+
+local function UpdateDropdown()
+    local players = GetPlayers()
+    playerDropdown:Refresh(players, true) 
+end
+
+local function GetPlayers()
+    local playerNames = {}
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            table.insert(playerNames, player.DisplayName .. " (@" .. player.Name .. ")")
+        end
+    end
+    table.sort(playerNames) 
+    return playerNames
+end
+
+local function FindPlayerByName(displayNameWithUsername)
+    for _, player in pairs(Players:GetPlayers()) do
+        if player.DisplayName .. " (@" .. player.Name .. ")" == displayNameWithUsername then
+            return player
+        end
+    end
+    return nil
+end
+
+-- Fling
+local function FlingPlayer(playerToFling)
+    if FlingDetectionEnabled then
+        OrionLib:MakeNotification({
+            Title = "Fling Failed",
+            Text = "Please turn off AntiFling to use Fling.",
+            Duration = 5
+        })
+        return
+    end
+
+    if not playerToFling then
+        OrionLib:MakeNotification({
+            Title = "Fling Failed",
+            Text = "You need to target a player to fling.",
+            Duration = 5
+        })
+        return
+    end
+
+    local player = game.Players.LocalPlayer
+    local Targets = {playerToFling}
+
+    local SkidFling = function(TargetPlayer)
+        local Character = player.Character
+        local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+        local RootPart = Humanoid and Humanoid.RootPart
+
+        local TCharacter = TargetPlayer.Character
+        local THumanoid
+        local TRootPart
+        local THead
+        local Accessory
+        local Handle
+
+        if TCharacter:FindFirstChildOfClass("Humanoid") then
+            THumanoid = TCharacter:FindFirstChildOfClass("Humanoid")
+        end
+        if THumanoid and THumanoid.RootPart then
+            TRootPart = THumanoid.RootPart
+        end
+        if TCharacter:FindFirstChild("Head") then
+            THead = TCharacter.Head
+        end
+        if TCharacter:FindFirstChildOfClass("Accessory") then
+            Accessory = TCharacter:FindFirstChildOfClass("Accessory")
+        end
+        if Accessory and Accessory:FindFirstChild("Handle") then
+            Handle = Accessory.Handle
+        end
+
+        if Character and Humanoid and RootPart then
+            if RootPart.Velocity.Magnitude < 50 then
+                getgenv().OldPos = RootPart.CFrame
+            end
+            if THumanoid and THumanoid.Sit then
+            end
+            if THead then
+                if THead.Velocity.Magnitude > 500 then
+                    OrionLib:MakeNotification({
+                        Title = "Fling Failed",
+                        Text = "Player is already flung.",
+                        Duration = 5
+                    })
+                    return
+                end
+            elseif not THead and Handle then
+                if Handle.Velocity.Magnitude > 500 then
+                    OrionLib:MakeNotification({
+                        Title = "Fling Failed",
+                        Text = "Player is already flung.",
+                        Duration = 5
+                    })
+                    return
+                end
+            end
+
+            if THead then
+                workspace.CurrentCamera.CameraSubject = THead
+            elseif not THead and Handle then
+                workspace.CurrentCamera.CameraSubject = Handle
+            elseif THumanoid and TRootPart then
+                workspace.CurrentCamera.CameraSubject = THumanoid
+            end
+            if not TCharacter:FindFirstChildWhichIsA("BasePart") then
+                return
+            end
+
+            local FPos = function(BasePart, Pos, Ang)
+                RootPart.CFrame = CFrame.new(BasePart.Position) * Pos * Ang
+                Character:SetPrimaryPartCFrame(CFrame.new(BasePart.Position) * Pos * Ang)
+                RootPart.Velocity = Vector3.new(9e7, 9e7 * 10, 9e7)
+                RootPart.RotVelocity = Vector3.new(9e8, 9e8, 9e8)
+            end
+
+            local SFBasePart = function(BasePart)
+                local TimeToWait = 2
+                local Time = tick()
+                local Angle = 0
+
+                repeat
+                    if RootPart and THumanoid then
+                        if BasePart.Velocity.Magnitude < 50 then
+                            Angle = Angle + 100
+
+                            FPos(BasePart, CFrame.new(0, 1.5, 0) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(Angle), 0, 0))
+                            task.wait()
+
+                            FPos(BasePart, CFrame.new(0, -1.5, 0) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(Angle), 0, 0))
+                            task.wait()
+
+                            FPos(BasePart, CFrame.new(2.25, 1.5, -2.25) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(Angle), 0, 0))
+                            task.wait()
+
+                            FPos(BasePart, CFrame.new(-2.25, -1.5, 2.25) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(Angle), 0, 0))
+                            task.wait()
+
+                            FPos(BasePart, CFrame.new(0, 1.5, 0) + THumanoid.MoveDirection, CFrame.Angles(math.rad(Angle), 0, 0))
+                            task.wait()
+
+                            FPos(BasePart, CFrame.new(0, -1.5, 0) + THumanoid.MoveDirection, CFrame.Angles(math.rad(Angle), 0, 0))
+                            task.wait()
+                        else
+                            FPos(BasePart, CFrame.new(0, 1.5, THumanoid.WalkSpeed), CFrame.Angles(math.rad(90), 0, 0))
+                            task.wait()
+
+                            FPos(BasePart, CFrame.new(0, -1.5, -THumanoid.WalkSpeed), CFrame.Angles(0, 0, 0))
+                            task.wait()
+
+                            FPos(BasePart, CFrame.new(0, 1.5, THumanoid.WalkSpeed), CFrame.Angles(math.rad(90), 0, 0))
+                            task.wait()
+
+                            FPos(BasePart, CFrame.new(0, 1.5, TRootPart.Velocity.Magnitude / 1.25), CFrame.Angles(math.rad(90), 0, 0))
+                            task.wait()
+
+                            FPos(BasePart, CFrame.new(0, -1.5, -TRootPart.Velocity.Magnitude / 1.25), CFrame.Angles(0, 0, 0))
+                            task.wait()
+
+                            FPos(BasePart, CFrame.new(0, 1.5, TRootPart.Velocity.Magnitude / 1.25), CFrame.Angles(math.rad(90), 0, 0))
+                            task.wait()
+
+                            FPos(BasePart, CFrame.new(0, -1.5, 0), CFrame.Angles(math.rad(90), 0, 0))
+                            task.wait()
+
+                            FPos(BasePart, CFrame.new(0, -1.5, 0), CFrame.Angles(0, 0, 0))
+                            task.wait()
+
+                            FPos(BasePart, CFrame.new(0, -1.5, 0), CFrame.Angles(math.rad(-90), 0, 0))
+                            task.wait()
+
+                            FPos(BasePart, CFrame.new(0, -1.5, 0), CFrame.Angles(0, 0, 0))
+                            task.wait()
+                        end
+                    else
+                        break
+                    end
+                until BasePart.Velocity.Magnitude > 500 or BasePart.Parent ~= TargetPlayer.Character or TargetPlayer.Parent ~= Players or TargetPlayer.Character ~= TCharacter or THumanoid.Sit or Humanoid.Health <= 0 or tick() > Time + TimeToWait
+            end
+
+            workspace.FallenPartsDestroyHeight = 0 / 0
+
+            local BV = Instance.new("BodyVelocity")
+            BV.Name = "EpixVel"
+            BV.Parent = RootPart
+            BV.Velocity = Vector3.new(9e8, 9e8, 9e8)
+            BV.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+
+            Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
+
+            if TRootPart and THead then
+                if (TRootPart.CFrame.p - THead.CFrame.p).Magnitude > 5 then
+                    SFBasePart(THead)
+                else
+                    SFBasePart(TRootPart)
+                end
+            elseif TRootPart and not THead then
+                SFBasePart(TRootPart)
+            elseif not TRootPart and THead then
+                SFBasePart(THead)
+            elseif not TRootPart and not THead and Accessory and Handle then
+                SFBasePart(Handle)
+            else
+                OrionLib:MakeNotification({
+                    Title = "Fling Failed",
+                    Text = "Can't find a proper part of the target player to fling.",
+                    Duration = 5
+                })
+            end
+
+            BV:Destroy()
+            Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
+            workspace.CurrentCamera.CameraSubject = Humanoid
+
+            repeat
+                RootPart.CFrame = getgenv().OldPos * CFrame.new(0, .5, 0)
+                Character:SetPrimaryPartCFrame(getgenv().OldPos * CFrame.new(0, .5, 0))
+                Humanoid:ChangeState("GettingUp")
+                for _, part in pairs(Character:GetChildren()) do
+                    if part:IsA("BasePart") then
+                        part.Velocity, part.RotVelocity = Vector3.new(), Vector3.new()
+                    end
+                end
+                task.wait()
+            until (RootPart.Position - getgenv().OldPos.p).Magnitude < 25
+            workspace.FallenPartsDestroyHeight = getgenv().FPDH
+        else
+            OrionLib:MakeNotification({
+                Title = "Fling Failed",
+                Text = "No valid character of the target player. They may have died.",
+                Duration = 5
+            })
+        end
+    end
+
+    SkidFling(Targets[1])
+end
+
+-- AntiFling
+local function PlayerAdded(Player)
+    if not FlingDetectionEnabled then return end
+    local Detected = false
+    local Character;
+    local PrimaryPart;
+
+    local function CharacterAdded(NewCharacter)
+        Character = NewCharacter
+        repeat
+            wait()
+            PrimaryPart = NewCharacter:FindFirstChild("HumanoidRootPart")
+        until PrimaryPart
+        Detected = false
+    end
+
+    CharacterAdded(Player.Character or Player.CharacterAdded:Wait())
+    Player.CharacterAdded:Connect(CharacterAdded)
+    RunService.Heartbeat:Connect(function()
+        if (Character and Character:IsDescendantOf(workspace)) and (PrimaryPart and PrimaryPart:IsDescendantOf(Character)) then
+            if PrimaryPart.AssemblyAngularVelocity.Magnitude > 50 or PrimaryPart.AssemblyLinearVelocity.Magnitude > 100 then
+                Detected = true
+                for i,v in ipairs(Character:GetDescendants()) do
+                    if v:IsA("BasePart") then
+                        v.CanCollide = false
+                        v.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+                        v.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                        v.CustomPhysicalProperties = PhysicalProperties.new(0, 0, 0)
+                    end
+                end
+                PrimaryPart.CanCollide = false
+                PrimaryPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+                PrimaryPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                PrimaryPart.CustomPhysicalProperties = PhysicalProperties.new(0, 0, 0)
+            end
+        end
+    end)
+end
+
+for i,v in ipairs(Players:GetPlayers()) do
+    if v ~= LocalPlayer then
+        PlayerAdded(v)
     end
 end
+Players.PlayerAdded:Connect(PlayerAdded)
+
+local LastPosition = nil
+RunService.Heartbeat:Connect(function()
+    if not FlingDetectionEnabled then return end
+    pcall(function()
+        local PrimaryPart = LocalPlayer.Character.PrimaryPart
+        if PrimaryPart.AssemblyLinearVelocity.Magnitude > 250 or PrimaryPart.AssemblyAngularVelocity.Magnitude > 250 then
+            PrimaryPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+            PrimaryPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+            PrimaryPart.CFrame = LastPosition
+
+            OrionLib:MakeNotification({
+	Name = "Anti Fling",
+	Content = "You were flung. Neutralizing velocity.",
+	Image = "rbxassetid://4483345998",
+	Time = 2
+})
+
+        elseif PrimaryPart.AssemblyLinearVelocity.Magnitude < 50 or PrimaryPart.AssemblyAngularVelocity.Magnitude > 50 then
+            LastPosition = PrimaryPart.CFrame
+        end
+    end)
+end)
+
 -- Mm2 Functions --
 local playerData = {}
+
 -- Find Players
 local function findMurderer()
 	for _, player in ipairs(game.Players:GetPlayers()) do
@@ -283,7 +615,6 @@ RunService.RenderStepped:Connect(function()
 
     UpdateFps = math.floor(1 / DeltaTime)
 end)
-
 -- Window
 local GameName = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
 local Window = OrionLib:MakeWindow({Name = "MoonLight : [" .. GameName .. "]", HidePremium = false, SaveConfig = false, ConfigFolder = "ReaperSaved"})
@@ -291,70 +622,99 @@ local Window = OrionLib:MakeWindow({Name = "MoonLight : [" .. GameName .. "]", H
 -- [Universal] --
 local Tab1 = Window:MakeTab({Name = "Universal", Icon = "rbxassetid://7733954760", PremiumOnly = false})
 
-local selectplayerdrop = Tab1:AddDropdown({
-    Name = "Player Select",
+local UniText1 = Tab1:AddParagraph("Player's select:", "Select a Player's first.")
+
+Tab1:AddDropdown({
+    Name = "Player Select:",
     Default = "",
-    Options = playerOptions,
+    Options = GetPlayers(),
     Callback = function(Value)
+        selectedPlayer = FindPlayerByName(Value)
     end
 })
 
-local teleportButton = Tab1:AddButton({
+Tab1:AddButton({
     Name = "Teleport",
     Callback = function()
-        local selectedPlayer = game.Players:FindFirstChild(selectplayerdrop.Value)
-        if selectedPlayer then
-            local character = game.Players.LocalPlayer.Character
-            if character then
-                character.HumanoidRootPart.CFrame = selectedPlayer.Character.HumanoidRootPart.CFrame
-            end
-        else
+        if not selectedPlayer then
             OrionLib:MakeNotification({
-                Name = "Warning",
-                Content = "You need to select a player first.",
-                Image = "rbxassetid://4483345998",
-                Time = 3
+                Title = "Teleport Failed",
+                Text = "Please select a player from the dropdown.",
+                Duration = 5
             })
+            return
         end
-    end
+        LocalPlayer.Character.HumanoidRootPart.CFrame = selectedPlayer.Character.HumanoidRootPart.CFrame
+    end    
 })
 
-local spectateToggle = Tab1:AddToggle({
+Tab1:AddToggle({
     Name = "Spectate",
     Default = false,
     Callback = function(Value)
-        local selectedPlayerName = selectplayerdrop.Value
-        local selectedPlayer = nil
-        for _, player in ipairs(game.Players:GetPlayers()) do
-            if player.DisplayName .. " (@" .. player.Name .. ")" == selectedPlayerName then
-                selectedPlayer = player
-                break
-            end
+        if not selectedPlayer then
+            OrionLib:MakeNotification({
+                Title = "Spectate Failed",
+                Text = "Please select a player from the dropdown.",
+                Duration = 5
+            })
+            return
         end
-        
         if Value then
-            if selectedPlayer and selectedPlayer.Character and selectedPlayer.Character:FindFirstChild("Humanoid") then
-                local camera = workspace.CurrentCamera
-                camera.CameraSubject = selectedPlayer.Character.Humanoid  -- Set camera to follow the selected player's humanoid
-            else
-                OrionLib:MakeNotification({
-                    Name = "Warning",
-                    Content = "You need to select a valid player first.",
-                    Image = "rbxassetid://4483345998",
-                    Time = 3
-                })
-            end
+            workspace.CurrentCamera.CameraSubject = selectedPlayer.Character.Humanoid
         else
-            local camera = workspace.CurrentCamera
-            camera.CameraSubject = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")  -- Reset camera to local player
+            workspace.CurrentCamera.CameraSubject = LocalPlayer.Character.Humanoid
         end
-    end
+    end    
+})
+
+Tab1:AddButton({
+    Name = "Fling",
+    Callback = function()
+        if not selectedPlayer then
+            OrionLib:MakeNotification({
+                Title = "Fling Failed",
+                Text = "Please select a player from the dropdown.",
+                Duration = 5
+            })
+            return
+        end
+        FlingPlayer(selectedPlayer)
+    end    
+})
+
+
+Players.PlayerAdded:Connect(function(player)
+    UpdateDropdown()
+end)
+
+Players.PlayerRemoving:Connect(function(player)
+    UpdateDropdown()
+end)
+
+local UniText1 = Tab1:AddParagraph("Mics:", "Random things maybe help.")
+
+Tab1:AddToggle({
+    Name = "AntiFling",
+    Default = false,
+    Callback = function(Value)
+        FlingDetectionEnabled = Value
+    end    
 })
 
 -- [Scripts] --
 local Tab2 = Window:MakeTab({Name = "Scripts", Icon = "rbxassetid://7734111084", PremiumOnly = false})
 
-Tab2:AddParagraph("Tools Scripting", "Easy to build a script")
+local SciText1 = Tab2:AddParagraph("Scripts:", "Random From internet.")
+
+Tab2:AddButton({
+    Name = "Yarhm",
+    Callback = function()
+        loadstring(game:HttpGet("https://scriptblox.com/raw/Universal-Script-YARHM-12403"))()
+    end
+})
+
+local SciText2 = Tab2:AddParagraph("Build Scripts:", "May Help from Building scripts")
 
 Tab2:AddButton({
     Name = "Infinite Yield",
@@ -377,29 +737,6 @@ Tab2:AddButton({
     end
 })
 
-local text2 = Tab2:AddParagraph("Scripts", "Useful Scripts to avoid Exploiters.")
-
-Tab2:AddButton({
-    Name = "AntiBang",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/SattyO07/Scripts/main/AntiBang", true))()
-    end
-})
-
-Tab2:AddButton({
-    Name = "AntiFling",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/SattyO07/Scripts/main/AntiFling", true))()
-    end
-})
-
-Tab2:AddButton({
-    Name = "Yarhm",
-    Callback = function()
-        loadstring(game:HttpGet("https://scriptblox.com/raw/Universal-Script-YARHM-12403"))()
-    end
-})
-
 Tab2:AddButton({
     Name = "Console",
     Callback = function()
@@ -413,8 +750,6 @@ Tab2:AddButton({
     Icon = "rbxassetid://7733799795",
     PremiumOnly = false,
 })
-
-local parsilentaim = Tab3:AddParagraph("Silent Aim:", "Offset 2.8 default")
 
 local AimUiToggle = Tab3:AddToggle({
     Name = "Shoot Ui",
@@ -479,33 +814,12 @@ OrionLib:MakeNotification({
 -- [Info] --
 local InfoT = Window:MakeTab({Name = "Info", Icon = "rbxassetid://7733964719", PremiumOnly = false})
 
-local playerCountLabel = InfoT:AddLabel("Player Count: " .. #plrs:GetPlayers() .. "/" .. game.Players.MaxPlayers)
-local fpsLabel = InfoT:AddLabel("Current FPS: " .. UpdateFps)
+local playerCountLabel = InfoT:AddLabel("Player Count: 0/0")
+local fpsLabel = InfoT:AddLabel("Current FPS: 0")
 
--- Update loop for dropdown and cooldown
-local lastRefreshTime = 0
-RunService.RenderStepped:Connect(function()
-    playerCountLabel:Set("Player Count: " .. #plrs:GetPlayers() .. "/" .. game.Players.MaxPlayers)
-    fpsLabel:Set("Current FPS: " .. UpdateFps)
-    
-    if tick() - lastRefreshTime > 5 then
-        playerOptions = {}
-        local addedPlayers = {}
-        
-        -- Update playerOptions with current players
-        for _, player in ipairs(game.Players:GetPlayers()) do
-            if player ~= game.Players.LocalPlayer then
-                local displayName = player.DisplayName .. " (@" .. player.Name .. ")"
-                if not addedPlayers[displayName] then
-                    table.insert(playerOptions, displayName)
-                    addedPlayers[displayName] = true
-                end
-            end
-			end
-        selectplayerdrop:Refresh(playerOptions)
-        lastRefreshTime = tick()
-    end
-end)
-
--- Initialize the library
 OrionLib:Init()
+    playerCountLabel:Set("Player Count: " .. #game.Players:GetPlayers() .. "/" .. game.Players.MaxPlayers)
+    fpsLabel:Set("Current FPS: " .. UpdateFps)
+
+RunService.RenderStepped:Connect(updateLabels)
+updateLabels()
