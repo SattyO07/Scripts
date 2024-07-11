@@ -6,56 +6,6 @@ local RunService = game.RunService
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/Unknownkellymc1/Orion/main/source')))()
 
 -- Universal Functions --
--- Dropdown
-local selectedPlayer = nil
-
-local function GetPlayers()
-    local playerNames = {}
-    for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer then
-            table.insert(playerNames, player.DisplayName .. " (@" .. player.Name .. ")")
-        end
-    end
-    table.sort(playerNames)
-    return playerNames
-end
-
-local function FindPlayerByName(displayNameWithUsername)
-    for _, player in pairs(Players:GetPlayers()) do
-        if player.DisplayName .. " (@" .. player.Name .. ")" == displayNameWithUsername then
-            return player
-        end
-    end
-    return nil
-end
-
-local playerDropdown
-
-local function UpdateDropdown()
-    local players = GetPlayers()
-    playerDropdown:Refresh(players, true) 
-end
-
-local function GetPlayers()
-    local playerNames = {}
-    for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer then
-            table.insert(playerNames, player.DisplayName .. " (@" .. player.Name .. ")")
-        end
-    end
-    table.sort(playerNames) 
-    return playerNames
-end
-
-local function FindPlayerByName(displayNameWithUsername)
-    for _, player in pairs(Players:GetPlayers()) do
-        if player.DisplayName .. " (@" .. player.Name .. ")" == displayNameWithUsername then
-            return player
-        end
-    end
-    return nil
-end
-
 -- Fling
 local function FlingPlayer(playerToFling)
     if FlingDetectionEnabled then
@@ -272,7 +222,6 @@ local function FlingPlayer(playerToFling)
 
     SkidFling(Targets[1])
 end
-
 -- AntiFling
 local function PlayerAdded(Player)
     if not FlingDetectionEnabled then return end
@@ -624,27 +573,50 @@ local Tab1 = Window:MakeTab({Name = "Universal", Icon = "rbxassetid://7733954760
 
 local UniText1 = Tab1:AddParagraph("Player's select:", "Select a Player's first.")
 
-Tab1:AddDropdown({
+local selectedPlayer = nil
+
+local function GetPlayers()
+    local playerNames = {}
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            table.insert(playerNames, player.DisplayName .. " (@" .. player.Name .. ")")
+        end
+    end
+    table.sort(playerNames) 
+    return playerNames
+end
+
+local function FindPlayerByName(displayNameWithUsername)
+    for _, player in pairs(Players:GetPlayers()) do
+        if player.DisplayName .. " (@" .. player.Name .. ")" == displayNameWithUsername then
+            return player
+        end
+    end
+    return nil
+end
+
+local playerDropdown
+
+local function UpdateDropdown()
+    local players = GetPlayers()
+    playerDropdown:Refresh(players, true) 
+end
+
+playerDropdown = Tab1:AddDropdown({
     Name = "Player Select:",
     Default = "",
     Options = GetPlayers(),
     Callback = function(Value)
         selectedPlayer = FindPlayerByName(Value)
-    end
+    end    
 })
 
 Tab1:AddButton({
     Name = "Teleport",
     Callback = function()
-        if not selectedPlayer then
-            OrionLib:MakeNotification({
-                Title = "Teleport Failed",
-                Text = "Please select a player from the dropdown.",
-                Duration = 5
-            })
-            return
+        if selectedPlayer and selectedPlayer.Character and selectedPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            LocalPlayer.Character.HumanoidRootPart.CFrame = selectedPlayer.Character.HumanoidRootPart.CFrame
         end
-        LocalPlayer.Character.HumanoidRootPart.CFrame = selectedPlayer.Character.HumanoidRootPart.CFrame
     end    
 })
 
@@ -652,18 +624,10 @@ Tab1:AddToggle({
     Name = "Spectate",
     Default = false,
     Callback = function(Value)
-        if not selectedPlayer then
-            OrionLib:MakeNotification({
-                Title = "Spectate Failed",
-                Text = "Please select a player from the dropdown.",
-                Duration = 5
-            })
-            return
-        end
-        if Value then
-            workspace.CurrentCamera.CameraSubject = selectedPlayer.Character.Humanoid
+        if Value and selectedPlayer then
+            workspace.CurrentCamera.CameraSubject = selectedPlayer.Character:FindFirstChildOfClass("Humanoid")
         else
-            workspace.CurrentCamera.CameraSubject = LocalPlayer.Character.Humanoid
+            workspace.CurrentCamera.CameraSubject = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
         end
     end    
 })
@@ -682,7 +646,6 @@ Tab1:AddButton({
         FlingPlayer(selectedPlayer)
     end    
 })
-
 
 Players.PlayerAdded:Connect(function(player)
     UpdateDropdown()
