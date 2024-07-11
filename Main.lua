@@ -561,8 +561,6 @@ local LastTime = tick()
 RunService.RenderStepped:Connect(function()
     local DeltaTime = tick() - LastTime
     LastTime = tick()
-
-    UpdateFps = math.floor(1 / DeltaTime)
 end)
 -- Window
 local GameName = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
@@ -781,8 +779,8 @@ local playerCountLabel = InfoT:AddLabel("Player Count: 0/0")
 local fpsLabel = InfoT:AddLabel("Current FPS: 0")
 
 OrionLib:Init()
+RunService.RenderStepped:Connect(function()
+    UpdateFps = math.floor(1 / RunService.RenderStepped:Wait())
     playerCountLabel:Set("Player Count: " .. #game.Players:GetPlayers() .. "/" .. game.Players.MaxPlayers)
     fpsLabel:Set("Current FPS: " .. UpdateFps)
-
-RunService.RenderStepped:Connect(updateLabels)
-updateLabels()
+end)
