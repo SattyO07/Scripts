@@ -8,25 +8,24 @@ local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/Unk
 -- Universal Functions --
 -- Fling
 local function FlingPlayer(playerToFling)
-    if FlingDetectionEnabled then
-        OrionLib:MakeNotification({
-            Name = "Fling Failed ",
-            Content = "Please turn off AntiFling to use Fling.",
-            Image = "rbxassetid://4483345998",
-            Time = 5
-        })
+    OrionLib:MakeNotification({
+	Name = "Title!",
+	Content = "Notification content... what will it say??",
+	Image = "rbxassetid://4483345998",
+	Time = 5
+})
         return
     end
 
     if not playerToFling then
         OrionLib:MakeNotification({
-            Name = "Fling Failed",
-            Content = You need to target a player to fling.",
-            Image = "rbxassetid://4483345998",
-            Time = 5
-        })
+	Name = "Title!",
+	Content = "Notification content... what will it say??",
+	Image = "rbxassetid://4483345998",
+	Time = 5
+})
         return
-	end
+    end
 
     local player = game.Players.LocalPlayer
     local Targets = {playerToFling}
@@ -70,7 +69,6 @@ local function FlingPlayer(playerToFling)
                     OrionLib:MakeNotification({
                         Title = "Fling Failed",
                         Text = "Player is already flung.",
-		        Image = "rbxassetid://4483345998",
                         Duration = 5
                     })
                     return
@@ -194,7 +192,6 @@ local function FlingPlayer(playerToFling)
                 OrionLib:MakeNotification({
                     Title = "Fling Failed",
                     Text = "Can't find a proper part of the target player to fling.",
-		    Image = "rbxassetid://4483345998",			
                     Duration = 5
                 })
             end
@@ -219,8 +216,7 @@ local function FlingPlayer(playerToFling)
             OrionLib:MakeNotification({
                 Title = "Fling Failed",
                 Text = "No valid character of the target player. They may have died.",
-                Image = "rbxassetid://4483345998",
-		Duration = 5
+                Duration = 5
             })
         end
     end
