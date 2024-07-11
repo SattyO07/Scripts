@@ -8,12 +8,14 @@ local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/Unk
 -- Universal Functions --
 -- Fling
 local function FlingPlayer(playerToFling)
-        return
-    end
-
     if not playerToFling then
+        OrionLib:MakeNotification({
+            Title = "Fling Failed",
+            Text = "No player selected to fling.",
+            Duration = 5
+        })
         return
-    end
+	end
 
     local player = game.Players.LocalPlayer
     local Targets = {playerToFling}
