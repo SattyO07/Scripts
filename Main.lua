@@ -1,4 +1,5 @@
 -- Values
+local uis = game:GetService("UserInputService")
 local LocalPlayer = game:GetService("Players").LocalPlayer
 local Players = game:GetService("Players")
 local camera = game.Workspace.CurrentCamera
@@ -564,6 +565,16 @@ end)
 
 -- Function Executor
 local Exe = identifyexecutor()
+
+--Function Device
+local Device = Nil
+if uis.TouchEnabled and not uis.KeyboardEnabled then
+    Device = "Mobile"
+elseif uis.KeyboardEnabled and not uis.TouchEnabled then
+    Device = "Computer"
+elseif uis.GamepadEnabled and not uis.TouchEnabled and not uis.KeyboardEnabled then
+    Device = "Console"
+end
 -- Window
 local GameName = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
 local Window = OrionLib:MakeWindow({Name = "MoonLight : [" .. GameName .. "]", HidePremium = false, SaveConfig = false, ConfigFolder = "ReaperSaved"})
@@ -823,7 +834,7 @@ local SecInf = InfoT:AddSection({
 	})
 
 local fpsLabel = InfoT:AddLabel("Current FPS: 0")
-local ExeLabel = InfoT:AddLabel("Device: ".. Exe)
+local ExeLabel = InfoT:AddLabel("Device: ".. Device)
 local ExeLabel = InfoT:AddLabel("Executor: ".. Exe)
 local playerCountLabel = InfoT:AddLabel("Player Count: 0/0")
 
