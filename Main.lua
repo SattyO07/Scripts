@@ -423,6 +423,8 @@ Sense = {
   }
 }
 
+Sence.Load()
+
 -- Info Functions --
 -- Function Fps
 local UpdateFps = 0
@@ -667,7 +669,7 @@ local nameT = Tab3:AddToggle({
 	Default = false,
 	Callback = function(Value)
 		Sense.teamSettings.enemy.name	= Value
-                Sense.teamSettings.friendly.name = Value
+                Sense.teamSettings.friendly.name  = Value
 	end    
 })
 
@@ -699,5 +701,3 @@ RunService.RenderStepped:Connect(function()
     playerCountLabel:Set("Player Count: " .. #game.Players:GetPlayers() .. "/" .. game.Players.MaxPlayers)
     fpsLabel:Set("Current FPS: " .. UpdateFps)
 end)
-
-Sence.Load()
