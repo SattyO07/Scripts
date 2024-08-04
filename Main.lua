@@ -2,7 +2,7 @@
 local LocalPlayer = game:GetService("Players").LocalPlayer
 local Players = game:GetService("Players")
 local camera = game.Workspace.CurrentCamera
-local RunService = game.RunService
+local RunService = game:GetService("RunService")
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/Unknownkellymc1/Orion/main/source')))()
 
 -- Universal Functions --
