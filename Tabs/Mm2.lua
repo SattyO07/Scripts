@@ -242,14 +242,96 @@ button.Activated:Connect(function()
     shoot()
 end)
 
+-- Esp 
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local highlight = Instance.new("Highlight")
+highlight.Name = "Highlight"
+local highlightEnabled = true 
+
+local function addHighlight(character, color)
+    if highlightEnabled and character then
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart and not humanoidRootPart:FindFirstChild("Highlight") then
+            local highlightClone = highlight:Clone()
+            highlightClone.Adornee = character
+            highlightClone.Parent = humanoidRootPart
+            highlightClone.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+            highlightClone.FillColor = color
+            highlightClone.Name = "Highlight"
+        end
+    end
+end
+
+local function removeHighlight(character)
+    if character then
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart then
+            local highlightInstance = humanoidRootPart:FindFirstChild("Highlight")
+            if highlightInstance then
+                highlightInstance:Destroy()
+            end
+        end
+    end
+end
+
+local function setupCharacter(character, color)
+    removeHighlight(character)
+    addHighlight(character, color)
+    
+    local humanoid = character:FindFirstChild("Humanoid")
+    if humanoid then
+        humanoid.Died:Connect(function()
+            removeHighlight(character)
+        end)
+    end
+end
+
+local function findRole(player)
+    if player.Backpack:FindFirstChild("Knife") or player.Character:FindFirstChild("Knife") then
+        return "Murderer"
+    elseif player.Backpack:FindFirstChild("Gun") or player.Character:FindFirstChild("Gun") then
+        return "Sheriff"
+    elseif playerData and playerData[player.Name] and playerData[player.Name].Role then
+        return playerData[player.Name].Role
+    else
+        return "Innocent"
+    end
+end
+
+while true do
+    if highlightEnabled then
+        for _, player in pairs(Players:GetPlayers()) do
+            if player.Character then
+                local character = player.Character
+                local role = findRole(player)
+                if role == "Murderer" then
+                    setupCharacter(character, Color3.fromRGB(255, 0, 0))
+                elseif role == "Sheriff" then
+                    setupCharacter(character, Color3.fromRGB(0, 150, 255))
+                else
+                    setupCharacter(character, Color3.fromRGB(0, 255, 0))
+                end
+            end
+        end
+    else
+        for _, player in pairs(Players:GetPlayers()) do
+            if player.Character then
+                removeHighlight(player.Character)
+            end
+        end
+    end
+    wait(1)
+end
+
 -- [[Mm2]] --
-    local Tab4 = Window:MakeTab({
+    local TabM = Window:MakeTab({
     Name = "Murder Mystery 2",
     Icon = "rbxassetid://7733799795",
     PremiumOnly = false,
 })
 
-local AimUiToggle = Tab3:AddToggle({
+local AimUiToggle = TabM:AddToggle({
     Name = "Shoot Ui",
     Default = false,
     Callback = function(value)
@@ -257,7 +339,7 @@ local AimUiToggle = Tab3:AddToggle({
     end
 })
 
-local AimKeybind = Tab3:AddBind({
+local AimKeybind = TabM:AddBind({
 	Name = "Shoot Keybind",
 	Default = Enum.KeyCode.Q,
 	Hold = false,
@@ -266,7 +348,7 @@ local AimKeybind = Tab3:AddBind({
 	end    
 })
 
-local AimOffset = Tab3:AddTextbox({
+local AimOffset = TabM:AddTextbox({
     Name = "Aim Offset",
     Default = "2.8",
     TextDisappear = true
@@ -308,4 +390,16 @@ OrionLib:MakeNotification({
 })
         end
     end
+})
+
+local SectionM = TabM:AddSection({
+	Name = "Esp"
+})
+
+TabM:AddToggle({
+	Name = "Esp",
+	Default = false,
+	Callback = function(Value)
+		highlightEnabled = Value
+	end    
 })
