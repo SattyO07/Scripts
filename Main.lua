@@ -818,9 +818,14 @@ OrionLib:MakeNotification({
 -- [Info] --
 local InfoT = Window:MakeTab({Name = "Info", Icon = "rbxassetid://7733964719", PremiumOnly = false})
 
-local playerCountLabel = InfoT:AddLabel("Player Count: 0/0")
+local SecInf = InfoT:AddSection({
+	Name = "Stats:"
+	})
+
 local fpsLabel = InfoT:AddLabel("Current FPS: 0")
-local ExeLabel = InfoT:AddLabel("Using: ".. Exe)
+local ExeLabel = InfoT:AddLabel("Device: ".. Exe)
+local ExeLabel = InfoT:AddLabel("Executor: ".. Exe)
+local playerCountLabel = InfoT:AddLabel("Player Count: 0/0")
 
 OrionLib:Init()
 RunService.RenderStepped:Connect(function()
