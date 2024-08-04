@@ -3,27 +3,10 @@ local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = game:GetService("Players").LocalPlayer
 local Players = game:GetService("Players")
 local camera = game.Workspace.CurrentCamera
-local plr = game.Players.LocalPlayer
 local RunService = game:GetService("RunService")
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/Unknownkellymc1/Orion/main/source')))()
 
 -- Universal Functions --
--- Noclip
-local function Noclip()
-    for i, v in pairs(plr.Character:GetDescendants()) do
-        if v:IsA("BasePart") then
-            v.CanCollide = false
-        end
-    end
-end
-
-local function Clip()
-    for i, v in pairs(plr.Character:GetDescendants()) do
-        if v:IsA("BasePart") then
-            v.CanCollide = true
-        end
-    end
-end
 -- Fling
 local function FlingPlayer(playerToFling)
     if FlingDetectionEnabled then
@@ -712,18 +695,6 @@ Players.PlayerRemoving:Connect(function(player)
 end)
 
 local UniText1 = Tab1:AddParagraph("Mics:", "Random things maybe help.")
-
-Tab1:AddToggle({
-    Name = "Noclip",
-    Default = false,
-    Callback = function(Value)
-        if Value then
-            Noclip()
-        else
-            Clip()
-        end
-    end
-})
 
 Tab1:AddToggle({
     Name = "Anti Fling",
