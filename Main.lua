@@ -561,6 +561,15 @@ RunService.RenderStepped:Connect(function()
     local DeltaTime = tick() - LastTime
     LastTime = tick()
 end)
+
+-- Function Executor
+local Exe = identifyexecutor()
+
+if SideName then
+    ExeLabel:Set("Executor: ", Exe)
+else
+    ExeLabel:Set("Executor: Unknow")
+end
 -- Window
 local GameName = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
 local Window = OrionLib:MakeWindow({Name = "MoonLight : [" .. GameName .. "]", HidePremium = false, SaveConfig = false, ConfigFolder = "ReaperSaved"})
@@ -817,6 +826,7 @@ local InfoT = Window:MakeTab({Name = "Info", Icon = "rbxassetid://7733964719", P
 
 local playerCountLabel = InfoT:AddLabel("Player Count: 0/0")
 local fpsLabel = InfoT:AddLabel("Current FPS: 0")
+local ExeLabel = InfoT:AddLabel()
 
 OrionLib:Init()
 RunService.RenderStepped:Connect(function()
