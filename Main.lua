@@ -723,7 +723,7 @@ Tab1:AddToggle({
     Name = "Noclip",
     Default = false,
     Callback = function(value)
-        if value do
+        if value then
 					noclip()
 				else
 					clip()
