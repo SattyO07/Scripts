@@ -693,7 +693,11 @@ local ChamsT = 3Tab:AddToggle({
 	end    
 })
 -- [[Mm2] --
+local gameId = game.GameId
 
+if gameId == "142823291" then
+    loadstring(game:HttpGet(('https://raw.githubusercontent.com/SattyO07/Scripts/main/Tabs/Mm2.Lua')))()
+end
 -- [Info] --
 local InfoT = Window:MakeTab({Name = "Info", Icon = "rbxassetid://7733964719", PremiumOnly = false})
 
