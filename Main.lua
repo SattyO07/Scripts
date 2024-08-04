@@ -651,19 +651,6 @@ local Tab3 = Window:MakeTab({
     PremiumOnly = false,
 })
 
-local EspLabel1 = Tab3:AddLabel("Enable:")
-Tab3:AddToggle({
-    Name = "Enable",
-    Default = false,
-    Callback = function(Value)
-        if Value then
-            Sense:Load()
-        else
-            Sense:Unload()
-        end
-    end
-})
-
 local EspLabel2 = Tab3:AddLabel("Team:")
 Tab3:AddToggle({
 	Name = "Enemy",
@@ -712,3 +699,5 @@ RunService.RenderStepped:Connect(function()
     playerCountLabel:Set("Player Count: " .. #game.Players:GetPlayers() .. "/" .. game.Players.MaxPlayers)
     fpsLabel:Set("Current FPS: " .. UpdateFps)
 end)
+
+Sence.Load()
