@@ -94,7 +94,7 @@ end
 
 local shootOffset = 2.8 --Default
 
--- AimShot
+-- Aim Shot
 local function shoot()
 	if not isLocalPlayerSheriff() then
 		OrionLib:MakeNotification({
@@ -323,12 +323,6 @@ while true do
 end
 
 -- [[Mm2]] --
-    local TabM = Window:MakeTab({
-    Name = "Murder Mystery 2",
-    Icon = "rbxassetid://7733799795",
-    PremiumOnly = false,
-})
-
 local AimUiToggle = TabM:AddToggle({
     Name = "Shoot Ui",
     Default = false,
@@ -400,4 +394,5 @@ TabM:AddToggle({
 	Callback = function(Value)
 		highlightEnabled = Value
 	end    
-})
+})local AimUiToggle = TabM:AddToggle({
+    Name
