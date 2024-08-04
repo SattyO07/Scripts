@@ -724,12 +724,11 @@ Tab1:AddToggle({
     Default = false,
     Callback = function(value)
         if value then
-					noclip()
-				else
-					clip()
-				end
-        })
-    end    
+            noclip()
+        else
+            clip()
+        end
+    end
 })
 
 Tab1:AddToggle({
