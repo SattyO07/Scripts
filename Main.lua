@@ -696,7 +696,7 @@ end)
 
 local UniText1 = Tab1:AddParagraph("Mics:", "Random things maybe help.")
 
-Tab:AddToggle({
+Tab1:AddToggle({
     Name = "Noclip",
     Default = false,
     Callback = function(Value)
