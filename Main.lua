@@ -668,12 +668,14 @@ Tab1:AddToggle({
     Default = false,
     Callback = function(Value)
         if not selectedPlayer then
-            OrionLib:MakeNotification({
-                Name = "Notification",
-                Content = "No player selected.",
-                Image = "rbxassetid://4483345998",
-                Time = 5
-            })
+            if Value then
+                OrionLib:MakeNotification({
+                    Name = "Notification",
+                    Content = "No player selected.",
+                    Image = "rbxassetid://4483345998",
+                    Time = 5
+                })
+            end
             return
         end
 
@@ -829,9 +831,7 @@ OrionLib:MakeNotification({
 -- [Info] --
 local InfoT = Window:MakeTab({Name = "Info", Icon = "rbxassetid://7733964719", PremiumOnly = false})
 
-local SecInf = InfoT:AddSection({
-	Name = "Stats:"
-	})
+local SecInf = InfoT:AddSection({Name = "Stats:"})
 
 local fpsLabel = InfoT:AddLabel("Current FPS: 0")
 local ExeLabel = InfoT:AddLabel("Device: ".. Device)
