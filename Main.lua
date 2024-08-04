@@ -565,14 +565,15 @@ end)
 local Exe = identifyexecutor()
 
 --Function Device
-local Device = Nil
-if UserInputServices.TouchEnabled and not uis.KeyboardEnabled then
+local Device = nil
+if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then
     Device = "Mobile"
-elseif UserInputService.KeyboardEnabled and not uis.TouchEnabled then
+elseif UserInputService.KeyboardEnabled and not UserInputService.TouchEnabled then
     Device = "Computer"
-elseif UserInputService.GamepadEnabled and not uis.TouchEnabled and not uis.KeyboardEnabled then
+elseif UserInputService.GamepadEnabled and not UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then
     Device = "Console"
 end
+
 -- Window
 local GameName = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
 local Window = OrionLib:MakeWindow({Name = "MoonLight : [" .. GameName .. "]", HidePremium = false, SaveConfig = false, ConfigFolder = "ReaperSaved"})
