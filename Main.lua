@@ -4,6 +4,7 @@ local LocalPlayer = game:GetService("Players").LocalPlayer
 local Players = game:GetService("Players")
 local camera = game.Workspace.CurrentCamera
 local RunService = game:GetService("RunService")
+local espLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Sirius/request/library/esp/esp.lua'),true))()
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/Unknownkellymc1/Orion/main/source')))()
 
 -- Universal Functions --
@@ -314,6 +315,75 @@ RunService.Heartbeat:Connect(function()
         end
     end)
 end)
+-- Esp Functions --
+local espLib = {
+    drawings = {},
+    instances = {},
+    espCache = {},
+    chamsCache = {},
+    objectCache = {},
+    conns = {},
+    whitelist = {}, 
+    blacklist = {},
+    options = {
+        enabled = true,
+        minScaleFactorX = 1,
+        maxScaleFactorX = 10,
+        minScaleFactorY = 1,
+        maxScaleFactorY = 10,
+        boundingBox = false, 
+        boundingBoxDescending = true,
+        font = 2,
+        fontSize = 13,
+        limitDistance = false,
+        maxDistance = 10000,
+        visibleOnly = false,
+        teamCheck = false,
+        teamColor = true,
+        fillColor = nil,
+        whitelistColor = Color3.new(1, 0, 0),
+        outOfViewArrows = false,
+        outOfViewArrowsFilled = false,
+        outOfViewArrowsSize = 25,
+        outOfViewArrowsRadius = 100,
+        outOfViewArrowsColor = Color3.new(1, 1, 1),
+        outOfViewArrowsTransparency = 0.5,
+        outOfViewArrowsOutline = false,
+        outOfViewArrowsOutlineFilled = false,
+        outOfViewArrowsOutlineColor = Color3.new(1, 1, 1),
+        outOfViewArrowsOutlineTransparency = 1,
+        names = false,
+        nameTransparency = 1,
+        nameColor = Color3.new(1, 1, 1),
+        boxes = false,
+        boxesTransparency = 1,
+        boxesColor = Color3.new(1, 0, 0),
+        boxFill = false,
+        boxFillTransparency = 0.5,
+        boxFillColor = Color3.new(1, 0, 0),
+        healthBars = false,
+        healthBarsSize = 1,
+        healthBarsTransparency = 1,
+        healthBarsColor = Color3.new(0, 1, 0),
+        healthText = false,
+        healthTextTransparency = 1,
+        healthTextSuffix = "%",
+        healthTextColor = Color3.new(1, 1, 1),
+        distance = false,
+        distanceTransparency = 1,
+        distanceSuffix = " Studs",
+        distanceColor = Color3.new(1, 1, 1),
+        tracers = false,
+        tracerTransparency = 1,
+        tracerColor = Color3.new(1, 1, 1),
+        tracerOrigin = "Bottom", -- Available [Mouse, Top, Bottom]
+        chams = false,
+        chamsFillColor = Color3.new(1, 0, 0),
+        chamsFillTransparency = 0.5,
+        chamsOutlineColor = Color3.new(),
+        chamsOutlineTransparency = 0
+    },
+};
 -- Mm2 Functions --
 local playerData = {}
 
@@ -795,8 +865,94 @@ Tab2:AddButton({
 		end
 })
 
+-- [[Esp]] --
+local Tab3 = Window:MakeTab({
+    Name = "Esp",
+    Icon = "rbxassetid://7733774602",
+    PremiumOnly = false,
+})
+
+local EspLabel1 = Tab3:AddLabel("Enable:")
+local Esp = 3Tab:AddToggle({
+	Name = "Enable",
+	Default = false,
+	Callback = function(Value)
+		if value then
+				espLib:Load()
+			else
+				espLib:Unload()
+			end
+	end    
+})
+
+local TeamCheck = 3Tab:AddToggle({
+	Name = "Team",
+	Default = false,
+	Callback = function(Value)
+   espLib.options.teamCheck = Value
+	end    
+})
+
+local EspLabel2 = Tab3:AddLabel("Configs:")
+
+local NameT = 3Tab:AddToggle({
+	Name = "Name",
+	Default = false,
+	Callback = function(Value)
+		espLib.options.Names = Value
+	end    
+})
+
+local BoxsT = 3Tab:AddToggle({
+	Name = "Box",
+	Default = false,
+	Callback = function(Value)
+		espLib.options.boxes = Value
+	end    
+})
+
+local HealthBarT = 3Tab:AddToggle({
+	Name = "HealthBar",
+	Default = false,
+	Callback = function(Value)
+   espLib.options.healthBars = Value
+	end    
+})
+
+local HealtTextT = 3Tab:AddToggle({
+	Name = "HealthText",
+	Default = false,
+	Callback = function(Value)
+   espLib.options.healthText = Value
+	end    
+})
+
+local DistanceT = 3Tab:AddToggle({
+	Name = "Distance",
+	Default = false,
+	Callback = function(Value)
+   espLib.options.distance = Value
+	end    
+})
+
+local TracersT = 3Tab:AddToggle({
+	Name = "Tracers",
+	Default = false,
+	Callback = function(Value)
+   espLib.options.tracers = Value
+	end    
+})
+
+local ChamsT = 3Tab:AddToggle({
+	Name = "Chams",
+	Default = false,
+	Callback = function(Value)
+   espLib.options.chams = Value
+	end    
+})
+
 -- [[Mm2]] --
-    local Tab3 = Window:MakeTab({
+    local Tab4 = Window:MakeTab({
     Name = "Murder Mystery 2",
     Icon = "rbxassetid://7733799795",
     PremiumOnly = false,
