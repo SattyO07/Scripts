@@ -820,8 +820,7 @@ local InfoT = Window:MakeTab({Name = "Info", Icon = "rbxassetid://7733964719", P
 
 local playerCountLabel = InfoT:AddLabel("Player Count: 0/0")
 local fpsLabel = InfoT:AddLabel("Current FPS: 0")
- wait.task()
-local ExeLabel = InfoT:AddLabel()
+local ExeLabel = InfoT:AddLabel("Using: ".. Exe)
 
 OrionLib:Init()
 RunService.RenderStepped:Connect(function()
