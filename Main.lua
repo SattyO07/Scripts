@@ -698,7 +698,7 @@ end)
 local UniText1 = Tab1:AddParagraph("Mics:", "Random things maybe help.")
 
 Tab1:AddToggle({
-    Name = "AntiFling",
+    Name = "Anti Fling",
     Default = false,
     Callback = function(Value)
         FlingDetectionEnabled = Value
