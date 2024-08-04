@@ -1,5 +1,5 @@
 -- Values
-local uis = game:GetService("UserInputService")
+local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = game:GetService("Players").LocalPlayer
 local Players = game:GetService("Players")
 local camera = game.Workspace.CurrentCamera
@@ -507,8 +507,6 @@ local dragStart
 local startPos
 local enabled = true
 
-local UserInputService = game:GetService("UserInputService")
-
 local function update(input)
     local delta = input.Position - dragStart
     frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
@@ -568,11 +566,11 @@ local Exe = identifyexecutor()
 
 --Function Device
 local Device = Nil
-if uis.TouchEnabled and not uis.KeyboardEnabled then
+if UserInputServices.TouchEnabled and not uis.KeyboardEnabled then
     Device = "Mobile"
-elseif uis.KeyboardEnabled and not uis.TouchEnabled then
+elseif UserInputService.KeyboardEnabled and not uis.TouchEnabled then
     Device = "Computer"
-elseif uis.GamepadEnabled and not uis.TouchEnabled and not uis.KeyboardEnabled then
+elseif UserInputService.GamepadEnabled and not uis.TouchEnabled and not uis.KeyboardEnabled then
     Device = "Console"
 end
 -- Window
@@ -715,6 +713,36 @@ Tab1:AddToggle({
                     part.CanCollide = true
                 end
             end
+        end
+    end
+})
+
+Tab1:AddToggle({
+    Name = "Fly",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            -- Enable fly
+            LocalPlayer.Character.Humanoid.WalkSpeed = 0
+            LocalPlayer.Character.Humanoid.Fly = true
+            
+            -- Mobile fly controls
+            local flySpeed = 10
+            local onTouch = UserInputService.InputChanged:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.Touch then
+                    local touchPosition = input.Position
+                    local characterPosition = LocalPlayer.Character.HumanoidRootPart.Position
+                    local direction = (touchPosition - characterPosition).Unit * flySpeed
+                    LocalPlayer.Character.HumanoidRootPart.Velocity = direction
+                end
+            end)
+        else
+            -- Disable fly
+            LocalPlayer.Character.Humanoid.WalkSpeed = 16
+            LocalPlayer.Character.Humanoid.Fly = false
+            
+            -- Disconnect mobile fly controls
+            onTouch:Disconnect()
         end
     end
 })
