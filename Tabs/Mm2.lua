@@ -1,6 +1,6 @@
+-- Find Player
 local playerData = {}
 
--- Find Players
 local function findMurderer()
 	for _, player in ipairs(game.Players:GetPlayers()) do
 		if player.Backpack:FindFirstChild("Knife") then
@@ -52,6 +52,7 @@ local function findSheriff()
 	end
 	return nil
 end
+
 -- ShootOffset
 local function getPredictedPosition(player, shootOffset)
 	pcall(function()
@@ -91,7 +92,8 @@ function isLocalPlayerSheriff()
 	return localPlayer == sheriff
 end
 
-local shootOffset = 2.8
+local shootOffset = 2.8 --Default
+
 -- AimShot
 local function shoot()
 	if not isLocalPlayerSheriff() then
@@ -151,15 +153,13 @@ local function shoot()
 	}
 	game.Players.LocalPlayer.Character.Gun.KnifeLocal.CreateBeam.RemoteFunction:InvokeServer(unpack(args))
 end
--- Create ButtonUi
+-- Create Button
 local player = game.Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "CrosshairGui"
 screenGui.Parent = playerGui
 screenGui.ResetOnSpawn = false
-
--- Create frame
 local frame = Instance.new("Frame")
 frame.Size = UDim2.new(0, 150, 0, 60)
 frame.Position = UDim2.new(0.5, -75, 0.5, -30)
@@ -169,13 +169,9 @@ frame.BorderSizePixel = 1
 frame.BorderColor3 = Color3.fromRGB(0, 0, 255)
 frame.BackgroundTransparency = 0.8
 frame.Parent = screenGui
-
--- Create cornered outline
 local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 10)
 corner.Parent = frame
-
--- Create inner frame with black transparent background
 local innerFrame = Instance.new("Frame")
 innerFrame.Size = UDim2.new(1, -4, 1, -4) 
 innerFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
@@ -183,13 +179,9 @@ innerFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 innerFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0) 
 innerFrame.BackgroundTransparency = 0.8
 innerFrame.Parent = frame
-
--- Create cornered inner frame
 local innerCorner = Instance.new("UICorner")
 innerCorner.CornerRadius = UDim.new(0, 10)
 innerCorner.Parent = innerFrame
-
--- Create image label
 local imageLabel = Instance.new("ImageLabel")
 imageLabel.Size = UDim2.new(0, 50, 0, 50)
 imageLabel.Image = "rbxassetid://7733765307"
@@ -197,8 +189,6 @@ imageLabel.BackgroundTransparency = 1
 imageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
 imageLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
 imageLabel.Parent = innerFrame
-
--- Create button
 local button = Instance.new("ImageButton")
 button.Size = UDim2.new(1, 0, 1, 0)
 button.Position = UDim2.new(0, 0, 0, 0)
@@ -206,25 +196,22 @@ button.AnchorPoint = Vector2.new(0, 0)
 button.BackgroundTransparency = 1
 button.Parent = innerFrame
 
--- Variables for dragging
+-- Drag Ui
 local dragging
 local dragInput
 local dragStart
 local startPos
 local enabled = true
-
 local function update(input)
     local delta = input.Position - dragStart
     frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
 end
-
 button.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         if not enabled then return end
         dragging = true
         dragStart = input.Position
         startPos = frame.Position
-
         input.Changed:Connect(function()
             if input.UserInputState == Enum.UserInputState.End then
                 dragging = false
@@ -245,14 +232,12 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
--- Function to enable or disable the button
 local function toggleButton(state)
     enabled = state
     frame.Visible = state
 end
 
 toggleButton(false)
--- Connect the click event to print "Clicked"
 button.Activated:Connect(function()
     shoot()
 end)
