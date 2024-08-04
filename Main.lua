@@ -660,7 +660,7 @@ Tab3:AddToggle({
 		Sense.Load()
 		else
 		Sense.UnLoad()
-	end    
+	end    end
 })
 
 local EspLabel2 = Tab3:AddLabel("Team:")
