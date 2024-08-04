@@ -657,6 +657,7 @@ Tab3:AddToggle({
 	Default = false,
 	Callback = function(Value)
 		Sense.teamSettings.enemy.enable	= Value
+                Sense.teamSettings.enemy.friendly = Value
 	end    
 })
 
