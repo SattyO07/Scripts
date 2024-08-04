@@ -865,12 +865,18 @@ OrionLib:MakeNotification({
 -- [Info] --
 local InfoT = Window:MakeTab({Name = "Info", Icon = "rbxassetid://7733964719", PremiumOnly = false})
 
-local SecInf = InfoT:AddSection({Name = "Stats:"})
+local SecInf1 = InfoT:AddSection({Name = "Stats:"})
 
 local fpsLabel = InfoT:AddLabel("Current FPS: 0")
 local ExeLabel = InfoT:AddLabel("Device: ".. Device)
 local ExeLabel = InfoT:AddLabel("Executor: ".. Exe)
 local playerCountLabel = InfoT:AddLabel("Player Count: 0/0")
+
+local SecInf2 = InfoT:AddSection({Name = "Configs:"})
+InfoT:AddButton({
+	Name = "Destroy Gui",
+	Callback = function() OrionLib:Destroy()end})
+
 
 OrionLib:Init()
 RunService.RenderStepped:Connect(function()
