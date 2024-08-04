@@ -653,7 +653,7 @@ local Tab3 = Window:MakeTab({
 
 local EspLabel1 = Tab3:AddLabel("Enable:")
 Tab3:AddToggle({
-    Name = "Enemy",
+    Name = "Enable",
     Default = false,
     Callback = function(Value)
         if Value then
