@@ -878,7 +878,7 @@ local EspEnable = 3Tab:AddToggle({
 	Name = "Enable",
 	Default = false,
 	Callback = function(Value)
-		if value then
+		if Value then
 				espLib:Load()
 			else
 				espLib:Unload()
