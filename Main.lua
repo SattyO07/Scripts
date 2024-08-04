@@ -4,7 +4,7 @@ local LocalPlayer = game:GetService("Players").LocalPlayer
 local Players = game:GetService("Players")
 local camera = game.Workspace.CurrentCamera
 local RunService = game:GetService("RunService")
-local espLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Sirius/request/library/esp/esp.lua'),true))()
+local Sense = loadstring(game:HttpGet('https://raw.githubusercontent.com/shlexware/Sirius/request/library/sense/source.lua'))()
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/Unknownkellymc1/Orion/main/source')))()
 
 -- Universal Functions --
@@ -316,74 +316,112 @@ RunService.Heartbeat:Connect(function()
     end)
 end)
 -- Esp Functions --
-local espLib = {
-    drawings = {},
-    instances = {},
-    espCache = {},
-    chamsCache = {},
-    objectCache = {},
-    conns = {},
-    whitelist = {}, 
-    blacklist = {},
-    options = {
-        enabled = true,
-        minScaleFactorX = 1,
-        maxScaleFactorX = 10,
-        minScaleFactorY = 1,
-        maxScaleFactorY = 10,
-        boundingBox = false, 
-        boundingBoxDescending = true,
-        font = 2,
-        fontSize = 13,
-        limitDistance = false,
-        maxDistance = 10000,
-        visibleOnly = false,
-        teamCheck = false,
-        teamColor = true,
-        fillColor = nil,
-        whitelistColor = Color3.new(1, 0, 0),
-        outOfViewArrows = false,
-        outOfViewArrowsFilled = false,
-        outOfViewArrowsSize = 25,
-        outOfViewArrowsRadius = 100,
-        outOfViewArrowsColor = Color3.new(1, 1, 1),
-        outOfViewArrowsTransparency = 0.5,
-        outOfViewArrowsOutline = false,
-        outOfViewArrowsOutlineFilled = false,
-        outOfViewArrowsOutlineColor = Color3.new(1, 1, 1),
-        outOfViewArrowsOutlineTransparency = 1,
-        names = false,
-        nameTransparency = 1,
-        nameColor = Color3.new(1, 1, 1),
-        boxes = false,
-        boxesTransparency = 1,
-        boxesColor = Color3.new(1, 0, 0),
-        boxFill = false,
-        boxFillTransparency = 0.5,
-        boxFillColor = Color3.new(1, 0, 0),
-        healthBars = false,
-        healthBarsSize = 1,
-        healthBarsTransparency = 1,
-        healthBarsColor = Color3.new(0, 1, 0),
-        healthText = false,
-        healthTextTransparency = 1,
-        healthTextSuffix = "%",
-        healthTextColor = Color3.new(1, 1, 1),
-        distance = false,
-        distanceTransparency = 1,
-        distanceSuffix = " Studs",
-        distanceColor = Color3.new(1, 1, 1),
-        tracers = false,
-        tracerTransparency = 1,
-        tracerColor = Color3.new(1, 1, 1),
-        tracerOrigin = "Bottom", -- Available [Mouse, Top, Bottom]
-        chams = false,
-        chamsFillColor = Color3.new(1, 0, 0),
-        chamsFillTransparency = 0.5,
-        chamsOutlineColor = Color3.new(),
-        chamsOutlineTransparency = 0
-    },
-};
+Sense = {
+  whitelist = {}, -- When this table contains at least 1 user id, it will only show esp for those players.
+  sharedSettings = {
+      textSize = 13,
+      textFont = 2,
+      limitDistance = false, -- Set a maximum render distance
+      maxDistance = 150,
+      useTeamColor = true -- Change all colors to the players team color
+  },
+  teamSettings = {
+      enemy = {
+          enabled = false,
+          box = false,
+          boxColor = { Color3.new(1,0,0), 1 },
+          boxOutline = false,
+          boxOutlineColor = { Color3.new(), 1 },
+          boxFill = false,
+          boxFillColor = { Color3.new(1,0,0), 0.5 },
+          healthBar = false,
+          healthyColor = Color3.new(0,1,0),
+          dyingColor = Color3.new(1,0,0),
+          healthBarOutline = false,
+          healthBarOutlineColor = { Color3.new(), 0.5 },
+          healthText = false,
+          healthTextColor = { Color3.new(1,1,1), 1 },
+          healthTextOutline = false,
+          healthTextOutlineColor = Color3.new(),
+          box3d = false,
+          box3dColor = { Color3.new(1,0,0), 1 },
+          name = false,
+          nameColor = { Color3.new(1,1,1), 1 },
+          nameOutline = false,
+          nameOutlineColor = Color3.new(),
+          weapon = false,
+          weaponColor = { Color3.new(1,1,1), 1 },
+          weaponOutline = false,
+          weaponOutlineColor = Color3.new(),
+          distance = false,
+          distanceColor = { Color3.new(1,1,1), 1 },
+          distanceOutline = false,
+          distanceOutlineColor = Color3.new(),
+          tracer = false,
+          tracerOrigin = "Bottom",
+          tracerColor = { Color3.new(1,0,0), 1 },
+          tracerOutline = true,
+          tracerOutlineColor = { Color3.new(), 1 },
+          offScreenArrow = false,
+          offScreenArrowColor = { Color3.new(1,1,1), 1 },
+          offScreenArrowSize = 15,
+          offScreenArrowRadius = 150,
+          offScreenArrowOutline = true,
+          offScreenArrowOutlineColor = { Color3.new(), 1 },
+          chams = false,
+          chamsVisibleOnly = false,
+          chamsFillColor = { Color3.new(0.2, 0.2, 0.2), 0.5 },
+          chamsOutlineColor = { Color3.new(1,0,0), 0 },
+      },
+      friendly = {
+          enabled = false,
+          box = false,
+          boxColor = { Color3.new(0,1,0), 1 },
+          boxOutline = true,
+          boxOutlineColor = { Color3.new(), 1 },
+          boxFill = false,
+          boxFillColor = { Color3.new(0,1,0), 0.5 },
+          healthBar = false,
+          healthyColor = Color3.new(0,1,0),
+          dyingColor = Color3.new(1,0,0),
+          healthBarOutline = true,
+          healthBarOutlineColor = { Color3.new(), 0.5 },
+          healthText = false,
+          healthTextColor = { Color3.new(1,1,1), 1 },
+          healthTextOutline = true,
+          healthTextOutlineColor = Color3.new(),
+          box3d = false,
+          box3dColor = { Color3.new(0,1,0), 1 },
+          name = false,
+          nameColor = { Color3.new(1,1,1), 1 },
+          nameOutline = true,
+          nameOutlineColor = Color3.new(),
+          weapon = false,
+          weaponColor = { Color3.new(1,1,1), 1 },
+          weaponOutline = true,
+          weaponOutlineColor = Color3.new(),
+          distance = false,
+          distanceColor = { Color3.new(1,1,1), 1 },
+          distanceOutline = true,
+          distanceOutlineColor = Color3.new(),
+          tracer = false,
+          tracerOrigin = "Bottom",
+          tracerColor = { Color3.new(0,1,0), 1 },
+          tracerOutline = true,
+          tracerOutlineColor = { Color3.new(), 1 },
+          offScreenArrow = false,
+          offScreenArrowColor = { Color3.new(1,1,1), 1 },
+          offScreenArrowSize = 15,
+          offScreenArrowRadius = 150,
+          offScreenArrowOutline = true,
+          offScreenArrowOutlineColor = { Color3.new(), 1 },
+          chams = false,
+          chamsVisibleOnly = false,
+          chamsFillColor = { Color3.new(0.2, 0.2, 0.2), 0.5 },
+          chamsOutlineColor = { Color3.new(0,1,0), 0 }
+      }
+  }
+}
 
 -- Info Functions --
 -- Function Fps
@@ -614,84 +652,14 @@ local Tab3 = Window:MakeTab({
 })
 
 local EspLabel1 = Tab3:AddLabel("Enable:")
-
-3Tab:AddToggle({
-	Name = "Enable",
+Tab3:AddToggle({
+	Name = "Enemy",
 	Default = false,
 	Callback = function(Value)
-		if Value then
-				espLib:Load()
-			else
-				espLib:Unload()
-			end
+		Sense.teamSettings.enemy.enable	= Value
 	end    
 })
 
-local TeamCheck = 3Tab:AddToggle({
-	Name = "Team",
-	Default = false,
-	Callback = function(Value)
-   espLib.options.teamCheck = Value
-	end    
-})
-
-local EspLabel2 = Tab3:AddLabel("Configs:")
-
-local NameT = 3Tab:AddToggle({
-	Name = "Name",
-	Default = false,
-	Callback = function(Value)
-		espLib.options.Names = Value
-	end    
-})
-
-local BoxsT = 3Tab:AddToggle({
-	Name = "Box",
-	Default = false,
-	Callback = function(Value)
-		espLib.options.boxes = Value
-	end    
-})
-
-local HealthBarT = 3Tab:AddToggle({
-	Name = "HealthBar",
-	Default = false,
-	Callback = function(Value)
-   espLib.options.healthBars = Value
-	end    
-})
-
-local HealtTextT = 3Tab:AddToggle({
-	Name = "HealthText",
-	Default = false,
-	Callback = function(Value)
-   espLib.options.healthText = Value
-	end    
-})
-
-local DistanceT = 3Tab:AddToggle({
-	Name = "Distance",
-	Default = false,
-	Callback = function(Value)
-   espLib.options.distance = Value
-	end    
-})
-
-local TracersT = 3Tab:AddToggle({
-	Name = "Tracers",
-	Default = false,
-	Callback = function(Value)
-   espLib.options.tracers = Value
-	end    
-})
-
-local ChamsT = 3Tab:AddToggle({
-	Name = "Chams",
-	Default = false,
-	Callback = function(Value)
-   espLib.options.chams = Value
-	end    
-})
 -- [[Mm2] --
 local gameId = game.GameId
 
