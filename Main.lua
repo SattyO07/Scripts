@@ -537,6 +537,12 @@ Tab2:AddButton({
 })
 
 -- [[Mm2] --
+local TabM = Window:MakeTab({
+    Name = "Murder Mystery 2",
+    Icon = "rbxassetid://7733799795",
+    PremiumOnly = false,
+})
+
 -- Find Player
 local playerData = {}
 
@@ -862,11 +868,6 @@ while true do
 end
 
 -- [[Mm2]] --
-    local TabM = Window:MakeTab({
-    Name = "Murder Mystery 2",
-    Icon = "rbxassetid://7733799795",
-    PremiumOnly = false,
-})
 
 local AimUiToggle = TabM:AddToggle({
     Name = "Shoot Ui",
