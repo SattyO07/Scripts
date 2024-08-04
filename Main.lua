@@ -653,14 +653,15 @@ local Tab3 = Window:MakeTab({
 
 local EspLabel1 = Tab3:AddLabel("Enable:")
 Tab3:AddToggle({
-	Name = "Enemy",
-	Default = false,
-	Callback = function(Value)
-		if Value then
-		Sense.Load()
-		else
-		Sense.UnLoad()
-	end    end
+    Name = "Enemy",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            Sense:Load()
+        else
+            Sense:Unload()
+        end
+    end
 })
 
 local EspLabel2 = Tab3:AddLabel("Team:")
