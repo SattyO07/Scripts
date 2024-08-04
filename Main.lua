@@ -540,7 +540,7 @@ Tab2:AddButton({
 local gameId = game.GameId
 
 if gameId == "142823291" then
-    loadstring(game:HttpGet(('https://raw.githubusercontent.com/SattyO07/Scripts/main/Tabs/Mm2.Lua')))()
+    loadstring(game:HttpGet(('https://raw.githubusercontent.com/SattyO07/Scripts/main/Tabs/Mm2.lua')))()
 end
 -- [Info] --
 local InfoT = Window:MakeTab({Name = "Info", Icon = "rbxassetid://7733964719", PremiumOnly = false})
