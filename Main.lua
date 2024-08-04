@@ -423,7 +423,7 @@ Sense = {
   }
 }
 
-Sence.Load()
+Sense.Load()
 
 -- Info Functions --
 -- Function Fps
