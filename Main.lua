@@ -656,6 +656,18 @@ Tab3:AddToggle({
 	Name = "Enemy",
 	Default = false,
 	Callback = function(Value)
+		if Value then
+		Sense.Load()
+		else
+		Sense.UnLoad()
+	end    
+})
+
+local EspLabel2 = Tab3:AddLabel("Team:")
+Tab3:AddToggle({
+	Name = "Enemy",
+	Default = false,
+	Callback = function(Value)
 		Sense.teamSettings.enemy.enable	= Value
                 Sense.teamSettings.enemy.friendly = Value
 	end    
