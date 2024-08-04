@@ -243,8 +243,6 @@ button.Activated:Connect(function()
 end)
 
 -- Esp 
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
 local highlight = Instance.new("Highlight")
 highlight.Name = "Highlight"
 local highlightEnabled = true 
