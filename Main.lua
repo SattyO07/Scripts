@@ -330,28 +330,28 @@ Sense = {
           enabled = false,
           box = false,
           boxColor = { Color3.new(1,0,0), 1 },
-          boxOutline = false,
+          boxOutline = true,
           boxOutlineColor = { Color3.new(), 1 },
           boxFill = false,
           boxFillColor = { Color3.new(1,0,0), 0.5 },
           healthBar = false,
           healthyColor = Color3.new(0,1,0),
           dyingColor = Color3.new(1,0,0),
-          healthBarOutline = false,
+          healthBarOutline = true,
           healthBarOutlineColor = { Color3.new(), 0.5 },
-          healthText = false,
+          healthText = true,
           healthTextColor = { Color3.new(1,1,1), 1 },
-          healthTextOutline = false,
+          healthTextOutline = true,
           healthTextOutlineColor = Color3.new(),
           box3d = false,
           box3dColor = { Color3.new(1,0,0), 1 },
           name = true,
           nameColor = { Color3.new(1,1,1), 1 },
-          nameOutline = false,
+          nameOutline = true,
           nameOutlineColor = Color3.new(),
           weapon = false,
           weaponColor = { Color3.new(1,1,1), 1 },
-          weaponOutline = false,
+          weaponOutline = true,
           weaponOutlineColor = Color3.new(),
           distance = false,
           distanceColor = { Color3.new(1,1,1), 1 },
@@ -658,6 +658,16 @@ Tab3:AddToggle({
 	Callback = function(Value)
 		Sense.teamSettings.enemy.enable	= Value
                 Sense.teamSettings.enemy.friendly = Value
+	end    
+})
+
+local EspLabel1 = Tab3:AddLabel("Enable:")
+local nameT = Tab3:AddToggle({
+	Name = "Names",
+	Default = false,
+	Callback = function(Value)
+		Sense.teamSettings.enemy.name	= Value
+                Sense.teamSettings.friendly.name = Value
 	end    
 })
 
