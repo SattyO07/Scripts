@@ -698,6 +698,28 @@ end)
 local UniText1 = Tab1:AddParagraph("Mics:", "Random things maybe help.")
 
 Tab1:AddToggle({
+    Name = "Noclip",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            LocalPlayer.Character.Humanoid.WalkSpeed = 16
+            for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
+            end
+	else
+            LocalPlayer.Character.Humanoid.WalkSpeed = 16
+            for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = true
+                end
+            end
+        end
+    end
+})
+
+Tab1:AddToggle({
     Name = "Anti Fling",
     Default = false,
     Callback = function(Value)
