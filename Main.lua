@@ -7,6 +7,15 @@ local RunService = game:GetService("RunService")
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/Unknownkellymc1/Orion/main/source')))()
 
 -- Universal Functions --
+-- Noclip
+local function setNoclip(enabled)
+    for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.CanCollide = not enabled
+        end
+    end
+end
+
 -- Fling
 local function FlingPlayer(playerToFling)
     if FlingDetectionEnabled then
@@ -695,6 +704,20 @@ Players.PlayerRemoving:Connect(function(player)
 end)
 
 local UniText1 = Tab1:AddParagraph("Mics:", "Random things maybe help.")
+
+Tab1:AddToggle({
+    Name = "Noclip",
+    Default = false,
+    Callback = function(value)
+        setNoclip(value)
+        OrionLib:MakeNotification({
+            Name = "Noclip",
+            Content = value and "Noclip enabled." or "Noclip disabled.",
+            Image = "rbxassetid://4483345998",
+            Time = 5
+        })
+    end    
+})
 
 Tab1:AddToggle({
     Name = "Anti Fling",
