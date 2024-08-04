@@ -537,7 +537,8 @@ Tab2:AddButton({
 })
 
 -- [[Mm2] --
-    loadstring(game:HttpGet(('https://raw.githubusercontent.com/SattyO07/Scripts/main/Tabs/Mm2.lua')))()
+local Mm2Tab = loadstring(game:HttpGet(('https://raw.githubusercontent.com/SattyO07/Scripts/main/Tabs/Mm2.lua')))()
+Mm2Tab()
 -- [Info] --
 local InfoT = Window:MakeTab({Name = "Info", Icon = "rbxassetid://7733964719", PremiumOnly = false})
 
