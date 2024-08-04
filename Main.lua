@@ -615,7 +615,7 @@ local Tab3 = Window:MakeTab({
 
 local EspLabel1 = Tab3:AddLabel("Enable:")
 
-local EspEnable = 3Tab:AddToggle({
+3Tab:AddToggle({
 	Name = "Enable",
 	Default = false,
 	Callback = function(Value)
