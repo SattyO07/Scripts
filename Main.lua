@@ -719,36 +719,6 @@ Tab1:AddToggle({
 })
 
 Tab1:AddToggle({
-    Name = "Fly",
-    Default = false,
-    Callback = function(Value)
-        if Value then
-            -- Enable fly
-            LocalPlayer.Character.Humanoid.WalkSpeed = 0
-            LocalPlayer.Character.Humanoid.Fly = true
-            
-            -- Mobile fly controls
-            local flySpeed = 10
-            local onTouch = UserInputService.InputChanged:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.Touch then
-                    local touchPosition = input.Position
-                    local characterPosition = LocalPlayer.Character.HumanoidRootPart.Position
-                    local direction = (touchPosition - characterPosition).Unit * flySpeed
-                    LocalPlayer.Character.HumanoidRootPart.Velocity = direction
-                end
-            end)
-        else
-            -- Disable fly
-            LocalPlayer.Character.Humanoid.WalkSpeed = 16
-            LocalPlayer.Character.Humanoid.Fly = false
-            
-            -- Disconnect mobile fly controls
-            onTouch:Disconnect()
-        end
-    end
-})
-
-Tab1:AddToggle({
     Name = "Anti Fling",
     Default = false,
     Callback = function(Value)
