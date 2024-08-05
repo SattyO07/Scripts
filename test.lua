@@ -59,10 +59,97 @@ local function findSheriff()
     end
     return nil
 end
+-- Functions
+-- predicting
+local function getPredictedPosition(player, shootOffset)
+    if not player.Character then
+        warn("No character found for player")
+        return Vector3.new(0, 0, 0)
+    end
 
+    local character = player.Character
+    local playerHRP = character:FindFirstChild("UpperTorso") or character:FindFirstChild("HumanoidRootPart")
+    local playerHum = character:FindFirstChild("Humanoid")
+
+    if not playerHRP or not playerHum then
+        warn("Could not find the player's HumanoidRootPart or Humanoid")
+        return Vector3.new(0, 0, 0)
+    end
+
+    local playerPosition = playerHRP.Position
+    local velocity = playerHRP.AssemblyLinearVelocity
+    local playerMoveDirection = playerHum.MoveDirection
+    local playerLookVec = playerHRP.CFrame.LookVector
+    local yVelFactor = velocity.Y > 0 and -1 or 0.5
+
+    local predictedPosition = playerHRP.Position + ((velocity * Vector3.new(0, 0.5, 0))) * (shootOffset / 15) + playerMoveDirection * shootOffset
+
+    return predictedPosition
+end
+
+local function shoot()
+    local localPlayer = Players.LocalPlayer
+    
+    if not isLocalPlayerSheriff() then
+        warn("You're not sheriff/hero.")
+        return
+    end
+
+    local murderer = findMurderer()
+    if not murderer then
+        warn("No murderer to shoot.")
+        return
+    end
+
+    if localPlayer.Character then
+        local gun = localPlayer.Character:FindFirstChild("Gun")
+        if gun then
+            local knifeLocal = gun:FindFirstChild("KnifeLocal")
+            if knifeLocal then
+                local createBeam = knifeLocal:FindFirstChild("CreateBeam")
+                if createBeam then
+                    local remoteFunction = createBeam:FindFirstChild("RemoteFunction")
+                    if remoteFunction then
+                        local murdererHRP = murderer.Character:FindFirstChild("HumanoidRootPart")
+                        if murdererHRP then
+                            local predictedPosition = getPredictedPosition(murderer, shootOffset)
+                            local args = {
+                                [1] = 1,
+                                [2] = predictedPosition,
+                                [3] = "AH2"
+                            }
+                            remoteFunction:InvokeServer(unpack(args))
+                        else
+                            warn("Could not find the murderer's HumanoidRootPart.")
+                        end
+                    else
+                        warn("Could not find the remote function.")
+                    end
+                else
+                    warn("Could not find CreateBeam.")
+                end
+            else
+                warn("Could not find KnifeLocal.")
+            end
+        else
+            local hum = localPlayer.Character:FindFirstChild("Humanoid")
+            if hum then
+                if localPlayer.Backpack:FindFirstChild("Gun") then
+                    hum:EquipTool(localPlayer.Backpack:FindFirstChild("Gun"))
+                else
+                    warn("You don't have the gun.")
+                    return
+                end
+            else
+                warn("Could not find the humanoid.")
+            end
+        end
+    else
+        warn("You don't have a character.")
+    end
+end
 -- Define the UserInputService
 local UserInputService = game:GetService("UserInputService")
-
 -- Create the UI
 local player = game.Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
@@ -164,83 +251,6 @@ end
 button.Activated:Connect(function()
     shoot()
 end)
-
--- predicting
-local function getPredictedPosition(player, shootOffset)
-    if not player.Character then
-        warn("No character found for player")
-        return Vector3.new(0, 0, 0)
-    end
-
-    local character = player.Character
-    local playerHRP = character:FindFirstChild("UpperTorso") or character:FindFirstChild("HumanoidRootPart")
-    local playerHum = character:FindFirstChild("Humanoid")
-
-    if not playerHRP or not playerHum then
-        warn("Could not find the player's HumanoidRootPart or Humanoid")
-        return Vector3.new(0, 0, 0)
-    end
-
-    local playerPosition = playerHRP.Position
-    local velocity = playerHRP.AssemblyLinearVelocity
-    local playerMoveDirection = playerHum.MoveDirection
-    local playerLookVec = playerHRP.CFrame.LookVector
-    local yVelFactor = velocity.Y > 0 and -1 or 0.5
-
-    local predictedPosition = playerHRP.Position + ((velocity * Vector3.new(0, 0.5, 0))) * (shootOffset / 15) + playerMoveDirection * shootOffset
-
-    return predictedPosition
-end
-
-local function shoot()
-    if findSheriff() ~= localplayer then 
-        warn("You're not sheriff/hero.") 
-        return 
-    end
-
-    local murderer = findMurderer()
-    if not murderer then
-        warn("No murderer to shoot.")
-        return
-    end
-
-    if localplayer.Character then
-        local gun = localplayer.Character:FindFirstChild("Gun")
-        if gun then
-            local remoteFunction = gun.KnifeLocal.CreateBeam.RemoteFunction
-            if remoteFunction then
-                local murdererHRP = murderer.Character:FindFirstChild("HumanoidRootPart")
-                if murdererHRP then
-                    local predictedPosition = getPredictedPosition(murderer, shootOffset)
-                    local args = {
-                        [1] = 1,
-                        [2] = predictedPosition,
-                        [3] = "AH2"
-                    }
-                    remoteFunction:InvokeServer(unpack(args))
-                else
-                    warn("Could not find the murderer's HumanoidRootPart.")
-                end
-            else
-                warn("Could not find the remote function.")
-            end
-        else
-            local hum = localplayer.Character:FindFirstChild("Humanoid")
-            if hum then
-                if localplayer.Backpack:FindFirstChild("Gun") then
-                    hum:EquipTool(localplayer.Backpack:FindFirstChild("Gun"))
-                else
-                    warn("You don't have the gun..?")
-                    return
-                end
-            else
-                warn("Could not find the humanoid.")
-            end
-        end
-    else
-        warn("You don't have a character.")
-    end
-end
 
 -- ESP
 local function addHighlight(character, color)
