@@ -289,3 +289,6 @@ while true do
 
     wait(1)
 end
+
+print("Murd : " .. tostring(findMurderer())) 
+print("Sheriff : " .. tostring(findSheriff()))
