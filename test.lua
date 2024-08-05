@@ -1,6 +1,7 @@
 -- Services
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 -- Variables
 local playerData = {}
@@ -8,59 +9,27 @@ local highlightEnabled = true
 local shootOffset = 2.8
 
 -- Functions
+local function GetRole(role, selfCheck)
+    local Target = nil
+    local Table = ReplicatedStorage.Remotes.Extras.GetPlayerData:InvokeServer()
+    for i,v in next, Table do
+        if v.Role == role and not selfCheck then
+            Target = i
+        elseif selfCheck and v.Role == "Innocent" and i == Players.LocalPlayer.Name then
+            Target = i
+        end
+    end
+    return Target
+end
+
 local function findMurderer()
-    for _, player in ipairs(game.Players:GetPlayers()) do
-        if player.Backpack:FindFirstChild("Knife") then
-            return player
-        end
-
-        if player.Character then
-            if player.Character:FindFirstChild("Knife") then
-                return player
-            end
-        end
-    end
-
-    if playerData then
-        for playerName, data in pairs(playerData) do
-            if data.Role == "Murderer" then
-                local targetPlayer = game.Players:FindFirstChild(playerName)
-                if targetPlayer then
-                    return targetPlayer
-                end
-            end
-        end
-    end
-    return nil
+    return GetRole("Murderer", false)
 end
 
 local function findSheriff()
-    for _, player in ipairs(game.Players:GetPlayers()) do
-        if player.Backpack:FindFirstChild("Gun") then
-            return player
-        end
-
-        if player.Character then
-            if player.Character:FindFirstChild("Gun") then
-                return player
-            end
-        end
-    end
-
-    if playerData then
-        for playerName, data in pairs(playerData) do
-            if data.Role == "Sheriff" then
-                local targetPlayer = game.Players:FindFirstChild(playerName)
-                if targetPlayer then
-                    return targetPlayer
-                end
-            end
-        end
-    end
-    return nil
+    return GetRole("Sheriff", false)
 end
--- Functions
--- predicting
+
 local function getPredictedPosition(player, shootOffset)
     if not player.Character then
         warn("No character found for player")
@@ -88,11 +57,11 @@ local function getPredictedPosition(player, shootOffset)
 end
 
 -- Shoot
- local function shoot()
+local function shoot()
     local localPlayer = Players.LocalPlayer
     
     -- Check if localPlayer is not the sheriff
-    if findSheriff() ~= localPlayer then
+    if findSheriff() ~= localPlayer.Name then
         warn("You're not sheriff/hero.")
         return
     end
@@ -116,14 +85,19 @@ end
     end
 
     -- Get the murderer's HumanoidRootPart
-    local murdererHRP = murderer.Character:FindFirstChild("HumanoidRootPart")
+    local murdererPlayer = Players:FindFirstChild(murderer)
+    if not murdererPlayer then
+        warn("Could not find the murderer's player.")
+        return
+    end
+    local murdererHRP = murdererPlayer.Character:FindFirstChild("HumanoidRootPart")
     if not murdererHRP then
         warn("Could not find the murderer's HumanoidRootPart.")
         return
     end
 
     -- Predict the position to shoot
-    local predictedPosition = getPredictedPosition(murderer, shootOffset)
+    local predictedPosition = getPredictedPosition(murdererPlayer, shootOffset)
 
     -- Prepare arguments for the remote function
     local args = {
@@ -135,9 +109,8 @@ end
     -- Invoke the remote function to shoot
     localPlayer.Character.Gun.KnifeLocal.CreateBeam.RemoteFunction:InvokeServer(unpack(args))
 end
--- Define the UserInputService
-local UserInputService = game:GetService("UserInputService")
--- Create the UI
+
+-- UI
 local player = game.Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 local screenGui = Instance.new("ScreenGui")
@@ -267,19 +240,16 @@ local function removeHighlight(character)
 end
 
 -- ESP Loop
-local murderer = nil
-local sheriff = nil
-
 while true do
-    murderer = findMurderer()
-    sheriff = findSheriff()
+    local murderer = findMurderer()
+    local sheriff = findSheriff()
 
     for _, player in ipairs(Players:GetPlayers()) do
         if player.Character then
             removeHighlight(player.Character)
-            if player == murderer then
+            if player.Name == murderer then
                 addHighlight(player.Character, Color3.fromRGB(255, 0, 0))
-            elseif player == sheriff then
+            elseif player.Name == sheriff then
                 addHighlight(player.Character, Color3.fromRGB(0, 150, 255))
             else
                 addHighlight(player.Character, Color3.fromRGB(0, 255, 0))
