@@ -290,5 +290,8 @@ while true do
     wait(1)
 end
 
-print("Murd : " .. tostring(findMurderer())) 
-print("Sheriff : " .. tostring(findSheriff()))
+while true do
+    print("Murd : " .. tostring(findMurderer())) 
+    print("Sheriff : " .. tostring(findSheriff()))
+    wait(1)
+end
