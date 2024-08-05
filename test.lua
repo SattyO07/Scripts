@@ -88,69 +88,52 @@ local function getPredictedPosition(player, shootOffset)
 end
 
 -- Shoot
-local function shoot()
+ local function shoot()
     local localPlayer = Players.LocalPlayer
     
-    -- Ensure localPlayer is sheriff or hero
-    if not isLocalPlayerSheriff() then
+    -- Check if localPlayer is not the sheriff
+    if findSheriff() ~= localPlayer then
         warn("You're not sheriff/hero.")
         return
     end
 
+    -- Find the murderer
     local murderer = findMurderer()
     if not murderer then
         warn("No murderer to shoot.")
         return
     end
 
-    if localPlayer.Character then
-        local gun = localPlayer.Character:FindFirstChild("Gun")
-        if gun then
-            local knifeLocal = gun:FindFirstChild("KnifeLocal")
-            if knifeLocal then
-                local createBeam = knifeLocal:FindFirstChild("CreateBeam")
-                if createBeam then
-                    local remoteFunction = createBeam:FindFirstChild("RemoteFunction")
-                    if remoteFunction then
-                        local murdererHRP = murderer.Character:FindFirstChild("HumanoidRootPart")
-                        if murdererHRP then
-                            local predictedPosition = getPredictedPosition(murderer, shootOffset)
-                            local args = {
-                                [1] = 1,
-                                [2] = predictedPosition,
-                                [3] = "AH2"
-                            }
-                            remoteFunction:InvokeServer(unpack(args))
-                        else
-                            warn("Could not find the murderer's HumanoidRootPart.")
-                        end
-                    else
-                        warn("Could not find the remote function inside CreateBeam.")
-                    end
-                else
-                    warn("Could not find CreateBeam inside KnifeLocal.")
-                end
-            else
-                warn("Could not find KnifeLocal inside the Gun.")
-            end
+    -- Ensure localPlayer has a gun
+    if not localPlayer.Character:FindFirstChild("Gun") then
+        local hum = localPlayer.Character:FindFirstChild("Humanoid")
+        if localPlayer.Backpack:FindFirstChild("Gun") then
+            hum:EquipTool(localPlayer.Backpack:FindFirstChild("Gun"))
         else
-            warn("You don't have the Gun equipped.")
-            local hum = localPlayer.Character:FindFirstChild("Humanoid")
-            if hum then
-                local backpackGun = localPlayer.Backpack:FindFirstChild("Gun")
-                if backpackGun then
-                    hum:EquipTool(backpackGun)
-                    warn("Equipped Gun from backpack. Please try shooting again.")
-                else
-                    warn("No Gun found in backpack.")
-                end
-            else
-                warn("Could not find the humanoid.")
-            end
+            warn("You don't have the gun..?")
+            return
         end
-    else
-        warn("You don't have a character.")
     end
+
+    -- Get the murderer's HumanoidRootPart
+    local murdererHRP = murderer.Character:FindFirstChild("HumanoidRootPart")
+    if not murdererHRP then
+        warn("Could not find the murderer's HumanoidRootPart.")
+        return
+    end
+
+    -- Predict the position to shoot
+    local predictedPosition = getPredictedPosition(murderer, shootOffset)
+
+    -- Prepare arguments for the remote function
+    local args = {
+        [1] = 1,
+        [2] = predictedPosition,
+        [3] = "AH2"
+    }
+
+    -- Invoke the remote function to shoot
+    localPlayer.Character.Gun.KnifeLocal.CreateBeam.RemoteFunction:InvokeServer(unpack(args))
 end
 -- Define the UserInputService
 local UserInputService = game:GetService("UserInputService")
