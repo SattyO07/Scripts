@@ -267,12 +267,16 @@ local function removeHighlight(character)
 end
 
 -- ESP Loop
+local murderer = nil
+local sheriff = nil
+
 while true do
-    local murderer = findMurderer()
-    local sheriff = findSheriff()
+    murderer = findMurderer()
+    sheriff = findSheriff()
 
     for _, player in ipairs(Players:GetPlayers()) do
         if player.Character then
+            removeHighlight(player.Character)
             if player == murderer then
                 addHighlight(player.Character, Color3.fromRGB(255, 0, 0))
             elseif player == sheriff then
