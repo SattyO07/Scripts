@@ -565,16 +565,14 @@ local fpsLabel = InfoT:AddLabel("Current FPS: 0")
 local ExeLabel = InfoT:AddLabel("Device: ".. Device)
 local ExeLabel = InfoT:AddLabel("Executor: ".. Exe)
 local playerCountLabel = InfoT:AddLabel("Player Count: 0/0")
-
+ 
+local SecInf2 = InfoT:AddSection({Name = "Configs:"})
 
 InfoT:AddButton({
     Name = "Console",
     Callback = function()
-        game.StarterGui:SetCore("DevConsoleVisible", true)
-		end
-})
- 
-local SecInf2 = InfoT:AddSection({Name = "Configs:"})
+        game.StarterGui:SetCore("DevConsoleVisible", true)end})
+
 InfoT:AddButton({
 	Name = "Destroy Gui",
 	Callback = function() OrionLib:Destroy()end})
