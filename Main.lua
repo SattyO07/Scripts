@@ -1084,7 +1084,7 @@ local Tab3 = Window:MakeTab({Name = "MM2", Icon = "rbxassetid://7733954760", Pre
 local Section2 = Tab3:AddSection({Name = "AimBot"})
 
 if Device == "Mobile" then
-    TabG1:AddToggle({
+    Tab3:AddToggle({
         Name = "ButtonShoot",
         Default = false,
         Callback = function(Value)
