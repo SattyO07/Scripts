@@ -11,8 +11,8 @@ loadstring(game:HttpGet(('https://raw.githubusercontent.com/SattyO07/Scripts/mai
 
 <h3 align="left">Features:</h3>
 
-- **Murder Mystery 2**: Enjoy enhanced gameplay with advanced features.
-- **Dandy's World**: Explore and interact with exciting new content.
+- **Murder Mystery 2**: Updated Aug 9, 2024.
+- **Dandy's World**: Working Progress.
 - **Other**: More features coming soon!
 
 ##
