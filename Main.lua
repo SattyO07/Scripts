@@ -323,6 +323,7 @@ local UpdateFps = 0
 local LastTime = tick()
 
 RunService.RenderStepped:Connect(function()
+		wait(2)
     local DeltaTime = tick() - LastTime
     LastTime = tick()
 end)
@@ -345,7 +346,7 @@ local GameName = game:GetService("MarketplaceService"):GetProductInfo(game.Place
 local Window = OrionLib:MakeWindow({Name = "MoonLight : [" .. GameName .. "]", HidePremium = false, SaveConfig = false, ConfigFolder = "ReaperSaved"})
 
 -- [Universal] --
-local Tab1 = Window:MakeTab({Name = "Universal", Icon = "rbxassetid://7733954760", PremiumOnly = false})
+local Tab1 = Window:MakeTab({Name = "Universal", Icon = "rbxassetid://7733954760", PremiumOnly = false, IntroText = "Welcome", IntroIcon = "rbxassetid://5998624788"})
 
 local UniText1 = Tab1:AddParagraph("Player's select:", "Select a Player's first.")
 
