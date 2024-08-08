@@ -4,19 +4,19 @@
 
 <h3 align="left">Script:</h3>
 
-```bash
+```lua
 loadstring(game:HttpGet(('https://raw.githubusercontent.com/SattyO07/Scripts/main/Main.lua')))()
 ```
 ##
 
-<h3 align="left">Futured:</h3>
+<h3 align="left">Features:</h3>
 
-  + Murder Mistery 2<br>  
-  - Dandys World<br>
-  * Other Soon.
+- **Murder Mystery 2**: Enjoy enhanced gameplay with advanced features.
+- **Dandy's World**: Explore and interact with exciting new content.
+- **Other**: More features coming soon!
 
 ##
 
 <h3 align="left">Social Media:</h3>
 
-Nothing
+- **GitHub**: [Here](https://github.com/SattyO07)
