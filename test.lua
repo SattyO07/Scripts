@@ -6,11 +6,11 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
 
 -- Variables
-local gunDropESP = true
-local EspPlayer = true
+local gunDropESP = false
+local EspPlayer = false
 local shootOffset = 2.8
 local gunDropCache = {}
-local TimeGUI = true
+local TimeGUI = false
 
 -- Functions
 local function GetMurderer()
@@ -72,13 +72,13 @@ local function shoot()
     local localPlayer = Players.LocalPlayer
 
     if GetSheriff() ~= localPlayer.Name and GetHero() ~= localPlayer.Name then
-        warn("You're not sheriff/hero.")
+        OrionLib:MakeNotification({Name = "AimBot",Content = "You are Not Sheriff/Hero!",Image = "rbxassetid://7733771628",Time = 5})
         return
     end
 
     local murderer = GetMurderer()
     if not murderer then
-        warn("No murderer to shoot.")
+        OrionLib:MakeNotification({Name = "AimBot",Content = "No Murder to shoot!",Image = "rbxassetid://7733771628",Time = 5})
         return
     end
 
@@ -92,20 +92,20 @@ local function shoot()
         if localPlayer.Backpack:FindFirstChild("Gun") then
             hum:EquipTool(localPlayer.Backpack:FindFirstChild("Gun"))
         else
-            warn("You don't have the gun..?")
+            OrionLib:MakeNotification({Name = "AimBot",Content = "You need a Gun first",Image = "rbxassetid://7733771628",Time = 5})
             return
         end
     end
 
     local murdererPlayer = Players:FindFirstChild(murderer)
     if not murdererPlayer or not murdererPlayer.Character then
-        warn("Could not find the murderer's character.")
+        OrionLib:MakeNotification({Name = "AimBot",Content = "Could not find the murderer's character.",Image = "rbxassetid://7733771628",Time = 5})
         return
     end
 
     local murdererHRP = murdererPlayer.Character:FindFirstChild("HumanoidRootPart")
     if not murdererHRP then
-        warn("Could not find the murderer's HumanoidRootPart.")
+        OrionLib:MakeNotification({Name = "AimBot",Content = "Could not find the Murderer maybe died",Image = "rbxassetid://7733771628",Time = 5})
         return
     end
 
@@ -285,7 +285,7 @@ local function createGunDropHighlight(part)
 
         billboardGui.Parent = part
     else
-        print("Highlight or Billboard already exists.")
+        OrionLib:MakeNotification({Name = "DeBug",Content = "Highlight or Billboard already exists.",Image = "rbxassetid://7733771628",Time = 5})
     end
 end
 
@@ -294,7 +294,6 @@ local function updateGunDropHighlights()
         for part, _ in pairs(gunDropCache) do
             if not part:IsDescendantOf(Workspace) or part.Name ~= "GunDrop" then
                 gunDropCache[part] = nil
-                print("GunDrop removed from cache:", part.Name)
                 if part:FindFirstChild("GunDropHighlight") then
                     part.GunDropHighlight:Destroy()
                 end
@@ -308,11 +307,10 @@ local function updateGunDropHighlights()
             if part:IsA("BasePart") and part.Name == "GunDrop" and not gunDropCache[part] then
                 gunDropCache[part] = true
                 createGunDropHighlight(part)
-                print("Gun Droped")
+                OrionLib:MakeNotification({Name = "GunEsp",Content = "Gun Droped Find Yellow Highlight on Map",Image = "rbxassetid://7733771628",Time = 5})
             end
         end
     else
-        print("Gun drop ESP is disabled.")
         for part, _ in pairs(gunDropCache) do
             if part:FindFirstChild("GunDropHighlight") then
                 part.GunDropHighlight:Destroy()
@@ -420,7 +418,7 @@ local gameEnded = false
 local function UpdatePlayerESP()
     if isNormalMapPresent() then
         if gameAboutToStart then
-            print("Game about to start")
+            OrionLib:MakeNotification({Name = "Esp",Content = "Enabling Esp",Image = "rbxassetid://7733771628",Time = 5})
             PText2 = false
         end
 
@@ -454,7 +452,7 @@ local function UpdatePlayerESP()
                     removeBillboard(player.Character)
                 end
             end
-            print("Game Ended")
+            OrionLib:MakeNotification({Name = "Player Esp",Content = "Game Ended. Disabling the Esp",Image = "rbxassetid://7733771628",Time = 5})
             PText1 = true
             PText2 = true
         end
@@ -546,6 +544,83 @@ RunService.Heartbeat:Connect(function(deltaTime)
     wait(roleCheckInterval)
 end)
 
--- Initial check to handle cases where the map is present on startup
 checkMapPresence()
 checkRoles()
+
+-- Orion Properties
+local TabG1 = Window:MakeTab({Name = "Murder Mistery 2",Icon = "rbxassetid://7733799901",PremiumOnly = false})
+
+local Section2 = TabG1:AddSection({Name = "AimBot"})
+
+if Device == "Mobile" then
+    TabG1:AddToggle({
+        Name = "ButtonShoot",
+        Default = false,
+        Callback = function(Value)
+            toggleButton(Value)
+        end    
+    })
+end
+
+TabG1:AddBind({
+	Name = "Shoot Keybind",
+	Default = Enum.KeyCode.Q,
+	Hold = false,
+	Callback = function()
+		shoot()
+	end    
+})
+
+TabG1:AddTextbox({
+    Name = "Textbox",
+    Default = "Shoot Offset",
+    TextDisappear = true,
+    Callback = function(Value)
+        local text = Value
+        local num = tonumber(text)
+        
+        if not num then
+            OrionLib:MakeNotification({Name = "AimBot",Content = "Not Valid Number" .. text,Image = "rbxassetid://4483345998",Time = 5})
+            return
+        end
+        
+        if num > 5 then
+            OrionLib:MakeNotification({Name = "AimBot",Content = "An offset with a multiplier of 5 might not at all shoot the murderer!",Image = "rbxassetid://4483345998",Time = 5})
+        end
+        
+        if num < 0 then
+            OrionLib:MakeNotification({Name = "AimBot",Content = "An offset with a negative multiplier will make a shot BEHIND the murderer's walk direction.",Image = "rbxassetid://4483345998",Time = 5})
+        end
+        
+        shootOffset = num
+        OrionLib:MakeNotification({Name = "AimBot",Content = "Offset has been set." .. num,Image = "rbxassetid://4483345998",Time = 5})
+    end    
+})
+
+local Section2 = TabG1:AddSection({Name = "Esp:"})
+
+TabG1:AddToggle({
+        Name = "Player Esp",
+        Default = false,
+        Callback = function(Value)
+            EspPlayer = Value
+        end    
+    })
+
+TabG1:AddToggle({
+        Name = "GunEsp",
+        Default = false,
+        Callback = function(Value)
+            gunDropESP = Value
+        end    
+    })
+
+local Section2 = TabG1:AddSection({Name = "Mics:"})
+
+TabG1:AddToggle({
+        Name = "Timer",
+        Default = false,
+        Callback = function(Value)
+            TimeGUI = Value
+        end    
+    })
