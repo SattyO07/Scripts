@@ -529,15 +529,35 @@ Tab2:AddButton({
     end
 })
 
-Tab2:AddButton({
-    Name = "Console",
-    Callback = function()
-        game.StarterGui:SetCore("DevConsoleVisible", true)
-		end
-})
+-- Games Table
+local targetGameIds = {
+    [142823291] = "https://raw.githubusercontent.com/SattyO07/Scripts/main/Tabs/Mm2.lua", --Mm2
+    [12345678] = "Test", -- Dandys World
+}
+local currentGameId = game.GameId 
+local scriptUrl = targetGameIds[currentGameId]
+
+if scriptUrl then
+    local success, response = pcall(function()
+        return game:HttpGet(scriptUrl)
+    end)
+
+    if success then
+        local script, err = loadstring(response)
+        if script then
+            script()
+        else
+            print("Error loading script: " .. tostring(err))
+        end
+    else
+        print("Error fetching script URL: " .. tostring(response))
+    end
+else
+    print("The current game ID does not match any of the target IDs.")
+end
 
 -- [Info] --
-local InfoT = Window:MakeTab({Name = "Info", Icon = "rbxassetid://7733964719", PremiumOnly = false})
+local InfoT = Window:MakeTab({Name = "Mics", Icon = "rbxassetid://7733964719", PremiumOnly = false})
 
 local SecInf1 = InfoT:AddSection({Name = "Stats:"})
 
@@ -546,6 +566,14 @@ local ExeLabel = InfoT:AddLabel("Device: ".. Device)
 local ExeLabel = InfoT:AddLabel("Executor: ".. Exe)
 local playerCountLabel = InfoT:AddLabel("Player Count: 0/0")
 
+
+InfoT:AddButton({
+    Name = "Console",
+    Callback = function()
+        game.StarterGui:SetCore("DevConsoleVisible", true)
+		end
+})
+ 
 local SecInf2 = InfoT:AddSection({Name = "Configs:"})
 InfoT:AddButton({
 	Name = "Destroy Gui",
