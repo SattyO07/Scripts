@@ -520,13 +520,21 @@ local function checkRoles()
     end
 end
 
-local wasMapPresent = false
+local function isMapPresent()
+    for _, descendant in ipairs(Workspace:GetDescendants()) do
+        if descendant.Name == "Normal" then
+            return true
+        end
+    end
+    return false
+end
+
+local previousMapState = isMapPresent()
 
 local function checkMapPresence()
-    local currentMapPresence = wasMapPresent()
-    if currentMapPresence ~= wasMapPresent then
-        wasMapPresent = currentMapPresence
-        wait(5)
+    local currentMapState = isNormalMapPresent()
+    if currentMapState ~= previousMapState then
+        previousMapState = currentMapState
         UpdatePlayerESP()
     end
 end
@@ -538,5 +546,6 @@ RunService.Heartbeat:Connect(function(deltaTime)
     wait(roleCheckInterval)
 end)
 
+-- Initial check to handle cases where the map is present on startup
 checkMapPresence()
 checkRoles()
