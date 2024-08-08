@@ -1084,7 +1084,7 @@ local Tab3 = Window:MakeTab({Name = "MM2", Icon = "rbxassetid://7733954760", Pre
 local Section2 = Tab3:AddSection({Name = "AimBot"})
 
 if Device == "Mobile" then
-    Tab3:AddToggle({
+  local Buttonuiw = Tab3:AddToggle({
         Name = "ButtonShoot",
         Default = false,
         Callback = function(Value)
@@ -1093,7 +1093,7 @@ if Device == "Mobile" then
     })
 end
 
-Tab3:AddBind({
+local keybindshoot = Tab3:AddBind({
 	Name = "Shoot Keybind",
 	Default = Enum.KeyCode.Q,
 	Hold = false,
@@ -1102,7 +1102,7 @@ Tab3:AddBind({
 	end    
 })
 
-Tab3:AddTextbox({
+local offsetbox =Tab3:AddTextbox({
     Name = "Textbox",
     Default = "Shoot Offset",
     TextDisappear = true,
@@ -1130,7 +1130,7 @@ Tab3:AddTextbox({
 
 local Section2 = Tab3:AddSection({Name = "Esp:"})
 
-Tab3:AddToggle({
+local Playerespe =Tab3:AddToggle({
         Name = "Player Esp",
         Default = false,
         Callback = function(Value)
@@ -1138,7 +1138,7 @@ Tab3:AddToggle({
         end    
     })
 
-Tab3:AddToggle({
+local Gunespe = Tab3:AddToggle({
         Name = "GunEsp",
         Default = false,
         Callback = function(Value)
@@ -1148,7 +1148,7 @@ Tab3:AddToggle({
 
 local Section3 = Tab3:AddSection({Name = "Mics:"})
 
-Tab3:AddToggle({
+local timeruiw = Tab3:AddToggle({
         Name = "Timer",
         Default = false,
         Callback = function(Value)
