@@ -979,7 +979,7 @@ local function UpdatePlayerESP()
                     removeBillboard(player.Character)
                 end
             end
-            OrionLib:MakeNotification({Name = "Player Esp",Content = "Game Ended. Disabling the Esp",Image = "rbxassetid://7733771628",Time = 5})
+            OrionLib:MakeNotification({Name = "Player Esp",Content = "Game Ended Disabling the Esp",Image = "rbxassetid://7733771628",Time = 5})
             PText1 = true
             PText2 = true
         end
