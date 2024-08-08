@@ -1099,8 +1099,8 @@ local keybindshoot = Tab3:AddBind({
 })
 
 local offsetbox =Tab3:AddTextbox({
-    Name = "Textbox",
-    Default = "Shoot Offset",
+    Name = "Shoot Offset",
+    Default = "2.8",
     TextDisappear = true,
     Callback = function(Value)
         local text = Value
