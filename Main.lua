@@ -5,6 +5,8 @@ local Players = game:GetService("Players")
 local camera = game.Workspace.CurrentCamera
 local RunService = game:GetService("RunService")
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/Unknownkellymc1/Orion/main/source')))()
+local Workspace = game:GetService("Workspace")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 -- Universal Functions --
 -- Noclip
@@ -528,14 +530,8 @@ Tab2:AddButton({
         loadstring(game:HttpGet("https://raw.githubusercontent.com/exxtremestuffs/SimpleSpySource/master/SimpleSpy.lua"))()
     end
 })
--- Mm2
--- Services
-local RunService = game:GetService("RunService")
-local Workspace = game:GetService("Workspace")
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local UserInputService = game:GetService("UserInputService")
 
+-- [[Mm2]] --
 -- Variables
 local gunDropESP = false
 local EspPlayer = false
@@ -543,7 +539,7 @@ local shootOffset = 2.8
 local gunDropCache = {}
 local TimeGUI = false
 
--- Functions
+-- Functions Mm2
 local function GetMurderer()
     local playerData = ReplicatedStorage.Remotes.Extras.GetPlayerData:InvokeServer()
     for playerName, playerInfo in pairs(playerData) do
@@ -1180,6 +1176,7 @@ InfoT:AddButton({
 
 OrionLib:Init()
 RunService.RenderStepped:Connect(function()
+		wait(1)
     UpdateFps = math.floor(1 / RunService.RenderStepped:Wait())
     playerCountLabel:Set("Player Count: " .. #game.Players:GetPlayers() .. "/" .. game.Players.MaxPlayers)
     fpsLabel:Set("Current FPS: " .. UpdateFps)
