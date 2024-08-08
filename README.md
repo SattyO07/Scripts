@@ -1,15 +1,15 @@
-<div align="center">
-  <h1 style="font-size: 9em; margin: 0;">MoonLight Hub</h1>
-  <h5 style="font-size: 5.5em; margin: 0;">By Satty007</h5>
-</div>
 
+<h3 style="font-weight: bold;", align = "center" >Moonlight Hub</h3>
+<p align="center">By Satty007</p>
+  
+#
 
 <h3 align="left">Script:</h3>
 
 ```lua
 loadstring(game:HttpGet(('https://raw.githubusercontent.com/SattyO07/Scripts/main/Main.lua')))()
 ```
-##
+#
 
 <h3 align="left">Features:</h3>
 
@@ -17,7 +17,7 @@ loadstring(game:HttpGet(('https://raw.githubusercontent.com/SattyO07/Scripts/mai
 - **Dandy's World**: Working Progress.
 - **Other**: More features coming soon!
 
-##
+#
 
 <h3 align="left">Social Media:</h3>
 
