@@ -530,14 +530,20 @@ Tab2:AddButton({
 })
 
 -- Games Table
+-- Define your table of target game IDs and corresponding script URLs
 local targetGameIds = {
-    [142823291] = "https://raw.githubusercontent.com/SattyO07/Scripts/main/Tabs/Mm2.lua", --Mm2
-    [12345678] = "Test", -- Dandys World
+    [142823291] = "https://raw.githubusercontent.com/SattyO07/Scripts/main/Tabs/Mm2.lua",
+    -- Add more game ID and URL pairs as needed
 }
-local currentGameId = game.GameId 
+
+-- Get the current game ID
+local currentGameId = game.GameId  -- Or however you determine the current game ID
+
+-- Retrieve the script URL based on the current game ID
 local scriptUrl = targetGameIds[currentGameId]
 
 if scriptUrl then
+    -- Try to fetch and execute the script
     local success, response = pcall(function()
         return game:HttpGet(scriptUrl)
     end)
@@ -545,7 +551,9 @@ if scriptUrl then
     if success then
         local script, err = loadstring(response)
         if script then
+            -- Execute the script
             script()
+            print("Script executed successfully.")
         else
             print("Error loading script: " .. tostring(err))
         end
