@@ -1,165 +1,169 @@
--- Find Player
-local playerData = {}
+-- Services
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService")
 
-local function findMurderer()
-	for _, player in ipairs(game.Players:GetPlayers()) do
-		if player.Backpack:FindFirstChild("Knife") then
-			return player
-		end
+-- Variables
+local gunDropESP = false
+local EspPlayer = false
+local shootOffset = 2.8
+local gunDropCache = {}
+local TimeGUI = false
 
-		if player.Character then
-			if player.Character:FindFirstChild("Knife") then
-				return player
-			end
-		end
-	end
-
-	if playerData then
-		for playerName, data in pairs(playerData) do
-			if data.Role == "Murderer" then
-				local targetPlayer = game.Players:FindFirstChild(playerName)
-				if targetPlayer then
-					return targetPlayer
-				end
-			end
-		end
-	end
-	return nil
+-- Functions
+local function GetMurderer()
+    local playerData = ReplicatedStorage.Remotes.Extras.GetPlayerData:InvokeServer()
+    for playerName, playerInfo in pairs(playerData) do
+        if playerInfo.Role == "Murderer" then
+            return playerName
+        end
+    end
+    return nil
 end
 
-local function findSheriff()
-	for _, player in ipairs(game.Players:GetPlayers()) do
-		if player.Backpack:FindFirstChild("Gun") then
-			return player
-		end
-
-		if player.Character then
-			if player.Character:FindFirstChild("Gun") then
-				return player
-			end
-		end
-	end
-
-	if playerData then
-		for playerName, data in pairs(playerData) do
-			if data.Role == "Sheriff" then
-				local targetPlayer = game.Players:FindFirstChild(playerName)
-				if targetPlayer then
-					return targetPlayer
-				end
-			end
-		end
-	end
-	return nil
+local function GetSheriff()
+    local playerData = ReplicatedStorage.Remotes.Extras.GetPlayerData:InvokeServer()
+    for playerName, playerInfo in pairs(playerData) do
+        if playerInfo.Role == "Sheriff" then
+            return playerName
+        end
+    end
+    return nil
 end
 
--- ShootOffset
+local function GetHero()
+    local playerData = ReplicatedStorage.Remotes.Extras.GetPlayerData:InvokeServer()
+    for playerName, playerInfo in pairs(playerData) do
+        if playerInfo.Role == "Hero" then
+            return playerName
+        end
+    end
+    return nil
+end
+
 local function getPredictedPosition(player, shootOffset)
-	pcall(function()
-		if not player.Character then
-			OrionLib:MakeNotification({
-	Name = "AimOffset",
-	Content = "No murderer to predict position.",
-	Image = "rbxassetid://4483345998",
-	Time = 3
-})
-			return Vector3.new(0, 0, 0)
-		end
-	end)
+    if not player.Character then
+        warn("No character found for player")
+        return Vector3.new(0, 0, 0)
+    end
 
-	local playerHRP = player.Character:FindFirstChild("UpperTorso")
-	local playerHum = player.Character:FindFirstChild("Humanoid")
+    local character = player.Character
+    local playerHRP = character:FindFirstChild("HumanoidRootPart")
+    local playerHum = character:FindFirstChild("Humanoid")
 
-	if not playerHRP or not playerHum then
-		return Vector3.new(0, 0, 0), "Could not find the player's HumanoidRootPart."
-	end
+    if not playerHRP or not playerHum then
+        warn("Could not find the player's HumanoidRootPart or Humanoid")
+        return Vector3.new(0, 0, 0)
+    end
 
-	local playerPosition = playerHRP.Position
-	local velocity = playerHRP.AssemblyLinearVelocity
-	local playerMoveDirection = playerHum.MoveDirection
-	local playerLookVec = playerHRP.CFrame.LookVector
-	local yVelFactor = (velocity.Y > 0 and -1) or 0.5
+    local playerPosition = playerHRP.Position
+    local velocity = playerHRP.AssemblyLinearVelocity
+    local playerMoveDirection = playerHum.MoveDirection
 
-	local predictedPosition = playerHRP.Position + ((velocity * Vector3.new(0, 0.5, 0))) * (shootOffset / 15) + playerMoveDirection * shootOffset
+    local predictedPosition = playerHRP.Position + ((velocity * Vector3.new(0, 0.5, 0))) * (shootOffset / 15) + playerMoveDirection * shootOffset
 
-	return predictedPosition
+    return predictedPosition
 end
 
-function isLocalPlayerSheriff()
-	local localPlayer = game.Players.LocalPlayer
-	local sheriff = findSheriff()
-
-	return localPlayer == sheriff
-end
-
-local shootOffset = 2.8 --Default
-
--- Aim Shot
+-- Shoot
 local function shoot()
-	if not isLocalPlayerSheriff() then
-		OrionLib:MakeNotification({
-	Name = "AimBot",
-	Content = "You're not sheriff/hero.",
-	Image = "rbxassetid://4483345998",
-	Time = 3
-})
-		return
-	end
+    local localPlayer = Players.LocalPlayer
 
-	local murderer = findMurderer()
-	if not murderer then
-		OrionLib:MakeNotification({
-	Name = "AimBot",
-	Content = "No Murder to Shoot",
-	Image = "rbxassetid://4483345998",
-	Time = 3
-})
+    if GetSheriff() ~= localPlayer.Name and GetHero() ~= localPlayer.Name then
+        OrionLib:MakeNotification({Name = "AimBot",Content = "You are Not Sheriff/Hero!",Image = "rbxassetid://7733771628",Time = 5})
+        return
+    end
 
-		return
-	end
+    local murderer = GetMurderer()
+    if not murderer then
+        OrionLib:MakeNotification({Name = "AimBot",Content = "No Murder to shoot!",Image = "rbxassetid://7733771628",Time = 5})
+        return
+    end
 
-	if not game.Players.LocalPlayer.Character:FindFirstChild("Gun") then
-		local hum = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
-		if game.Players.LocalPlayer.Backpack:FindFirstChild("Gun") then
-			hum:EquipTool(game.Players.LocalPlayer.Backpack:FindFirstChild("Gun"))
-		else
-			OrionLib:MakeNotification({
-	Name = "AimBot",
-	Content = " Chill out pal",
-	Image = "rbxassetid://4483345998",
-	Time = 3
-})
-			return
-		end
-	end
+    if not localPlayer.Character or not localPlayer.Character:FindFirstChild("Humanoid") then
+        warn("Character or Humanoid not found.")
+        return
+    end
 
-	local murdererHRP = murderer.Character:FindFirstChild("HumanoidRootPart")
+    if not localPlayer.Character:FindFirstChild("Gun") then
+        local hum = localPlayer.Character:FindFirstChild("Humanoid")
+        if localPlayer.Backpack:FindFirstChild("Gun") then
+            hum:EquipTool(localPlayer.Backpack:FindFirstChild("Gun"))
+        else
+            OrionLib:MakeNotification({Name = "AimBot",Content = "You need a Gun first",Image = "rbxassetid://7733771628",Time = 5})
+            return
+        end
+    end
 
-	if not murdererHRP then
-		OrionLib:MakeNotification({
-	Name = "Aimbot",
-	Content = "Could not find the murderer's",
-	Image = "rbxassetid://4483345998",
-	Time = 5})
-		return
-	end
+    local murdererPlayer = Players:FindFirstChild(murderer)
+    if not murdererPlayer or not murdererPlayer.Character then
+        OrionLib:MakeNotification({Name = "AimBot",Content = "Could not find the murderer's character.",Image = "rbxassetid://7733771628",Time = 5})
+        return
+    end
 
-	local predictedPosition = getPredictedPosition(murderer, shootOffset)
+    local murdererHRP = murdererPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not murdererHRP then
+        OrionLib:MakeNotification({Name = "AimBot",Content = "Could not find the Murderer maybe died",Image = "rbxassetid://7733771628",Time = 5})
+        return
+    end
 
-	local args = {
-		[1] = 1,
-		[2] = predictedPosition,
-		[3] = "AH2"
-	}
-	game.Players.LocalPlayer.Character.Gun.KnifeLocal.CreateBeam.RemoteFunction:InvokeServer(unpack(args))
+    local predictedPosition = getPredictedPosition(murdererPlayer, shootOffset)
+
+    local args = {
+        [1] = 1,
+        [2] = predictedPosition,
+        [3] = "AH2"
+    }
+
+    localPlayer.Character.Gun.KnifeLocal.CreateBeam.RemoteFunction:InvokeServer(unpack(args))
 end
--- Create Button
-local player = game.Players.LocalPlayer
+
+-- Time GUI
+local player = Players.LocalPlayer
+local surfaceGuiTextLabel = Workspace:WaitForChild("RoundTimerPart"):WaitForChild("SurfaceGui"):WaitForChild("Timer")
+
+-- Create TimerGui
+local TimGui = Instance.new("ScreenGui")
+TimGui.Name = "TimerGui"
+TimGui.Parent = player:WaitForChild("PlayerGui")
+TimGui.ResetOnSpawn = false
+
+local Timer = Instance.new("TextLabel")
+Timer.Size = UDim2.new(0, 200, 0, 50)
+Timer.Position = UDim2.new(0.5, -100, 0.1, 0)
+Timer.TextColor3 = Color3.fromRGB(255, 255, 255)
+Timer.BackgroundTransparency = 1
+Timer.TextSize = 50
+Timer.Text = "Loading..."
+Timer.Font = Enum.Font.SourceSans
+Timer.TextStrokeTransparency = 0.5
+Timer.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+Timer.Parent = TimGui
+
+-- Function to update Timer
+local function updateTimer()
+    if TimeGUI then
+        local surfaceGui = surfaceGuiTextLabel.Parent
+        if surfaceGui and surfaceGui:IsA("SurfaceGui") and surfaceGui.Enabled then
+            Timer.Text = surfaceGuiTextLabel.Text
+            TimGui.Enabled = true
+        else
+            TimGui.Enabled = false
+        end
+    else
+        TimGui.Enabled = false
+    end
+end
+
+-- Floating Button UI
 local playerGui = player:WaitForChild("PlayerGui")
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "CrosshairGui"
 screenGui.Parent = playerGui
 screenGui.ResetOnSpawn = false
+
 local frame = Instance.new("Frame")
 frame.Size = UDim2.new(0, 150, 0, 60)
 frame.Position = UDim2.new(0.5, -75, 0.5, -30)
@@ -169,19 +173,23 @@ frame.BorderSizePixel = 1
 frame.BorderColor3 = Color3.fromRGB(0, 0, 255)
 frame.BackgroundTransparency = 0.8
 frame.Parent = screenGui
+
 local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 10)
 corner.Parent = frame
+
 local innerFrame = Instance.new("Frame")
-innerFrame.Size = UDim2.new(1, -4, 1, -4) 
+innerFrame.Size = UDim2.new(1, -4, 1, -4)
 innerFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 innerFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-innerFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0) 
+innerFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 innerFrame.BackgroundTransparency = 0.8
 innerFrame.Parent = frame
+
 local innerCorner = Instance.new("UICorner")
 innerCorner.CornerRadius = UDim.new(0, 10)
 innerCorner.Parent = innerFrame
+
 local imageLabel = Instance.new("ImageLabel")
 imageLabel.Size = UDim2.new(0, 50, 0, 50)
 imageLabel.Image = "rbxassetid://7733765307"
@@ -189,6 +197,7 @@ imageLabel.BackgroundTransparency = 1
 imageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
 imageLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
 imageLabel.Parent = innerFrame
+
 local button = Instance.new("ImageButton")
 button.Size = UDim2.new(1, 0, 1, 0)
 button.Position = UDim2.new(0, 0, 0, 0)
@@ -196,16 +205,18 @@ button.AnchorPoint = Vector2.new(0, 0)
 button.BackgroundTransparency = 1
 button.Parent = innerFrame
 
--- Drag Ui
-local dragging
+-- Drag UI functionality
+local dragging = false
 local dragInput
 local dragStart
 local startPos
 local enabled = true
+
 local function update(input)
     local delta = input.Position - dragStart
     frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
 end
+
 button.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         if not enabled then return end
@@ -237,26 +248,97 @@ local function toggleButton(state)
     frame.Visible = state
 end
 
-toggleButton(false)
 button.Activated:Connect(function()
     shoot()
 end)
 
--- Esp 
-local highlight = Instance.new("Highlight")
-highlight.Name = "Highlight"
-local highlightEnabled = true 
+local function createGunDropHighlight(part)
+    if not part:FindFirstChild("GunDropHighlight") then
+        local highlight = Instance.new("Highlight")
+        highlight.Name = "GunDropHighlight"
+        highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+        highlight.OutlineTransparency = 1
+        highlight.FillColor = Color3.fromRGB(255, 255, 0)
+        highlight.Adornee = part
+        highlight.Parent = part
 
+        local billboardGui = Instance.new("BillboardGui")
+        billboardGui.Name = "GunDropBillboard"
+        billboardGui.Adornee = part
+        billboardGui.Size = UDim2.new(0, 200, 0.5, 60)
+        billboardGui.StudsOffset = Vector3.new(0, 1.5, 0)
+        billboardGui.AlwaysOnTop = true
+
+        local textLabel = Instance.new("TextLabel")
+        textLabel.Size = UDim2.new(1, 0, 1, 0)
+        textLabel.Position = UDim2.new(0, 0, 0, 0)
+        textLabel.BackgroundTransparency = 1
+        textLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
+        textLabel.TextStrokeTransparency = 0.5
+        textLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+        textLabel.Font = Enum.Font.Roboto
+        textLabel.TextSize = 24
+        textLabel.Text = "Gun"
+        textLabel.TextXAlignment = Enum.TextXAlignment.Center
+        textLabel.TextYAlignment = Enum.TextYAlignment.Center
+        textLabel.Parent = billboardGui
+
+        billboardGui.Parent = part
+    else
+        OrionLib:MakeNotification({Name = "DeBug",Content = "Highlight or Billboard already exists.",Image = "rbxassetid://7733771628",Time = 5})
+    end
+end
+
+local function updateGunDropHighlights()
+    if gunDropESP then
+        for part, _ in pairs(gunDropCache) do
+            if not part:IsDescendantOf(Workspace) or part.Name ~= "GunDrop" then
+                gunDropCache[part] = nil
+                if part:FindFirstChild("GunDropHighlight") then
+                    part.GunDropHighlight:Destroy()
+                end
+                if part:FindFirstChild("GunDropBillboard") then
+                    part.GunDropBillboard:Destroy()
+                end
+            end
+        end
+
+        for _, part in ipairs(Workspace:GetDescendants()) do
+            if part:IsA("BasePart") and part.Name == "GunDrop" and not gunDropCache[part] then
+                gunDropCache[part] = true
+                createGunDropHighlight(part)
+                OrionLib:MakeNotification({Name = "GunEsp",Content = "Gun Droped Find Yellow Highlight on Map",Image = "rbxassetid://7733771628",Time = 5})
+            end
+        end
+    else
+        for part, _ in pairs(gunDropCache) do
+            if part:FindFirstChild("GunDropHighlight") then
+                part.GunDropHighlight:Destroy()
+            end
+            if part:FindFirstChild("GunDropBillboard") then
+                part.GunDropBillboard:Destroy()
+            end
+        end
+        gunDropCache = {}
+    end
+end
+
+-- ESP Player Functions
 local function addHighlight(character, color)
-    if highlightEnabled and character then
+    if EspPlayer and character then
         local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-        if humanoidRootPart and not humanoidRootPart:FindFirstChild("Highlight") then
-            local highlightClone = highlight:Clone()
-            highlightClone.Adornee = character
-            highlightClone.Parent = humanoidRootPart
-            highlightClone.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-            highlightClone.FillColor = color
-            highlightClone.Name = "Highlight"
+        if humanoidRootPart then
+            local existingHighlight = humanoidRootPart:FindFirstChild("Highlight")
+            if existingHighlight then
+                existingHighlight:Destroy()
+            end
+
+            local highlight = Instance.new("Highlight")
+            highlight.Adornee = character
+            highlight.Parent = humanoidRootPart
+            highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+            highlight.FillColor = color
+            highlight.Name = "Highlight"
         end
     end
 end
@@ -265,73 +347,222 @@ local function removeHighlight(character)
     if character then
         local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
         if humanoidRootPart then
-            local highlightInstance = humanoidRootPart:FindFirstChild("Highlight")
-            if highlightInstance then
-                highlightInstance:Destroy()
+            local highlight = humanoidRootPart:FindFirstChild("Highlight")
+            if highlight then
+                highlight:Destroy()
             end
         end
     end
 end
 
-local function setupCharacter(character, color)
-    removeHighlight(character)
-    addHighlight(character, color)
-    
-    local humanoid = character:FindFirstChild("Humanoid")
-    if humanoid then
-        humanoid.Died:Connect(function()
-            removeHighlight(character)
-        end)
+local function addBillboard(character, roleName, color)
+    if EspPlayer and character then
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart and not humanoidRootPart:FindFirstChild("BillboardGui") then
+            local billboard = Instance.new("BillboardGui")
+            billboard.Parent = humanoidRootPart
+            billboard.Adornee = humanoidRootPart
+            billboard.StudsOffset = Vector3.new(0, 3, 0)
+            billboard.Size = UDim2.new(0, 100, 0, 50)
+            billboard.AlwaysOnTop = true
+            billboard.LightInfluence = 0
+
+            local frame = Instance.new("Frame")
+            frame.Parent = billboard
+            frame.Size = UDim2.new(1, 0, 1, 0)
+            frame.BackgroundTransparency = 1
+
+            local textLabel = Instance.new("TextLabel")
+            textLabel.Parent = frame
+            textLabel.Size = UDim2.new(1, 0, 1, 0)
+            textLabel.BackgroundTransparency = 1
+            textLabel.TextColor3 = color
+            textLabel.Font = Enum.Font.PermanentMarker
+            textLabel.TextSize = 24
+            textLabel.Text = roleName
+            textLabel.TextStrokeTransparency = 0
+            textLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+        end
     end
 end
 
-local function findRole(player)
-    if player.Backpack:FindFirstChild("Knife") or player.Character:FindFirstChild("Knife") then
-        return "Murderer"
-    elseif player.Backpack:FindFirstChild("Gun") or player.Character:FindFirstChild("Gun") then
-        return "Sheriff"
-    elseif playerData and playerData[player.Name] and playerData[player.Name].Role then
-        return playerData[player.Name].Role
-    else
-        return "Innocent"
+local function removeBillboard(character)
+    if character then
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart then
+            local billboard = humanoidRootPart:FindFirstChild("BillboardGui")
+            if billboard then
+                billboard:Destroy()
+            end
+        end
     end
 end
 
-while true do
-    if highlightEnabled then
-        for _, player in pairs(Players:GetPlayers()) do
+local function isNormalMapPresent()
+    for _, descendant in ipairs(Workspace:GetDescendants()) do
+        if descendant.Name == "Normal" then
+            return true
+        end
+    end
+    return false
+end
+
+local murderer = nil
+local sheriff = nil
+local hero = nil
+local PText1 = false
+local PText2 = true
+local gameAboutToStart = false
+local gameEnded = false
+
+local function UpdatePlayerESP()
+    if isNormalMapPresent() then
+        if gameAboutToStart then
+            OrionLib:MakeNotification({Name = "Esp",Content = "Enabling Esp",Image = "rbxassetid://7733771628",Time = 5})
+            PText2 = false
+        end
+
+        murderer = GetMurderer()
+        sheriff = GetSheriff()
+        hero = GetHero()
+
+        for _, player in ipairs(Players:GetPlayers()) do
             if player.Character then
-                local character = player.Character
-                local role = findRole(player)
-                if role == "Murderer" then
-                    setupCharacter(character, Color3.fromRGB(255, 0, 0))
-                elseif role == "Sheriff" then
-                    setupCharacter(character, Color3.fromRGB(0, 150, 255))
+                removeHighlight(player.Character)
+                removeBillboard(player.Character)
+                if player.Name == murderer then
+                    addHighlight(player.Character, Color3.fromRGB(255, 0, 0))
+                    addBillboard(player.Character, "Murderer", Color3.fromRGB(255, 0, 0))
+                elseif player.Name == sheriff then
+                    addHighlight(player.Character, Color3.fromRGB(0, 150, 255))
+                    addBillboard(player.Character, "Sheriff", Color3.fromRGB(0, 150, 255))
+                elseif player.Name == hero then
+                    addHighlight(player.Character, Color3.fromRGB(230, 230, 250))
+                    addBillboard(player.Character, "Hero", Color3.fromRGB(230, 230, 250))
                 else
-                    setupCharacter(character, Color3.fromRGB(0, 255, 0))
+                    addHighlight(player.Character, Color3.fromRGB(0, 255, 0))
                 end
             end
         end
     else
-        for _, player in pairs(Players:GetPlayers()) do
-            if player.Character then
-                removeHighlight(player.Character)
+        if not gameEnded then
+            for _, player in ipairs(Players:GetPlayers()) do
+                if player.Character then
+                    removeHighlight(player.Character)
+                    removeBillboard(player.Character)
+                end
             end
+            OrionLib:MakeNotification({Name = "Player Esp",Content = "Game Ended. Disabling the Esp",Image = "rbxassetid://7733771628",Time = 5})
+            PText1 = true
+            PText2 = true
         end
     end
-    wait(1)
 end
 
--- [[Mm2]] --
-local AimUiToggle = TabM:AddToggle({
-    Name = "Shoot Ui",
-    Default = false,
-    Callback = function(value)
-        toggleButton(value) 
-    end
-})
+local updateTimerInterval = 0.1
+local updateGunDropHighlightsInterval = 0.3
 
-local AimKeybind = TabM:AddBind({
+local updateTimerTime = 0
+local updateGunDropHighlightsTime = 0
+
+RunService.Heartbeat:Connect(function(deltaTime)
+    updateTimerTime = updateTimerTime + deltaTime
+    updateGunDropHighlightsTime = updateGunDropHighlightsTime + deltaTime
+
+    if updateTimerTime >= updateTimerInterval then
+        updateTimer()
+        updateTimerTime = 0
+    end
+
+    if updateGunDropHighlightsTime >= updateGunDropHighlightsInterval then
+        updateGunDropHighlights()
+        updateGunDropHighlightsTime = 0
+    end
+end)
+
+local function checkPlayerGunInventory(player)
+    player.Backpack.ChildAdded:Connect(function(child)
+        if child.Name == "Gun" then
+            UpdatePlayerESP()
+        end
+    end)
+
+    player.CharacterAdded:Connect(function(character)
+        character.ChildAdded:Connect(function(child)
+            if child.Name == "Gun" then
+                UpdatePlayerESP()
+            end
+        end)
+    end)
+end
+
+for _, player in ipairs(Players:GetPlayers()) do
+    checkPlayerGunInventory(player)
+end
+
+Players.PlayerAdded:Connect(checkPlayerGunInventory)
+
+local hasUpdatedESP = false
+
+local function checkRoles()
+    local murderer1 = GetMurderer()
+    local sheriff1 = GetSheriff()
+
+    if murderer1 or sheriff1 then
+        if not hasUpdatedESP then
+            UpdatePlayerESP()
+            hasUpdatedESP = true
+        end
+    else
+        hasUpdatedESP = false
+    end
+end
+
+local function isMapPresent()
+    for _, descendant in ipairs(Workspace:GetDescendants()) do
+        if descendant.Name == "Normal" then
+            return true
+        end
+    end
+    return false
+end
+
+local previousMapState = isMapPresent()
+
+local function checkMapPresence()
+    local currentMapState = isNormalMapPresent()
+    if currentMapState ~= previousMapState then
+        previousMapState = currentMapState
+        UpdatePlayerESP()
+    end
+end
+
+local roleCheckInterval = 1
+RunService.Heartbeat:Connect(function(deltaTime)
+    checkMapPresence()
+    checkRoles()
+    wait(roleCheckInterval)
+end)
+
+checkMapPresence()
+checkRoles()
+
+-- Orion Properties
+local TabG1 = Window:MakeTab({Name = "Murder Mistery 2",Icon = "rbxassetid://7733799901",PremiumOnly = false})
+
+local Section2 = TabG1:AddSection({Name = "AimBot"})
+
+if Device == "Mobile" then
+    TabG1:AddToggle({
+        Name = "ButtonShoot",
+        Default = false,
+        Callback = function(Value)
+            toggleButton(Value)
+        end    
+    })
+end
+
+TabG1:AddBind({
 	Name = "Shoot Keybind",
 	Default = Enum.KeyCode.Q,
 	Hold = false,
@@ -340,59 +571,56 @@ local AimKeybind = TabM:AddBind({
 	end    
 })
 
-local AimOffset = TabM:AddTextbox({
-    Name = "Aim Offset",
-    Default = "2.8",
-    TextDisappear = true
-,
-    Callback = function(text)
-        if not tonumber(text) then
-            OrionLib:MakeNotification({
-	Name = "AimBot",
-	Content = "Not a valid number.",
-	Image = "rbxassetid://4483345998",
-	Time = 3
-})
+TabG1:AddTextbox({
+    Name = "Textbox",
+    Default = "Shoot Offset",
+    TextDisappear = true,
+    Callback = function(Value)
+        local text = Value
+        local num = tonumber(text)
+        
+        if not num then
+            OrionLib:MakeNotification({Name = "AimBot",Content = "Not Valid Number" .. text,Image = "rbxassetid://4483345998",Time = 5})
             return
         end
         
-        local offset = tonumber(text)
-        
-        if offset > 5 then
-            OrionLib:MakeNotification({
-	Name = "AimBot",
-	Content = "An offset with a multiplier of 5 might not at all shoot the murderer!",
-	Image = "rbxassetid://4483345998",
-	Time = 3
-})
-        elseif offset < 0 then
-OrionLib:MakeNotification({
-	Name = "AimBot",
-	Content = "An offset with a negative multiplier will make a shot BEHIND the murderer's walk direction.",
-	Image = "rbxassetid://4483345998",
-	Time = 3
-})
-        else
-            shootOffset = offset
-OrionLib:MakeNotification({
-	Name = "AimBot",
-	Content = "Offset has been set to " .. offset,
-	Image = "rbxassetid://4483345998",
-	Time = 3
-})
+        if num > 5 then
+            OrionLib:MakeNotification({Name = "AimBot",Content = "An offset with a multiplier of 5 might not at all shoot the murderer!",Image = "rbxassetid://4483345998",Time = 5})
         end
-    end
+        
+        if num < 0 then
+            OrionLib:MakeNotification({Name = "AimBot",Content = "An offset with a negative multiplier will make a shot BEHIND the murderer's walk direction.",Image = "rbxassetid://4483345998",Time = 5})
+        end
+        
+        shootOffset = num
+        OrionLib:MakeNotification({Name = "AimBot",Content = "Offset has been set." .. num,Image = "rbxassetid://4483345998",Time = 5})
+    end    
 })
 
-local SectionM = TabM:AddSection({
-	Name = "Esp"
-})
+local Section2 = TabG1:AddSection({Name = "Esp:"})
 
-TabM:AddToggle({
-	Name = "Esp",
-	Default = false,
-	Callback = function(Value)
-		highlightEnabled = Value
-	end    
-})local AimUiToggle = TabM:AddToggle({
-    Name
+TabG1:AddToggle({
+        Name = "Player Esp",
+        Default = false,
+        Callback = function(Value)
+            EspPlayer = Value
+        end    
+    })
+
+TabG1:AddToggle({
+        Name = "GunEsp",
+        Default = false,
+        Callback = function(Value)
+            gunDropESP = Value
+        end    
+    })
+
+local Section2 = TabG1:AddSection({Name = "Mics:"})
+
+TabG1:AddToggle({
+        Name = "Timer",
+        Default = false,
+        Callback = function(Value)
+            TimeGUI = Value
+        end    
+    })
