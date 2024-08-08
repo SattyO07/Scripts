@@ -526,6 +526,7 @@ local function checkMapPresence()
     local currentMapPresence = wasMapPresent()
     if currentMapPresence ~= wasMapPresent then
         wasMapPresent = currentMapPresence
+        wait(5)
         UpdatePlayerESP()
     end
 end
