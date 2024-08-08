@@ -2,6 +2,8 @@
 
 <h1 align="center">MoonLight Hub</h1>
 
+<h3 align="center">By Satty007</h3>
+
 <h3 align="left">Script:</h3>
 
 ```lua
