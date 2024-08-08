@@ -1,33 +1,46 @@
 -- Services
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService")
 
 -- Variables
-local playerData = {}
-local highlightEnabled = true
+local gunDropESP = true
+local EspPlayer = true
 local shootOffset = 2.8
+local gunDropCache = {}
+local TimeGUI = true
 
 -- Functions
-local function GetRole(role, selfCheck)
-    local Target = nil
-    local Table = ReplicatedStorage.Remotes.Extras.GetPlayerData:InvokeServer()
-    for i,v in next, Table do
-        if v.Role == role and not selfCheck then
-            Target = i
-        elseif selfCheck and v.Role == "Innocent" and i == Players.LocalPlayer.Name then
-            Target = i
+local function GetMurderer()
+    local playerData = ReplicatedStorage.Remotes.Extras.GetPlayerData:InvokeServer()
+    for playerName, playerInfo in pairs(playerData) do
+        if playerInfo.Role == "Murderer" then
+            return playerName
         end
     end
-    return Target
+    return nil
 end
 
-local function findMurderer()
-    return GetRole("Murderer", false)
+local function GetSheriff()
+    local playerData = ReplicatedStorage.Remotes.Extras.GetPlayerData:InvokeServer()
+    for playerName, playerInfo in pairs(playerData) do
+        if playerInfo.Role == "Sheriff" then
+            return playerName
+        end
+    end
+    return nil
 end
 
-local function findSheriff()
-    return GetRole("Sheriff", false)
+local function GetHero()
+    local playerData = ReplicatedStorage.Remotes.Extras.GetPlayerData:InvokeServer()
+    for playerName, playerInfo in pairs(playerData) do
+        if playerInfo.Role == "Hero" then
+            return playerName
+        end
+    end
+    return nil
 end
 
 local function getPredictedPosition(player, shootOffset)
@@ -37,7 +50,7 @@ local function getPredictedPosition(player, shootOffset)
     end
 
     local character = player.Character
-    local playerHRP = character:FindFirstChild("UpperTorso") or character:FindFirstChild("HumanoidRootPart")
+    local playerHRP = character:FindFirstChild("HumanoidRootPart")
     local playerHum = character:FindFirstChild("Humanoid")
 
     if not playerHRP or not playerHum then
@@ -48,8 +61,6 @@ local function getPredictedPosition(player, shootOffset)
     local playerPosition = playerHRP.Position
     local velocity = playerHRP.AssemblyLinearVelocity
     local playerMoveDirection = playerHum.MoveDirection
-    local playerLookVec = playerHRP.CFrame.LookVector
-    local yVelFactor = velocity.Y > 0 and -1 or 0.5
 
     local predictedPosition = playerHRP.Position + ((velocity * Vector3.new(0, 0.5, 0))) * (shootOffset / 15) + playerMoveDirection * shootOffset
 
@@ -59,21 +70,23 @@ end
 -- Shoot
 local function shoot()
     local localPlayer = Players.LocalPlayer
-    
-    -- Check if localPlayer is not the sheriff
-    if findSheriff() ~= localPlayer.Name then
+
+    if GetSheriff() ~= localPlayer.Name and GetHero() ~= localPlayer.Name then
         warn("You're not sheriff/hero.")
         return
     end
 
-    -- Find the murderer
-    local murderer = findMurderer()
+    local murderer = GetMurderer()
     if not murderer then
         warn("No murderer to shoot.")
         return
     end
 
-    -- Ensure localPlayer has a gun
+    if not localPlayer.Character or not localPlayer.Character:FindFirstChild("Humanoid") then
+        warn("Character or Humanoid not found.")
+        return
+    end
+
     if not localPlayer.Character:FindFirstChild("Gun") then
         local hum = localPlayer.Character:FindFirstChild("Humanoid")
         if localPlayer.Backpack:FindFirstChild("Gun") then
@@ -84,41 +97,73 @@ local function shoot()
         end
     end
 
-    -- Get the murderer's HumanoidRootPart
     local murdererPlayer = Players:FindFirstChild(murderer)
-    if not murdererPlayer then
-        warn("Could not find the murderer's player.")
+    if not murdererPlayer or not murdererPlayer.Character then
+        warn("Could not find the murderer's character.")
         return
     end
+
     local murdererHRP = murdererPlayer.Character:FindFirstChild("HumanoidRootPart")
     if not murdererHRP then
         warn("Could not find the murderer's HumanoidRootPart.")
         return
     end
 
-    -- Predict the position to shoot
     local predictedPosition = getPredictedPosition(murdererPlayer, shootOffset)
 
-    -- Prepare arguments for the remote function
     local args = {
         [1] = 1,
         [2] = predictedPosition,
         [3] = "AH2"
     }
 
-    -- Invoke the remote function to shoot
     localPlayer.Character.Gun.KnifeLocal.CreateBeam.RemoteFunction:InvokeServer(unpack(args))
 end
 
--- UI
-local player = game.Players.LocalPlayer
+-- Time GUI
+local player = Players.LocalPlayer
+local surfaceGuiTextLabel = Workspace:WaitForChild("RoundTimerPart"):WaitForChild("SurfaceGui"):WaitForChild("Timer")
+
+-- Create TimerGui
+local TimGui = Instance.new("ScreenGui")
+TimGui.Name = "TimerGui"
+TimGui.Parent = player:WaitForChild("PlayerGui")
+TimGui.ResetOnSpawn = false
+
+local Timer = Instance.new("TextLabel")
+Timer.Size = UDim2.new(0, 200, 0, 50)
+Timer.Position = UDim2.new(0.5, -100, 0.1, 0)
+Timer.TextColor3 = Color3.fromRGB(255, 255, 255)
+Timer.BackgroundTransparency = 1
+Timer.TextSize = 50
+Timer.Text = "Loading..."
+Timer.Font = Enum.Font.SourceSans
+Timer.TextStrokeTransparency = 0.5
+Timer.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+Timer.Parent = TimGui
+
+-- Function to update Timer
+local function updateTimer()
+    if TimeGUI then
+        local surfaceGui = surfaceGuiTextLabel.Parent
+        if surfaceGui and surfaceGui:IsA("SurfaceGui") and surfaceGui.Enabled then
+            Timer.Text = surfaceGuiTextLabel.Text
+            TimGui.Enabled = true
+        else
+            TimGui.Enabled = false
+        end
+    else
+        TimGui.Enabled = false
+    end
+end
+
+-- Floating Button UI
 local playerGui = player:WaitForChild("PlayerGui")
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "CrosshairGui"
 screenGui.Parent = playerGui
 screenGui.ResetOnSpawn = false
 
--- Create the frame
 local frame = Instance.new("Frame")
 frame.Size = UDim2.new(0, 150, 0, 60)
 frame.Position = UDim2.new(0.5, -75, 0.5, -30)
@@ -129,12 +174,10 @@ frame.BorderColor3 = Color3.fromRGB(0, 0, 255)
 frame.BackgroundTransparency = 0.8
 frame.Parent = screenGui
 
--- Add a corner to the frame
 local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 10)
 corner.Parent = frame
 
--- Create the inner frame
 local innerFrame = Instance.new("Frame")
 innerFrame.Size = UDim2.new(1, -4, 1, -4)
 innerFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
@@ -143,12 +186,10 @@ innerFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 innerFrame.BackgroundTransparency = 0.8
 innerFrame.Parent = frame
 
--- Add a corner to the inner frame
 local innerCorner = Instance.new("UICorner")
 innerCorner.CornerRadius = UDim.new(0, 10)
 innerCorner.Parent = innerFrame
 
--- Create the image label
 local imageLabel = Instance.new("ImageLabel")
 imageLabel.Size = UDim2.new(0, 50, 0, 50)
 imageLabel.Image = "rbxassetid://7733765307"
@@ -157,7 +198,6 @@ imageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
 imageLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
 imageLabel.Parent = innerFrame
 
--- Create the button
 local button = Instance.new("ImageButton")
 button.Size = UDim2.new(1, 0, 1, 0)
 button.Position = UDim2.new(0, 0, 0, 0)
@@ -212,11 +252,89 @@ button.Activated:Connect(function()
     shoot()
 end)
 
--- ESP
+local function createGunDropHighlight(part)
+    if not part:FindFirstChild("GunDropHighlight") then
+        local highlight = Instance.new("Highlight")
+        highlight.Name = "GunDropHighlight"
+        highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+        highlight.OutlineTransparency = 1
+        highlight.FillColor = Color3.fromRGB(255, 255, 0)
+        highlight.Adornee = part
+        highlight.Parent = part
+
+        local billboardGui = Instance.new("BillboardGui")
+        billboardGui.Name = "GunDropBillboard"
+        billboardGui.Adornee = part
+        billboardGui.Size = UDim2.new(0, 200, 0.5, 60)
+        billboardGui.StudsOffset = Vector3.new(0, 1.5, 0)
+        billboardGui.AlwaysOnTop = true
+
+        local textLabel = Instance.new("TextLabel")
+        textLabel.Size = UDim2.new(1, 0, 1, 0)
+        textLabel.Position = UDim2.new(0, 0, 0, 0)
+        textLabel.BackgroundTransparency = 1
+        textLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
+        textLabel.TextStrokeTransparency = 0.5
+        textLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+        textLabel.Font = Enum.Font.Roboto
+        textLabel.TextSize = 24
+        textLabel.Text = "Gun"
+        textLabel.TextXAlignment = Enum.TextXAlignment.Center
+        textLabel.TextYAlignment = Enum.TextYAlignment.Center
+        textLabel.Parent = billboardGui
+
+        billboardGui.Parent = part
+    else
+        print("Highlight or Billboard already exists.")
+    end
+end
+
+local function updateGunDropHighlights()
+    if gunDropESP then
+        for part, _ in pairs(gunDropCache) do
+            if not part:IsDescendantOf(Workspace) or part.Name ~= "GunDrop" then
+                gunDropCache[part] = nil
+                print("GunDrop removed from cache:", part.Name)
+                if part:FindFirstChild("GunDropHighlight") then
+                    part.GunDropHighlight:Destroy()
+                end
+                if part:FindFirstChild("GunDropBillboard") then
+                    part.GunDropBillboard:Destroy()
+                end
+            end
+        end
+
+        for _, part in ipairs(Workspace:GetDescendants()) do
+            if part:IsA("BasePart") and part.Name == "GunDrop" and not gunDropCache[part] then
+                gunDropCache[part] = true
+                createGunDropHighlight(part)
+                print("Gun Droped")
+            end
+        end
+    else
+        print("Gun drop ESP is disabled.")
+        for part, _ in pairs(gunDropCache) do
+            if part:FindFirstChild("GunDropHighlight") then
+                part.GunDropHighlight:Destroy()
+            end
+            if part:FindFirstChild("GunDropBillboard") then
+                part.GunDropBillboard:Destroy()
+            end
+        end
+        gunDropCache = {}
+    end
+end
+
+-- ESP Player Functions
 local function addHighlight(character, color)
-    if highlightEnabled and character then
+    if EspPlayer and character then
         local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-        if humanoidRootPart and not humanoidRootPart:FindFirstChild("Highlight") then
+        if humanoidRootPart then
+            local existingHighlight = humanoidRootPart:FindFirstChild("Highlight")
+            if existingHighlight then
+                existingHighlight:Destroy()
+            end
+
             local highlight = Instance.new("Highlight")
             highlight.Adornee = character
             highlight.Parent = humanoidRootPart
@@ -239,29 +357,185 @@ local function removeHighlight(character)
     end
 end
 
--- ESP Loop
-while true do
-    local murderer = findMurderer()
-    local sheriff = findSheriff()
+local function addBillboard(character, roleName, color)
+    if EspPlayer and character then
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart and not humanoidRootPart:FindFirstChild("BillboardGui") then
+            local billboard = Instance.new("BillboardGui")
+            billboard.Parent = humanoidRootPart
+            billboard.Adornee = humanoidRootPart
+            billboard.StudsOffset = Vector3.new(0, 3, 0)
+            billboard.Size = UDim2.new(0, 100, 0, 50)
+            billboard.AlwaysOnTop = true
+            billboard.LightInfluence = 0
 
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player.Character then
-            removeHighlight(player.Character)
-            if player.Name == murderer then
-                addHighlight(player.Character, Color3.fromRGB(255, 0, 0))
-            elseif player.Name == sheriff then
-                addHighlight(player.Character, Color3.fromRGB(0, 150, 255))
-            else
-                addHighlight(player.Character, Color3.fromRGB(0, 255, 0))
+            local frame = Instance.new("Frame")
+            frame.Parent = billboard
+            frame.Size = UDim2.new(1, 0, 1, 0)
+            frame.BackgroundTransparency = 1
+
+            local textLabel = Instance.new("TextLabel")
+            textLabel.Parent = frame
+            textLabel.Size = UDim2.new(1, 0, 1, 0)
+            textLabel.BackgroundTransparency = 1
+            textLabel.TextColor3 = color
+            textLabel.Font = Enum.Font.PermanentMarker
+            textLabel.TextSize = 24
+            textLabel.Text = roleName
+            textLabel.TextStrokeTransparency = 0
+            textLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+        end
+    end
+end
+
+local function removeBillboard(character)
+    if character then
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart then
+            local billboard = humanoidRootPart:FindFirstChild("BillboardGui")
+            if billboard then
+                billboard:Destroy()
             end
         end
     end
-
-    wait(1)
 end
 
-while true do
-    print("Murd : " .. tostring(findMurderer())) 
-    print("Sheriff : " .. tostring(findSheriff()))
-    wait(1)
+local function isNormalMapPresent()
+    for _, descendant in ipairs(Workspace:GetDescendants()) do
+        if descendant.Name == "Normal" then
+            return true
+        end
+    end
+    return false
 end
+
+local murderer = nil
+local sheriff = nil
+local hero = nil
+local PText1 = false
+local PText2 = true
+local gameAboutToStart = false
+local gameEnded = false
+
+local function UpdatePlayerESP()
+    if isNormalMapPresent() then
+        if gameAboutToStart then
+            print("Game about to start")
+            PText2 = false
+        end
+
+        murderer = GetMurderer()
+        sheriff = GetSheriff()
+        hero = GetHero()
+
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player.Character then
+                removeHighlight(player.Character)
+                removeBillboard(player.Character)
+                if player.Name == murderer then
+                    addHighlight(player.Character, Color3.fromRGB(255, 0, 0))
+                    addBillboard(player.Character, "Murderer", Color3.fromRGB(255, 0, 0))
+                elseif player.Name == sheriff then
+                    addHighlight(player.Character, Color3.fromRGB(0, 150, 255))
+                    addBillboard(player.Character, "Sheriff", Color3.fromRGB(0, 150, 255))
+                elseif player.Name == hero then
+                    addHighlight(player.Character, Color3.fromRGB(230, 230, 250))
+                    addBillboard(player.Character, "Hero", Color3.fromRGB(230, 230, 250))
+                else
+                    addHighlight(player.Character, Color3.fromRGB(0, 255, 0))
+                end
+            end
+        end
+    else
+        if not gameEnded then
+            for _, player in ipairs(Players:GetPlayers()) do
+                if player.Character then
+                    removeHighlight(player.Character)
+                    removeBillboard(player.Character)
+                end
+            end
+            print("Game Ended")
+            PText1 = true
+            PText2 = true
+        end
+    end
+end
+
+local updateTimerInterval = 0.1
+local updateGunDropHighlightsInterval = 0.3
+
+local updateTimerTime = 0
+local updateGunDropHighlightsTime = 0
+
+RunService.Heartbeat:Connect(function(deltaTime)
+    updateTimerTime = updateTimerTime + deltaTime
+    updateGunDropHighlightsTime = updateGunDropHighlightsTime + deltaTime
+
+    if updateTimerTime >= updateTimerInterval then
+        updateTimer()
+        updateTimerTime = 0
+    end
+
+    if updateGunDropHighlightsTime >= updateGunDropHighlightsInterval then
+        updateGunDropHighlights()
+        updateGunDropHighlightsTime = 0
+    end
+end)
+
+local function checkPlayerGunInventory(player)
+    player.Backpack.ChildAdded:Connect(function(child)
+        if child.Name == "Gun" then
+            UpdatePlayerESP()
+        end
+    end)
+
+    player.CharacterAdded:Connect(function(character)
+        character.ChildAdded:Connect(function(child)
+            if child.Name == "Gun" then
+                UpdatePlayerESP()
+            end
+        end)
+    end)
+end
+
+for _, player in ipairs(Players:GetPlayers()) do
+    checkPlayerGunInventory(player)
+end
+
+Players.PlayerAdded:Connect(checkPlayerGunInventory)
+
+local hasUpdatedESP = false
+
+local function checkRoles()
+    local murderer1 = GetMurderer()
+    local sheriff1 = GetSheriff()
+
+    if murderer1 or sheriff1 then
+        if not hasUpdatedESP then
+            UpdatePlayerESP()
+            hasUpdatedESP = true
+        end
+    else
+        hasUpdatedESP = false
+    end
+end
+
+local wasMapPresent = false
+
+local function checkMapPresence()
+    local currentMapPresence = wasMapPresent()
+    if currentMapPresence ~= wasMapPresent then
+        wasMapPresent = currentMapPresence
+        UpdatePlayerESP()
+    end
+end
+
+local roleCheckInterval = 1
+RunService.Heartbeat:Connect(function(deltaTime)
+    checkMapPresence()
+    checkRoles()
+    wait(roleCheckInterval)
+end)
+
+checkMapPresence()
+checkRoles()
