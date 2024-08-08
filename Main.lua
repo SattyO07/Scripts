@@ -1079,9 +1079,9 @@ checkMapPresence()
 checkRoles()
 
 -- Orion Properties
-local TabG1 = Window:MakeTab({Name = "Murder Mistery 2",Icon = "rbxassetid://7733799901",PremiumOnly = false})
+local Tab3 = Window:MakeTab({Name = "MM2", Icon = "rbxassetid://7733954760", PremiumOnly = false})
 
-local Section2 = TabG1:AddSection({Name = "AimBot"})
+local Section2 = Tab3:AddSection({Name = "AimBot"})
 
 if Device == "Mobile" then
     TabG1:AddToggle({
@@ -1093,7 +1093,7 @@ if Device == "Mobile" then
     })
 end
 
-TabG1:AddBind({
+Tab3:AddBind({
 	Name = "Shoot Keybind",
 	Default = Enum.KeyCode.Q,
 	Hold = false,
@@ -1102,7 +1102,7 @@ TabG1:AddBind({
 	end    
 })
 
-TabG1:AddTextbox({
+Tab3:AddTextbox({
     Name = "Textbox",
     Default = "Shoot Offset",
     TextDisappear = true,
@@ -1128,9 +1128,9 @@ TabG1:AddTextbox({
     end    
 })
 
-local Section2 = TabG1:AddSection({Name = "Esp:"})
+local Section2 = Tab3:AddSection({Name = "Esp:"})
 
-TabG1:AddToggle({
+Tab3:AddToggle({
         Name = "Player Esp",
         Default = false,
         Callback = function(Value)
@@ -1138,7 +1138,7 @@ TabG1:AddToggle({
         end    
     })
 
-TabG1:AddToggle({
+Tab3:AddToggle({
         Name = "GunEsp",
         Default = false,
         Callback = function(Value)
@@ -1146,9 +1146,9 @@ TabG1:AddToggle({
         end    
     })
 
-local Section2 = TabG1:AddSection({Name = "Mics:"})
+local Section3 = Tab3:AddSection({Name = "Mics:"})
 
-TabG1:AddToggle({
+Tab3:AddToggle({
         Name = "Timer",
         Default = false,
         Callback = function(Value)
