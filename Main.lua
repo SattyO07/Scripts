@@ -248,6 +248,7 @@ local function FlingPlayer(playerToFling)
 
     SkidFling(Targets[1])
 end
+
 -- AntiFling
 local function PlayerAdded(Player)
     if not FlingDetectionEnabled then return end
@@ -580,19 +581,19 @@ end
 local function shoot()
     local localPlayer = Players.LocalPlayer
 
-    if GetSheriff() ~= localPlayer.Name and GetHero() ~= localPlayer.Name then
-        OrionLib:MakeNotification({Name = "AimBot",Content = "You are Not Sheriff/Hero!",Image = "rbxassetid://7733771628",Time = 5})
+    if GetRole("Sheriff") ~= localPlayer.Name and GetRole("Hero") ~= localPlayer.Name then
+        OrionLib:MakeNotification({Name = "AimBot", Content = "You are Not Sheriff/Hero!", Image = "rbxassetid://7733771628", Time = 5})
         return
     end
 
-    local murderer = GetMurderer()
+    local murderer = GetRole("Murderer")
     if not murderer then
-        OrionLib:MakeNotification({Name = "AimBot",Content = "No Murder to shoot!",Image = "rbxassetid://7733771628",Time = 5})
+        OrionLib:MakeNotification({Name = "AimBot", Content = "No Murderer to shoot!", Image = "rbxassetid://7733771628", Time = 5})
         return
     end
 
     if not localPlayer.Character or not localPlayer.Character:FindFirstChild("Humanoid") then
-        warn("Character or Humanoid not found.")
+        OrionLib:MakeNotification({Name = "AimBot", Content = "Can't Find a Character.", Image = "rbxassetid://7733771628", Time = 5})
         return
     end
 
@@ -601,20 +602,20 @@ local function shoot()
         if localPlayer.Backpack:FindFirstChild("Gun") then
             hum:EquipTool(localPlayer.Backpack:FindFirstChild("Gun"))
         else
-            OrionLib:MakeNotification({Name = "AimBot",Content = "You need a Gun first",Image = "rbxassetid://7733771628",Time = 5})
+            OrionLib:MakeNotification({Name = "AimBot", Content = "You need a Gun first", Image = "rbxassetid://7733771628", Time = 5})
             return
         end
     end
 
     local murdererPlayer = Players:FindFirstChild(murderer)
     if not murdererPlayer or not murdererPlayer.Character then
-        OrionLib:MakeNotification({Name = "AimBot",Content = "Could not find the murderer's character.",Image = "rbxassetid://7733771628",Time = 5})
+        OrionLib:MakeNotification({Name = "AimBot", Content = "Could not find the murderer's character.", Image = "rbxassetid://7733771628", Time = 5})
         return
     end
 
     local murdererHRP = murdererPlayer.Character:FindFirstChild("HumanoidRootPart")
     if not murdererHRP then
-        OrionLib:MakeNotification({Name = "AimBot",Content = "Could not find the Murderer maybe died",Image = "rbxassetid://7733771628",Time = 5})
+        OrionLib:MakeNotification({Name = "AimBot", Content = "Could not find the Murderer. Maybe died.", Image = "rbxassetid://7733771628", Time = 5})
         return
     end
 
