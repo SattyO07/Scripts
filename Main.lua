@@ -927,7 +927,7 @@ local function UpdatePlayerESP()
 
         for _, player in ipairs(Players:GetPlayers()) do
             if player.Character then
-                removeESP(player.Character) -- Updated to use removeESP
+                removeESP(player.Character)
                 if player.Name == murderer then
                     addESP(player.Character, "Murderer", Color3.fromRGB(255, 0, 0))
                 elseif player.Name == sheriff then
@@ -965,14 +965,30 @@ end
 
 local previousMapState = isMapPresent()
 
--- Function to check map presence and update ESP if the state changes
 local function checkMapPresence()
-    local currentMapState = isMapPresent()  -- Use isMapPresent here
+    local currentMapState = isMapPresent()
     if currentMapState ~= previousMapState then
+        if currentMapState then
+            print("Map has appeared!")
+			UpdatePlayerESP()
+			wait(10)
+			UpdatePlayerESP()
+        else
+            print("Map has disappeared!")
+			UpdatePlayerESP()
+        end
         previousMapState = currentMapState
-        UpdatePlayerESP()
+        UpdatePlayerESP() 
     end
 end
+
+RunService.Heartbeat:Connect(function(deltaTime)
+    checkMapPresence()
+end)
+
+-- Initial calls
+checkMapPresence()
+checkRoles()
 
 -- Orion Properties
 local Tab3 = Window:MakeTab({Name = "MM2", Icon = "rbxassetid://7733954760", PremiumOnly = false})
