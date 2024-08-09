@@ -856,53 +856,52 @@ local function addESP(character, roleName, color)
         local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
         
         if humanoidRootPart then
-            -- Remove existing highlight if it exists
-            local existingHighlight = character:FindFirstChild("Highlight")
+            local existingHighlight = humanoidRootPart:FindFirstChild("Highlight")
             if existingHighlight then
                 existingHighlight:Destroy()
             end
 
-            -- Create and apply a new highlight
             local highlight = Instance.new("Highlight")
-            highlight.Name = "Highlight"
             highlight.Adornee = character
-            highlight.Parent = character
+            highlight.Parent = humanoidRootPart
             highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
             highlight.FillColor = color
+            highlight.Name = "Highlight"
 
-            -- Remove existing BillboardGui if it exists
-            local existingBillboard = humanoidRootPart:FindFirstChild("BillboardGui")
-            if existingBillboard then
-                existingBillboard:Destroy()
+            -- Add Billboard only if the player has a role
+            if roleName ~= "Player" then
+                if not humanoidRootPart:FindFirstChild("BillboardGui") then
+                    local billboard = Instance.new("BillboardGui")
+                    billboard.Parent = humanoidRootPart
+                    billboard.Adornee = humanoidRootPart
+                    billboard.StudsOffset = Vector3.new(0, 3, 0)
+                    billboard.Size = UDim2.new(0, 100, 0, 50)
+                    billboard.AlwaysOnTop = true
+                    billboard.LightInfluence = 0
+
+                    local frame = Instance.new("Frame")
+                    frame.Parent = billboard
+                    frame.Size = UDim2.new(1, 0, 1, 0)
+                    frame.BackgroundTransparency = 1
+
+                    local textLabel = Instance.new("TextLabel")
+                    textLabel.Parent = frame
+                    textLabel.Size = UDim2.new(1, 0, 1, 0)
+                    textLabel.BackgroundTransparency = 1
+                    textLabel.TextColor3 = color
+                    textLabel.Font = Enum.Font.PermanentMarker
+                    textLabel.TextSize = 24
+                    textLabel.Text = roleName
+                    textLabel.TextStrokeTransparency = 0
+                    textLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+                end
+            else
+                -- If the player is not a special role, remove any existing BillboardGui
+                local existingBillboard = humanoidRootPart:FindFirstChild("BillboardGui")
+                if existingBillboard then
+                    existingBillboard:Destroy()
+                end
             end
-
-            -- Create and apply a new BillboardGui
-            local billboard = Instance.new("BillboardGui")
-            billboard.Name = "BillboardGui"
-            billboard.Parent = humanoidRootPart
-            billboard.Adornee = humanoidRootPart
-            billboard.StudsOffset = Vector3.new(0, 3, 0)
-            billboard.Size = UDim2.new(0, 100, 0, 50)
-            billboard.AlwaysOnTop = true
-            billboard.LightInfluence = 0
-
-            -- Create a frame inside the billboard
-            local frame = Instance.new("Frame")
-            frame.Parent = billboard
-            frame.Size = UDim2.new(1, 0, 1, 0)
-            frame.BackgroundTransparency = 1
-
-            -- Create a text label to display the role
-            local textLabel = Instance.new("TextLabel")
-            textLabel.Parent = frame
-            textLabel.Size = UDim2.new(1, 0, 1, 0)
-            textLabel.BackgroundTransparency = 1
-            textLabel.TextColor3 = color
-            textLabel.Font = Enum.Font.PermanentMarker
-            textLabel.TextSize = 24
-            textLabel.Text = roleName
-            textLabel.TextStrokeTransparency = 0
-            textLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
         end
     end
 end
@@ -939,7 +938,7 @@ local sheriff = nil
 local hero = nil
 
 local function UpdatePlayerESP()
-    if isMapPresent() then
+    if isMapPresent() then 
         murderer = GetMurderer()
         sheriff = GetSheriff()
         hero = GetHero()
@@ -965,6 +964,19 @@ local function UpdatePlayerESP()
                 removeESP(player.Character) 
             end
         end
+    end
+end
+
+local previousMapState = isMapPresent()
+
+-- Function to check map presence and update ESP if the state changes
+local function 
+    local currentMapState = isMapPresent()
+    if currentMapState ~= previousMapState then
+        previousMapState = currentMapState
+        UpdatePlayerESP() 
+	wait(10)
+	UpdatePlayerESP()
     end
 end
 
@@ -1071,8 +1083,8 @@ OrionLib:Init()
 
 RunService.RenderStepped:Connect(function()
     updateTimer()	
-    UpdatePlayerESP()
     isMapPresent()
+    checkMapPresence()
     updateGunDropHighlights()
     UpdateFps = math.floor(1 / RunService.RenderStepped:Wait(5))
     playerCountLabel:Set("Player Count: " .. #game.Players:GetPlayers() .. "/" .. game.Players.MaxPlayers)
