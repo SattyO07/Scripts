@@ -977,12 +977,10 @@ end
 local roleCheckInterval = 1
 RunService.Heartbeat:Connect(function(deltaTime)
     checkMapPresence()
-    checkRoles()
     wait(roleCheckInterval)
 end)
 
 checkMapPresence()
-checkRoles()
 
 -- Orion Properties
 local Tab3 = Window:MakeTab({Name = "MM2", Icon = "rbxassetid://7733954760", PremiumOnly = false})
