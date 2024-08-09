@@ -959,6 +959,45 @@ local function UpdatePlayerESP()
     end
 end
 
+local playerRoles = {}
+
+local function checkPlayerRoles()
+    local roleChanged = false
+
+    for _, player in ipairs(Players:GetPlayers()) do
+        local previousRole = playerRoles[player.Name]
+        local currentRole = nil  -- Default role
+
+        if player.Name == GetMurderer() then
+            currentRole = "Murderer"
+        elseif player.Name == GetSheriff() then
+            currentRole = "Sheriff"
+        elseif player.Name == GetHero() then
+            currentRole = "Hero"
+        end
+
+        -- Only update the role if it's one of the specified roles
+        if currentRole then
+            -- Detect if role has changed
+            if previousRole ~= currentRole then
+                playerRoles[player.Name] = currentRole
+                roleChanged = true
+            end
+        else
+            -- Remove the role if the player is not one of the specified roles
+            if previousRole then
+                playerRoles[player.Name] = nil
+                roleChanged = true
+            end
+        end
+    end
+
+    -- Trigger UpdatePlayerESP if any role has changed
+    if roleChanged then
+        UpdatePlayerESP()
+    end
+end
+
 -- Orion Properties
 local Tab3 = Window:MakeTab({Name = "MM2", Icon = "rbxassetid://7733954760", PremiumOnly = false})
 
@@ -1061,6 +1100,9 @@ InfoT:AddButton({
 OrionLib:Init()
 
 RunService.RenderStepped:Connect(function()
+    if isMapPresent() then
+        checkPlayerRoles()
+    end
     updateTimer()	
     isMapPresent()
     updateGunDropHighlights()
