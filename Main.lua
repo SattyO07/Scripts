@@ -1039,7 +1039,11 @@ local Playerespe =Tab3:AddToggle({
         Default = false,
         Callback = function(Value)
             EspPlayer = Value
-	    UpdatePlayerESP()	
+	    if Value then
+		UpdatePlayerESP()
+			else
+		UpdatePlayerESP()
+			end
         end    
     })
 
