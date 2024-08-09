@@ -868,7 +868,6 @@ local function removeESP(character)
     end
 end
 
-
 -- Esp add Player
 local function addESP(character, roleName, color)
     if EspPlayer and character then
@@ -938,7 +937,8 @@ local function UpdatePlayerESP()
         hero = GetHero()
 
         for _, player in ipairs(Players:GetPlayers()) do
-            if player.Character then	
+            if player.Character then
+		 removeESP(player.Character)
                 if player.Name == murderer then
                     addESP(player.Character, "Murderer", Color3.fromRGB(255, 0, 0))
                 elseif player.Name == sheriff then
@@ -1063,7 +1063,6 @@ OrionLib:Init()
 RunService.RenderStepped:Connect(function()
     updateTimer()	
     isMapPresent()
-    UpdatePlayerESP()
     updateGunDropHighlights()
     UpdateFps = math.floor(1 / RunService.RenderStepped:Wait(5))
     playerCountLabel:Set("Player Count: " .. #game.Players:GetPlayers() .. "/" .. game.Players.MaxPlayers)
