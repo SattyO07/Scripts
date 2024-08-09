@@ -953,35 +953,6 @@ local function UpdatePlayerESP()
     end
 end
 
--- Function to check if the "Normal" map is present
-local function isMapPresent()
-    for _, descendant in ipairs(Workspace:GetDescendants()) do
-        if descendant.Name == "Normal" then
-            return true
-        end
-    end
-    return false
-end
-
-local previousMapState = isMapPresent()
-
-local function checkMapPresence()
-    local currentMapState = isMapPresent()
-    if currentMapState ~= previousMapState then
-        if currentMapState then
-            print("Map has appeared!")
-			UpdatePlayerESP()
-			wait(10)
-			UpdatePlayerESP()
-        else
-            print("Map has disappeared!")
-			UpdatePlayerESP()
-        end
-        previousMapState = currentMapState
-        UpdatePlayerESP() 
-    end
-end
-
 -- Orion Properties
 local Tab3 = Window:MakeTab({Name = "MM2", Icon = "rbxassetid://7733954760", PremiumOnly = false})
 
@@ -1081,12 +1052,11 @@ InfoT:AddButton({
 	Name = "Destroy Gui",
 	Callback = function() OrionLib:Destroy()end})
 
-checkMapPresence()
 OrionLib:Init()
 
 RunService.RenderStepped:Connect(function()
     updateTimer()	
-    checkMapPresence()
+    UpdatePlayerESP()
     updateGunDropHighlights()
     UpdateFps = math.floor(1 / RunService.RenderStepped:Wait(5))
     playerCountLabel:Set("Player Count: " .. #game.Players:GetPlayers() .. "/" .. game.Players.MaxPlayers)
