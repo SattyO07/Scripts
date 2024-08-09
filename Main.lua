@@ -939,7 +939,7 @@ local sheriff = nil
 local hero = nil
 
 local function UpdatePlayerESP()
-    if isMapPresent then
+    if isMapPresent() then
         murderer = GetMurderer()
         sheriff = GetSheriff()
         hero = GetHero()
