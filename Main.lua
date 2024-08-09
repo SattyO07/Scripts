@@ -953,6 +953,7 @@ local function UpdatePlayerESP()
     end
 end
 
+-- Function to check if the "Normal" map is present
 local function isMapPresent()
     for _, descendant in ipairs(Workspace:GetDescendants()) do
         if descendant.Name == "Normal" then
@@ -964,8 +965,9 @@ end
 
 local previousMapState = isMapPresent()
 
+-- Function to check map presence and update ESP if the state changes
 local function checkMapPresence()
-    local currentMapState = isNormalMapPresent()
+    local currentMapState = isMapPresent()  -- Use isMapPresent here
     if currentMapState ~= previousMapState then
         previousMapState = currentMapState
         UpdatePlayerESP()
