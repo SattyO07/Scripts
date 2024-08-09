@@ -982,8 +982,6 @@ local function checkMapPresence()
     end
 end
 
--- Initial calls
-checkMapPresence()
 -- Orion Properties
 local Tab3 = Window:MakeTab({Name = "MM2", Icon = "rbxassetid://7733954760", PremiumOnly = false})
 
