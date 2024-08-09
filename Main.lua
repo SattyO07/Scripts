@@ -248,6 +248,7 @@ local function FlingPlayer(playerToFling)
 
     SkidFling(Targets[1])
 end
+
 -- AntiFling
 local function PlayerAdded(Player)
     if not FlingDetectionEnabled then return end
@@ -960,6 +961,7 @@ local function UpdatePlayerESP()
 end
 
 local playerRoles = {}
+local updatePending = false
 
 local function checkPlayerRoles()
     local roleChanged = false
@@ -992,10 +994,16 @@ local function checkPlayerRoles()
         end
     end
 
-    -- Trigger UpdatePlayerESP if any role has changed
-    if roleChanged then
+    -- Trigger UpdatePlayerESP if any role has changed and no update is pending
+    if roleChanged and not updatePending then
         UpdatePlayerESP()
+        updatePending = true
     end
+end
+
+-- Reset the updatePending flag after a delay to allow for a single update
+local function resetUpdatePending()
+    updatePending = false
 end
 
 -- Orion Properties
@@ -1098,6 +1106,7 @@ InfoT:AddButton({
 	Callback = function() OrionLib:Destroy()end})
 
 OrionLib:Init()
+resetUpdatePending()
 
 RunService.RenderStepped:Connect(function()
     if isMapPresent() then
