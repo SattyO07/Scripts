@@ -974,14 +974,6 @@ local function checkMapPresence()
     end
 end
 
-local roleCheckInterval = 1
-RunService.Heartbeat:Connect(function(deltaTime)
-    checkMapPresence()
-    wait(roleCheckInterval)
-end)
-
-checkMapPresence()
-
 -- Orion Properties
 local Tab3 = Window:MakeTab({Name = "MM2", Icon = "rbxassetid://7733954760", PremiumOnly = false})
 
@@ -1081,10 +1073,14 @@ InfoT:AddButton({
 	Name = "Destroy Gui",
 	Callback = function() OrionLib:Destroy()end})
 
-
+checkMapPresence()
 OrionLib:Init()
+
 RunService.RenderStepped:Connect(function()
+    checkMapPresence()
+    wait(roleCheckInterval)
     UpdateFps = math.floor(1 / RunService.RenderStepped:Wait(5))
     playerCountLabel:Set("Player Count: " .. #game.Players:GetPlayers() .. "/" .. game.Players.MaxPlayers)
     fpsLabel:Set("Current FPS: " .. UpdateFps)
+		wait(1)
 end)
