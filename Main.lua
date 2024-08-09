@@ -934,7 +934,6 @@ local function isMapPresent()
     return false
 end
 
-
 local murderer = nil
 local sheriff = nil
 local hero = nil
