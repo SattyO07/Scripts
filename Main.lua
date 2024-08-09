@@ -934,14 +934,13 @@ local function isMapPresent()
     return false
 end
 
-local previousMapState = isMapPresent()
 
 local murderer = nil
 local sheriff = nil
 local hero = nil
 
 local function UpdatePlayerESP()
-    if isNormalMapPresent() then
+    if isMapPresent() then
         murderer = GetMurderer()
         sheriff = GetSheriff()
         hero = GetHero()
