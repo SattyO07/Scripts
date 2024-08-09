@@ -982,10 +982,6 @@ local function checkMapPresence()
     end
 end
 
-RunService.Heartbeat:Connect(function(deltaTime)
-    checkMapPresence()
-end)
-
 -- Initial calls
 checkMapPresence()
 checkRoles()
@@ -1095,7 +1091,7 @@ OrionLib:Init()
 RunService.RenderStepped:Connect(function()
     updateTimer()	
     checkMapPresence()
-    wait(roleCheckInterval)
+    updateGunDropHighlights()
     UpdateFps = math.floor(1 / RunService.RenderStepped:Wait(5))
     playerCountLabel:Set("Player Count: " .. #game.Players:GetPlayers() .. "/" .. game.Players.MaxPlayers)
     fpsLabel:Set("Current FPS: " .. UpdateFps)
