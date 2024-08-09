@@ -850,17 +850,31 @@ local function updateGunDropHighlights()
     end
 end
 
--- Function to add ESP (Highlight and Billboard) to a character
+-- Esp Remove player
+local function removeESP(character)
+    if character then
+        local highlight = character:FindFirstChild("Highlight")
+        if highlight then
+            highlight:Destroy()
+        end
+
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart then
+            local billboard = humanoidRootPart:FindFirstChild("BillboardGui")
+            if billboard then
+                billboard:Destroy()
+            end
+        end
+    end
+end
+
+
+-- Esp add Player
 local function addESP(character, roleName, color)
     if EspPlayer and character then
         local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
         
         if humanoidRootPart then
-            local existingHighlight = humanoidRootPart:FindFirstChild("Highlight")
-            if existingHighlight then
-                existingHighlight:Destroy()
-            end
-
             local highlight = Instance.new("Highlight")
             highlight.Adornee = character
             highlight.Parent = humanoidRootPart
@@ -868,8 +882,7 @@ local function addESP(character, roleName, color)
             highlight.FillColor = color
             highlight.Name = "Highlight"
 
-            -- Add Billboard only if the player has a role
-            if roleName ~= "Player" then
+            if roleName == "Hero" or roleName == "Murderer" or roleName == "Sheriff" then
                 if not humanoidRootPart:FindFirstChild("BillboardGui") then
                     local billboard = Instance.new("BillboardGui")
                     billboard.Parent = humanoidRootPart
@@ -896,29 +909,10 @@ local function addESP(character, roleName, color)
                     textLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
                 end
             else
-                -- If the player is not a special role, remove any existing BillboardGui
                 local existingBillboard = humanoidRootPart:FindFirstChild("BillboardGui")
                 if existingBillboard then
                     existingBillboard:Destroy()
                 end
-            end
-        end
-    end
-end
-
--- Function to remove ESP (Highlight and Billboard) from a character
-local function removeESP(character)
-    if character then
-        local highlight = character:FindFirstChild("Highlight")
-        if highlight then
-            highlight:Destroy()
-        end
-
-        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-        if humanoidRootPart then
-            local billboard = humanoidRootPart:FindFirstChild("BillboardGui")
-            if billboard then
-                billboard:Destroy()
             end
         end
     end
@@ -938,15 +932,13 @@ local sheriff = nil
 local hero = nil
 
 local function UpdatePlayerESP()
-    if isMapPresent() then 
+    if isMapPresent() then
         murderer = GetMurderer()
         sheriff = GetSheriff()
         hero = GetHero()
 
         for _, player in ipairs(Players:GetPlayers()) do
-            if player.Character then
-                removeESP(player.Character)  -- Ensure ESP is reset before applying new one
-
+            if player.Character then	
                 if player.Name == murderer then
                     addESP(player.Character, "Murderer", Color3.fromRGB(255, 0, 0))
                 elseif player.Name == sheriff then
@@ -954,29 +946,16 @@ local function UpdatePlayerESP()
                 elseif player.Name == hero then
                     addESP(player.Character, "Hero", Color3.fromRGB(230, 230, 250))
                 else
-                    addESP(player.Character, "Player", Color3.fromRGB(0, 255, 0))
+                    addESP(player.Character, "Player", Color3.fromRGB(0, 255, 0))  -- Regular players only get the Highlight
                 end
             end
         end
     else
         for _, player in ipairs(Players:GetPlayers()) do
             if player.Character then
-                removeESP(player.Character) 
+                removeESP(player.Character)
             end
         end
-    end
-end
-
-local previousMapState = isMapPresent()
-
--- Function to check map presence and update ESP if the state changes
-local function 
-    local currentMapState = isMapPresent()
-    if currentMapState ~= previousMapState then
-        previousMapState = currentMapState
-        UpdatePlayerESP() 
-	wait(10)
-	UpdatePlayerESP()
     end
 end
 
@@ -1084,7 +1063,7 @@ OrionLib:Init()
 RunService.RenderStepped:Connect(function()
     updateTimer()	
     isMapPresent()
-    checkMapPresence()
+    UpdatePlayerESP()
     updateGunDropHighlights()
     UpdateFps = math.floor(1 / RunService.RenderStepped:Wait(5))
     playerCountLabel:Set("Player Count: " .. #game.Players:GetPlayers() .. "/" .. game.Players.MaxPlayers)
