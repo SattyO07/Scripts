@@ -538,7 +538,7 @@ local gunDropESP = false
 local EspPlayer = false
 local shootOffset = 2.8
 local gunDropCache = {}
-local TimeGUI = false
+-- local TimeGUI = false
 
 -- Functions Mm2
 local function GetMurderer()
@@ -648,33 +648,14 @@ local function shoot()
     localPlayer.Character.Gun.KnifeLocal.CreateBeam.RemoteFunction:InvokeServer(unpack(args))
 end
 
-local player1 = game.Players.LocalPlayer
-
--- Attempt to retrieve the RoundTimerPart
-local roundTimerPart = Workspace:FindFirstChild("RoundTimerPart")
-if not roundTimerPart then
-    warn("RoundTimerPart not found in Workspace")
-    return
-end
-
--- Attempt to retrieve the SurfaceGui
-local surfaceGui = roundTimerPart:FindFirstChild("SurfaceGui")
-if not surfaceGui then
-    warn("SurfaceGui not found in RoundTimerPart")
-    return
-end
-
--- Attempt to retrieve the Timer TextLabel
-local surfaceGuiTextLabel = surfaceGui:FindFirstChild("Timer")
-if not surfaceGuiTextLabel then
-    warn("Timer TextLabel not found in SurfaceGui")
-    return
-end
+--[[ Idk What happen its bugging me out
+local player = Players.LocalPlayer
+local surfaceGuiTextLabel = Workspace:WaitForChild("RoundTimerPart"):WaitForChild("SurfaceGui"):WaitForChild("Timer")
 
 -- Create TimerGui
 local TimGui = Instance.new("ScreenGui")
 TimGui.Name = "TimerGui"
-TimGui.Parent = player1:WaitForChild("PlayerGui")
+TimGui.Parent = player:WaitForChild("PlayerGui")
 TimGui.ResetOnSpawn = false
 
 local Timer = Instance.new("TextLabel")
@@ -683,6 +664,7 @@ Timer.Position = UDim2.new(0.5, -100, 0.1, 0)
 Timer.TextColor3 = Color3.fromRGB(255, 255, 255)
 Timer.BackgroundTransparency = 1
 Timer.TextSize = 50
+Timer.Text = "Loading..."
 Timer.Font = Enum.Font.SourceSans
 Timer.TextStrokeTransparency = 0.5
 Timer.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
@@ -690,7 +672,7 @@ Timer.Parent = TimGui
 
 -- Function to update Timer
 local function updateTimer()
-    if surfaceGuiTextLabel then
+    if TimeGUI then
         local surfaceGui = surfaceGuiTextLabel.Parent
         if surfaceGui and surfaceGui:IsA("SurfaceGui") and surfaceGui.Enabled then
             Timer.Text = surfaceGuiTextLabel.Text
@@ -702,6 +684,7 @@ local function updateTimer()
         TimGui.Enabled = false
     end
 end
+]]
 
 -- Floating Button UI
 local playerGui = player:WaitForChild("PlayerGui")
@@ -1000,7 +983,7 @@ end
 
 -- Continuously update the timer
 game:GetService("RunService").Heartbeat:Connect(function()
-    updateTimer()
+   -- updateTimer()
     checkRoles()	
     isMapPresent()
     updateGunDropHighlights()
@@ -1077,13 +1060,14 @@ local Gunespe = Tab3:AddToggle({
 
 local Section3 = Tab3:AddSection({Name = "Mics:"})
 
+--[[Button
 local timeruiw = Tab3:AddToggle({
         Name = "Timer",
         Default = false,
         Callback = function(Value)
             TimeGUI = Value
         end    
-    })
+    })]]
 
 -- [Info] --
 local InfoT = Window:MakeTab({Name = "Mics", Icon = "rbxassetid://7733964719", PremiumOnly = false})
