@@ -248,7 +248,6 @@ local function FlingPlayer(playerToFling)
 
     SkidFling(Targets[1])
 end
-
 -- AntiFling
 local function PlayerAdded(Player)
     if not FlingDetectionEnabled then return end
@@ -324,6 +323,7 @@ local UpdateFps = 0
 local LastTime = tick()
 
 RunService.RenderStepped:Connect(function()
+		wait(2)
     local DeltaTime = tick() - LastTime
     LastTime = tick()
 end)
@@ -346,7 +346,7 @@ local GameName = game:GetService("MarketplaceService"):GetProductInfo(game.Place
 local Window = OrionLib:MakeWindow({Name = "MoonLight : [" .. GameName .. "]", HidePremium = false, SaveConfig = false, ConfigFolder = "ReaperSaved"})
 
 -- [Universal] --
-local Tab1 = Window:MakeTab({Name = "Universal", Icon = "rbxassetid://7733954760", PremiumOnly = false})
+local Tab1 = Window:MakeTab({Name = "Universal", Icon = "rbxassetid://7733954760", PremiumOnly = false, IntroText = "Welcome", IntroIcon = "rbxassetid://5998624788"})
 
 local UniText1 = Tab1:AddParagraph("Player's select:", "Select a Player's first.")
 
@@ -538,7 +538,7 @@ local gunDropESP = false
 local EspPlayer = false
 local shootOffset = 2.8
 local gunDropCache = {}
--- local TimeGUI = false
+local TimeGUI = false
 
 -- Functions Mm2
 local function GetMurderer()
@@ -648,7 +648,8 @@ local function shoot()
     localPlayer.Character.Gun.KnifeLocal.CreateBeam.RemoteFunction:InvokeServer(unpack(args))
 end
 
---[[ Idk What happen its bugging me out
+-- Time GUI
+local player = Players.LocalPlayer
 local surfaceGuiTextLabel = Workspace:WaitForChild("RoundTimerPart"):WaitForChild("SurfaceGui"):WaitForChild("Timer")
 
 -- Create TimerGui
@@ -683,8 +684,6 @@ local function updateTimer()
         TimGui.Enabled = false
     end
 end
-]]
-local player = Players.LocalPlayer
 
 -- Floating Button UI
 local playerGui = player:WaitForChild("PlayerGui")
@@ -852,14 +851,71 @@ local function updateGunDropHighlights()
     end
 end
 
--- Esp Remove player
-local function removeESP(character)
-    if character then
-        local highlight = character:FindFirstChild("Highlight")
-        if highlight then
-            highlight:Destroy()
-        end
+-- ESP Player Functions
+local function addHighlight(character, color)
+    if EspPlayer and character then
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart then
+            local existingHighlight = humanoidRootPart:FindFirstChild("Highlight")
+            if existingHighlight then
+                existingHighlight:Destroy()
+            end
 
+            local highlight = Instance.new("Highlight")
+            highlight.Adornee = character
+            highlight.Parent = humanoidRootPart
+            highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+            highlight.FillColor = color
+            highlight.Name = "Highlight"
+        end
+    end
+end
+
+local function removeHighlight(character)
+    if character then
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart then
+            local highlight = humanoidRootPart:FindFirstChild("Highlight")
+            if highlight then
+                highlight:Destroy()
+            end
+        end
+    end
+end
+
+local function addBillboard(character, roleName, color)
+    if EspPlayer and character then
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart and not humanoidRootPart:FindFirstChild("BillboardGui") then
+            local billboard = Instance.new("BillboardGui")
+            billboard.Parent = humanoidRootPart
+            billboard.Adornee = humanoidRootPart
+            billboard.StudsOffset = Vector3.new(0, 3, 0)
+            billboard.Size = UDim2.new(0, 100, 0, 50)
+            billboard.AlwaysOnTop = true
+            billboard.LightInfluence = 0
+
+            local frame = Instance.new("Frame")
+            frame.Parent = billboard
+            frame.Size = UDim2.new(1, 0, 1, 0)
+            frame.BackgroundTransparency = 1
+
+            local textLabel = Instance.new("TextLabel")
+            textLabel.Parent = frame
+            textLabel.Size = UDim2.new(1, 0, 1, 0)
+            textLabel.BackgroundTransparency = 1
+            textLabel.TextColor3 = color
+            textLabel.Font = Enum.Font.PermanentMarker
+            textLabel.TextSize = 24
+            textLabel.Text = roleName
+            textLabel.TextStrokeTransparency = 0
+            textLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+        end
+    end
+end
+
+local function removeBillboard(character)
+    if character then
         local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
         if humanoidRootPart then
             local billboard = humanoidRootPart:FindFirstChild("BillboardGui")
@@ -870,120 +926,167 @@ local function removeESP(character)
     end
 end
 
--- Esp add Player
-local function addESP(character, roleName, color)
-    if EspPlayer and character then
-        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-        
-        if humanoidRootPart then
-            local highlight = Instance.new("Highlight")
-            highlight.Adornee = character
-            highlight.Parent = humanoidRootPart
-            highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-            highlight.FillColor = color
-            highlight.Name = "Highlight"
-
-            if roleName == "Hero" or roleName == "Murderer" or roleName == "Sheriff" then
-                if not humanoidRootPart:FindFirstChild("BillboardGui") then
-                    local billboard = Instance.new("BillboardGui")
-                    billboard.Parent = humanoidRootPart
-                    billboard.Adornee = humanoidRootPart
-                    billboard.StudsOffset = Vector3.new(0, 3, 0)
-                    billboard.Size = UDim2.new(0, 100, 0, 50)
-                    billboard.AlwaysOnTop = true
-                    billboard.LightInfluence = 0
-
-                    local frame = Instance.new("Frame")
-                    frame.Parent = billboard
-                    frame.Size = UDim2.new(1, 0, 1, 0)
-                    frame.BackgroundTransparency = 1
-
-                    local textLabel = Instance.new("TextLabel")
-                    textLabel.Parent = frame
-                    textLabel.Size = UDim2.new(1, 0, 1, 0)
-                    textLabel.BackgroundTransparency = 1
-                    textLabel.TextColor3 = color
-                    textLabel.Font = Enum.Font.PermanentMarker
-                    textLabel.TextSize = 24
-                    textLabel.Text = roleName
-                    textLabel.TextStrokeTransparency = 0
-                    textLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
-                end
-            else
-                local existingBillboard = humanoidRootPart:FindFirstChild("BillboardGui")
-                if existingBillboard then
-                    existingBillboard:Destroy()
-                end
-            end
+local function isNormalMapPresent()
+    for _, descendant in ipairs(Workspace:GetDescendants()) do
+        if descendant.Name == "Normal" then
+            return true
         end
     end
+    return false
 end
 
+local murderer = nil
+local sheriff = nil
+local hero = nil
+local PText1 = false
+local PText2 = true
+local gameAboutToStart = false
+local gameEnded = false
+
 local function UpdatePlayerESP()
-    if isMapPresent() then
+    if isNormalMapPresent() then
+        if gameAboutToStart then
+            OrionLib:MakeNotification({Name = "Esp",Content = "Enabling Esp",Image = "rbxassetid://7733771628",Time = 5})
+            PText2 = false
+        end
+
         murderer = GetMurderer()
         sheriff = GetSheriff()
         hero = GetHero()
 
         for _, player in ipairs(Players:GetPlayers()) do
             if player.Character then
-		 removeESP(player.Character)
+                removeHighlight(player.Character)
+                removeBillboard(player.Character)
                 if player.Name == murderer then
-                    addESP(player.Character, "Murderer", Color3.fromRGB(255, 0, 0))
+                    addHighlight(player.Character, Color3.fromRGB(255, 0, 0))
+                    addBillboard(player.Character, "Murderer", Color3.fromRGB(255, 0, 0))
                 elseif player.Name == sheriff then
-                    addESP(player.Character, "Sheriff", Color3.fromRGB(0, 150, 255))
+                    addHighlight(player.Character, Color3.fromRGB(0, 150, 255))
+                    addBillboard(player.Character, "Sheriff", Color3.fromRGB(0, 150, 255))
                 elseif player.Name == hero then
-                    addESP(player.Character, "Hero", Color3.fromRGB(230, 230, 250))
+                    addHighlight(player.Character, Color3.fromRGB(230, 230, 250))
+                    addBillboard(player.Character, "Hero", Color3.fromRGB(230, 230, 250))
                 else
-                    addESP(player.Character, "Player", Color3.fromRGB(0, 255, 0))  -- Regular players only get the Highlight
+                    addHighlight(player.Character, Color3.fromRGB(0, 255, 0))
                 end
             end
         end
     else
-        for _, player in ipairs(Players:GetPlayers()) do
-            if player.Character then
-                removeESP(player.Character)
-            end
-        end
-    end
-end
-
-local function UpdatePlayerESP()
-    if isMapPresent() then
-        murderer = GetMurderer()
-        sheriff = GetSheriff()
-        hero = GetHero()
-
-        for _, player in ipairs(Players:GetPlayers()) do
-            if player.Character then
-		 removeESP(player.Character)
-                if player.Name == murderer then
-                    addESP(player.Character, "Murderer", Color3.fromRGB(255, 0, 0))
-                elseif player.Name == sheriff then
-                    addESP(player.Character, "Sheriff", Color3.fromRGB(0, 150, 255))
-                elseif player.Name == hero then
-                    addESP(player.Character, "Hero", Color3.fromRGB(230, 230, 250))
-                else
-                    addESP(player.Character, "Player", Color3.fromRGB(0, 255, 0))  -- Regular players only get the Highlight
+        if not gameEnded then
+            for _, player in ipairs(Players:GetPlayers()) do
+                if player.Character then
+                    removeHighlight(player.Character)
+                    removeBillboard(player.Character)
                 end
             end
-        end
-    else
-        for _, player in ipairs(Players:GetPlayers()) do
-            if player.Character then
-                removeESP(player.Character)
-            end
+            OrionLib:MakeNotification({Name = "Player Esp",Content = "Game Ended Disabling the Esp",Image = "rbxassetid://7733771628",Time = 5})
+            PText1 = true
+            PText2 = true
         end
     end
 end
 
-isMapPresent()
+local updateTimerInterval = 0.1
+local updateGunDropHighlightsInterval = 0.3
 
-RunService.Heartbeat:Connect(function()
-    isMapPresent()
-    UpdatePlayerESP()
-    wait(1)
+local updateTimerTime = 0
+local updateGunDropHighlightsTime = 0
+
+RunService.Heartbeat:Connect(function(deltaTime)
+    updateTimerTime = updateTimerTime + deltaTime
+    updateGunDropHighlightsTime = updateGunDropHighlightsTime + deltaTime
+
+    if updateTimerTime >= updateTimerInterval then
+        updateTimer()
+        updateTimerTime = 0
+    end
+
+    if updateGunDropHighlightsTime >= updateGunDropHighlightsInterval then
+        updateGunDropHighlights()
+        updateGunDropHighlightsTime = 0
+    end
 end)
+
+local function checkPlayerGunInventory(player)
+    local function checkForGun(character)
+        local backpack = player:FindFirstChild("Backpack")
+        if backpack then
+            backpack.ChildAdded:Connect(function(child)
+                if child.Name == "Gun" then
+                    UpdatePlayerESP()
+                end
+            end)
+        end
+
+        character.ChildAdded:Connect(function(child)
+            if child.Name == "Gun" then
+                UpdatePlayerESP()
+            end
+        end)
+    end
+
+    player.CharacterAdded:Connect(function(character)
+        checkForGun(character)
+    end)
+
+    if player.Character then
+        checkForGun(player.Character)
+    end
+end
+
+for _, player in ipairs(Players:GetPlayers()) do
+    checkPlayerGunInventory(player)
+end
+
+Players.PlayerAdded:Connect(checkPlayerGunInventory)
+
+Players.PlayerAdded:Connect(checkPlayerGunInventory)
+
+local hasUpdatedESP = false
+
+local function checkRoles()
+    local murderer1 = GetMurderer()
+    local sheriff1 = GetSheriff()
+
+    if murderer1 or sheriff1 then
+        if not hasUpdatedESP then
+            UpdatePlayerESP()
+            hasUpdatedESP = true
+        end
+    else
+        hasUpdatedESP = false
+    end
+end
+
+local function isMapPresent()
+    for _, descendant in ipairs(Workspace:GetDescendants()) do
+        if descendant.Name == "Normal" then
+            return true
+        end
+    end
+    return false
+end
+
+local previousMapState = isMapPresent()
+
+local function checkMapPresence()
+    local currentMapState = isNormalMapPresent()
+    if currentMapState ~= previousMapState then
+        previousMapState = currentMapState
+        UpdatePlayerESP()
+    end
+end
+
+local roleCheckInterval = 1
+RunService.Heartbeat:Connect(function(deltaTime)
+    checkMapPresence()
+    checkRoles()
+    wait(roleCheckInterval)
+end)
+
+checkMapPresence()
+checkRoles()
 
 -- Orion Properties
 local Tab3 = Window:MakeTab({Name = "MM2", Icon = "rbxassetid://7733954760", PremiumOnly = false})
@@ -1042,7 +1145,6 @@ local Playerespe =Tab3:AddToggle({
         Default = false,
         Callback = function(Value)
             EspPlayer = Value
-	    UpdatePlayerESP()
         end    
     })
 
@@ -1056,14 +1158,13 @@ local Gunespe = Tab3:AddToggle({
 
 local Section3 = Tab3:AddSection({Name = "Mics:"})
 
---[[Button
 local timeruiw = Tab3:AddToggle({
         Name = "Timer",
         Default = false,
         Callback = function(Value)
             TimeGUI = Value
         end    
-    })]]
+    })
 
 -- [Info] --
 local InfoT = Window:MakeTab({Name = "Mics", Icon = "rbxassetid://7733964719", PremiumOnly = false})
@@ -1086,10 +1187,9 @@ InfoT:AddButton({
 	Name = "Destroy Gui",
 	Callback = function() OrionLib:Destroy()end})
 
-OrionLib:Init()
 
+OrionLib:Init()
 RunService.RenderStepped:Connect(function()
-		--Other
     UpdateFps = math.floor(1 / RunService.RenderStepped:Wait(5))
     playerCountLabel:Set("Player Count: " .. #game.Players:GetPlayers() .. "/" .. game.Players.MaxPlayers)
     fpsLabel:Set("Current FPS: " .. UpdateFps)
