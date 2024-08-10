@@ -960,21 +960,23 @@ local function UpdatePlayerESP()
     end
 end
 
-local hasUpdatedESP = false
+local lastMurderer, lastSheriff, lastHero = nil, nil, nil
+local roleCheckInterval = 1  -- Time interval between checks
 
 local function checkRoles()
-    local murderer1 = GetMurderer()
-    local sheriff1 = GetSheriff()
-    local hero1 = GetHero()
+    local currentMurderer = GetMurderer()
+    local currentSheriff = GetSheriff()
+    local currentHero = GetHero()
 
-	
-    if murderer1 or sheriff1 or sheriff then
-        if not hasUpdatedESP then
-            UpdatePlayerESP()
-            hasUpdatedESP = true
-        end
-    else
-        hasUpdatedESP = false
+    -- Check if there's any change in the roles
+    if currentMurderer ~= lastMurderer or currentSheriff ~= lastSheriff or currentHero ~= lastHero then
+        -- Update ESP if any role has changed
+        UpdatePlayerESP()
+        
+        -- Update the last known roles
+        lastMurderer = currentMurderer
+        lastSheriff = currentSheriff
+        lastHero = currentHero
     end
 end
 
@@ -1081,6 +1083,7 @@ OrionLib:Init()
 
 RunService.RenderStepped:Connect(function()
     checkRoles()
+    wait(roleCheckInterval)
     updateTimer()	
     isMapPresent()
     updateGunDropHighlights()
