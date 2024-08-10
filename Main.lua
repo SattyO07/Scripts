@@ -960,38 +960,31 @@ local function UpdatePlayerESP()
     end
 end
 
-local previousRoles = {
-    Murderer = nil,
-    Sheriff = nil,
-    Hero = nil
-}
-
-local function checkRoles()
-    local currentMurderer = GetMurderer()
-    local currentSheriff = GetSheriff()
-    local currentHero = GetHero()
-
-    local shouldUpdate = false
-
-    if currentMurderer ~= previousRoles.Murderer then
-        shouldUpdate = true
-        previousRoles.Murderer = currentMurderer
-    end
-
-    if currentSheriff ~= previousRoles.Sheriff then
-        shouldUpdate = true
-        previousRoles.Sheriff = currentSheriff
-    end
-
-    if currentHero ~= previousRoles.Hero then
-        shouldUpdate = true
-        previousRoles.Hero = currentHero
-    end
-
-    if shouldUpdate then
+local previousMapState = isMapPresent()
+local function checkMapPresence()
+    local currentMapState = isNormalMapPresent()
+    if currentMapState ~= previousMapState then
+        previousMapState = currentMapState
         UpdatePlayerESP()
     end
 end
+
+local hasUpdatedESP = false
+local function checkRoles()
+    local murderer1 = GetMurderer()
+    local sheriff1 = GetSheriff()
+    if murderer1 or sheriff1 then
+        if not hasUpdatedESP then
+            UpdatePlayerESP()
+            hasUpdatedESP = true
+        end
+    else
+        hasUpdatedESP = false
+    end
+end
+
+checkMapPresence()
+checkRoles()
 
 -- Orion Properties
 local Tab3 = Window:MakeTab({Name = "MM2", Icon = "rbxassetid://7733954760", PremiumOnly = false})
@@ -1095,6 +1088,7 @@ InfoT:AddButton({
 OrionLib:Init()
 
 RunService.RenderStepped:Connect(function()
+    checkMapPresence()
     checkRoles()
     updateTimer()	
     isMapPresent()
