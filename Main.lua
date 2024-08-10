@@ -960,45 +960,18 @@ local function UpdatePlayerESP()
     end
 end
 
-local lastMurderer, lastSheriff, lastHero = nil, nil, nil
-local roleCheckInterval = 1  -- Time interval between checks
+local previousMurderer, previousSheriff, previousHero = nil, nil, nil
 
 local function checkRoles()
     local currentMurderer = GetMurderer()
     local currentSheriff = GetSheriff()
     local currentHero = GetHero()
 
-    -- Check if there's any change in the roles
-    if currentMurderer ~= lastMurderer or currentSheriff ~= lastSheriff or currentHero ~= lastHero then
-        -- Remove ESP from previous roles that are no longer valid
-        if lastMurderer and lastMurderer ~= currentMurderer then
-            local lastMurdererPlayer = Players:FindFirstChild(lastMurderer)
-            if lastMurdererPlayer and lastMurdererPlayer.Character then
-                removeESP(lastMurdererPlayer.Character)
-            end
-        end
-
-        if lastSheriff and lastSheriff ~= currentSheriff then
-            local lastSheriffPlayer = Players:FindFirstChild(lastSheriff)
-            if lastSheriffPlayer and lastSheriffPlayer.Character then
-                removeESP(lastSheriffPlayer.Character)
-            end
-        end
-
-        if lastHero and lastHero ~= currentHero then
-            local lastHeroPlayer = Players:FindFirstChild(lastHero)
-            if lastHeroPlayer and lastHeroPlayer.Character then
-                removeESP(lastHeroPlayer.Character)
-            end
-        end
-
-        -- Update ESP for new roles
+    if currentMurderer ~= previousMurderer or currentSheriff ~= previousSheriff or currentHero ~= previousHero then
         UpdatePlayerESP()
-        
-        -- Update the last known roles
-        lastMurderer = currentMurderer
-        lastSheriff = currentSheriff
-        lastHero = currentHero
+        previousMurderer = currentMurderer
+        previousSheriff = currentSheriff
+        previousHero = currentHero
     end
 end
 
