@@ -968,24 +968,33 @@ local function checkRoles()
     local currentSheriff = GetSheriff()
     local currentHero = GetHero()
 
-    -- Check if roles have changed since the last update
+    -- Detect if any of the roles have changed
     if currentMurderer ~= previousRoles.murderer or 
        currentSheriff ~= previousRoles.sheriff or 
        currentHero ~= previousRoles.hero then
 
-        -- Update ESP if any role has changed
+        -- Only update if roles have actually changed
         if currentMurderer or currentSheriff or currentHero then
-            UpdatePlayerESP()
-            hasUpdatedESP = true
+            if not hasUpdatedESP then
+                UpdatePlayerESP()
+                hasUpdatedESP = true
+            end
         else
+            -- Reset ESP update flag if no roles are active
             hasUpdatedESP = false
         end
 
-        -- Store the current roles as the previous roles
+        -- Store current roles as the previous roles for the next comparison
         previousRoles.murderer = currentMurderer
         previousRoles.sheriff = currentSheriff
         previousRoles.hero = currentHero
     end
+end
+
+-- Example usage in a loop
+while true do
+    checkRoles()
+    wait(1)  -- Adjust the wait time as needed
 end
 
 -- Orion Properties
