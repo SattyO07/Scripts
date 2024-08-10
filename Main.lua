@@ -961,18 +961,23 @@ local function UpdatePlayerESP()
 end
 
 local hasUpdatedESP = false
+local updateTimer = 0
+
 local function checkRoles()
     local murderer1 = GetMurderer()
     local sheriff1 = GetSheriff()
     local hero1 = GetHero()
-    if murderer1 or sheriff1 or local hero1 then
-        if not hasUpdatedESP then
+    local shouldUpdateESP = murderer1 or sheriff1 or hero1
+    if shouldUpdateESP and not hasUpdatedESP then
+        if updateTimer <= 0 then
             UpdatePlayerESP()
             hasUpdatedESP = true
+            updateTimer = 1 -- 1 second delay
         end
-    else
+    elseif not shouldUpdateESP then
         hasUpdatedESP = false
     end
+    updateTimer = updateTimer - 0.01 -- decrement timer by 0.01 seconds
 end
 
 checkRoles()
