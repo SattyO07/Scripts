@@ -671,7 +671,7 @@ Timer.Parent = TimeGUI
 
 -- Function to update Timer
 local function updateTimer()
-    if TimeGUI then
+    if TimeGUI and Timer then
         local surfaceGui = surfaceGuiTextLabel.Parent
         if surfaceGui and surfaceGui:IsA("SurfaceGui") and surfaceGui.Enabled then
             Timer.Text = surfaceGuiTextLabel.Text
@@ -679,8 +679,6 @@ local function updateTimer()
         else
             TimeGUI.Enabled = false
         end
-    else
-        TimeGUI.Enabled = false
     end
 end
 
@@ -979,13 +977,6 @@ local function checkRoles()
     updateTimer = updateTimer - 0.01 -- decrement timer by 0.01 seconds
 end
 
-
-local function Mm2Updater()
-    checkRoles()
-    updateTimer()	
-    isMapPresent()
-    updateGunDropHighlights()
-end
 checkRoles()
 
 -- Orion Properties
