@@ -960,18 +960,36 @@ local function UpdatePlayerESP()
     end
 end
 
-local previousMurderer, previousSheriff, previousHero = nil, nil, nil
+local previousRoles = {
+    Murderer = nil,
+    Sheriff = nil,
+    Hero = nil
+}
 
 local function checkRoles()
     local currentMurderer = GetMurderer()
     local currentSheriff = GetSheriff()
     local currentHero = GetHero()
 
-    if currentMurderer ~= previousMurderer or currentSheriff ~= previousSheriff or currentHero ~= previousHero then
+    local shouldUpdate = false
+
+    if currentMurderer ~= previousRoles.Murderer then
+        shouldUpdate = true
+        previousRoles.Murderer = currentMurderer
+    end
+
+    if currentSheriff ~= previousRoles.Sheriff then
+        shouldUpdate = true
+        previousRoles.Sheriff = currentSheriff
+    end
+
+    if currentHero ~= previousRoles.Hero then
+        shouldUpdate = true
+        previousRoles.Hero = currentHero
+    end
+
+    if shouldUpdate then
         UpdatePlayerESP()
-        previousMurderer = currentMurderer
-        previousSheriff = currentSheriff
-        previousHero = currentHero
     end
 end
 
