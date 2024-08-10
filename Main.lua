@@ -919,32 +919,25 @@ local function addESP(character, roleName, color)
     end
 end
 
-local previousMurderer, previousSheriff, previousHero = nil, nil, nil
-
 local function UpdatePlayerESP()
     if isMapPresent() then
-        local murderer = GetMurderer()
-        local sheriff = GetSheriff()
-        local hero = GetHero()
+        murderer = GetMurderer()
+        sheriff = GetSheriff()
+        hero = GetHero()
 
-        if murderer ~= previousMurderer or sheriff ~= previousSheriff or hero ~= previousHero then
-            for _, player in ipairs(Players:GetPlayers()) do
-                if player.Character then
-                    removeESP(player.Character)
-                    if player.Name == murderer then
-                        addESP(player.Character, "Murderer", Color3.fromRGB(255, 0, 0))
-                    elseif player.Name == sheriff then
-                        addESP(player.Character, "Sheriff", Color3.fromRGB(0, 150, 255))
-                    elseif player.Name == hero then
-                        addESP(player.Character, "Hero", Color3.fromRGB(230, 230, 250))
-                    else
-                        addESP(player.Character, "Player", Color3.fromRGB(0, 255, 0))  -- Regular players only get the Highlight
-                    end
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player.Character then
+		 removeESP(player.Character)
+                if player.Name == murderer then
+                    addESP(player.Character, "Murderer", Color3.fromRGB(255, 0, 0))
+                elseif player.Name == sheriff then
+                    addESP(player.Character, "Sheriff", Color3.fromRGB(0, 150, 255))
+                elseif player.Name == hero then
+                    addESP(player.Character, "Hero", Color3.fromRGB(230, 230, 250))
+                else
+                    addESP(player.Character, "Player", Color3.fromRGB(0, 255, 0))  -- Regular players only get the Highlight
                 end
             end
-            previousMurderer = murderer
-            previousSheriff = sheriff
-            previousHero = hero
         end
     else
         for _, player in ipairs(Players:GetPlayers()) do
@@ -955,17 +948,42 @@ local function UpdatePlayerESP()
     end
 end
 
-local function isMapPresent()
-    for _, descendant in ipairs(Workspace:GetDescendants()) do
-        if descendant.Name == "Normal" then
-            return true
+local function UpdatePlayerESP()
+    if isMapPresent() then
+        murderer = GetMurderer()
+        sheriff = GetSheriff()
+        hero = GetHero()
+
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player.Character then
+		 removeESP(player.Character)
+                if player.Name == murderer then
+                    addESP(player.Character, "Murderer", Color3.fromRGB(255, 0, 0))
+                elseif player.Name == sheriff then
+                    addESP(player.Character, "Sheriff", Color3.fromRGB(0, 150, 255))
+                elseif player.Name == hero then
+                    addESP(player.Character, "Hero", Color3.fromRGB(230, 230, 250))
+                else
+                    addESP(player.Character, "Player", Color3.fromRGB(0, 255, 0))  -- Regular players only get the Highlight
+                end
+            end
+        end
+    else
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player.Character then
+                removeESP(player.Character)
+            end
         end
     end
-    return false
 end
 
 isMapPresent()
-UpdatePlayerESP()
+
+RunService.Heartbeat:Connect(function()
+    isMapPresent()
+    UpdatePlayerESP()
+    wait(1)
+end)
 
 -- Orion Properties
 local Tab3 = Window:MakeTab({Name = "MM2", Icon = "rbxassetid://7733954760", PremiumOnly = false})
