@@ -648,8 +648,26 @@ local function shoot()
     localPlayer.Character.Gun.KnifeLocal.CreateBeam.RemoteFunction:InvokeServer(unpack(args))
 end
 
-local player1 = Players.LocalPlayer
-local surfaceGuiTextLabel = Workspace:WaitForChild("RoundTimerPart"):WaitForChild("SurfaceGui"):WaitForChild("Timer")
+local player1 = game.Players.LocalPlayer
+
+-- Attempt to retrieve objects with error handling
+local roundTimerPart = Workspace:WaitForChild("RoundTimerPart", 10)  -- Wait up to 10 seconds
+if not roundTimerPart then
+    warn("RoundTimerPart not found in Workspace")
+    return
+end
+
+local surfaceGui = roundTimerPart:WaitForChild("SurfaceGui", 10)
+if not surfaceGui then
+    warn("SurfaceGui not found in RoundTimerPart")
+    return
+end
+
+local surfaceGuiTextLabel = surfaceGui:WaitForChild("Timer", 10)
+if not surfaceGuiTextLabel then
+    warn("Timer not found in SurfaceGui")
+    return
+end
 
 -- Create TimerGui
 local TimGui = Instance.new("ScreenGui")
@@ -663,7 +681,6 @@ Timer.Position = UDim2.new(0.5, -100, 0.1, 0)
 Timer.TextColor3 = Color3.fromRGB(255, 255, 255)
 Timer.BackgroundTransparency = 1
 Timer.TextSize = 50
-Timer.Text = "Loading..."
 Timer.Font = Enum.Font.SourceSans
 Timer.TextStrokeTransparency = 0.5
 Timer.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
@@ -671,7 +688,7 @@ Timer.Parent = TimGui
 
 -- Function to update Timer
 local function updateTimer()
-    if TimeGUI then
+    if surfaceGuiTextLabel then
         local surfaceGui = surfaceGuiTextLabel.Parent
         if surfaceGui and surfaceGui:IsA("SurfaceGui") and surfaceGui.Enabled then
             Timer.Text = surfaceGuiTextLabel.Text
