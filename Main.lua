@@ -964,7 +964,8 @@ local hasUpdatedESP = false
 local function checkRoles()
     local murderer1 = GetMurderer()
     local sheriff1 = GetSheriff()
-    if murderer1 or sheriff1 then
+    local hero1 = GetHero()
+    if murderer1 or sheriff1 or local hero1 then
         if not hasUpdatedESP then
             UpdatePlayerESP()
             hasUpdatedESP = true
