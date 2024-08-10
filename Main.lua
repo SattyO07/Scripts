@@ -961,7 +961,7 @@ local function UpdatePlayerESP()
 end
 
 local hasUpdatedESP = false
-local previousRoles = {murderer = nil, sheriff = nil, hero = nil}
+local previous1Roles = {murderer = nil, sheriff = nil, hero = nil}
 
 local function checkRoles()
     local currentMurderer = GetMurderer()
@@ -969,9 +969,9 @@ local function checkRoles()
     local currentHero = GetHero()
 
     -- Detect if any of the roles have changed
-    if currentMurderer ~= previousRoles.murderer or 
-       currentSheriff ~= previousRoles.sheriff or 
-       currentHero ~= previousRoles.hero then
+    if currentMurderer ~= previous1Roles.murderer or 
+       currentSheriff ~= previous1Roles.sheriff or 
+       currentHero ~= previous1Roles.hero then
 
         -- Only update if roles have actually changed
         if currentMurderer or currentSheriff or currentHero then
@@ -985,16 +985,10 @@ local function checkRoles()
         end
 
         -- Store current roles as the previous roles for the next comparison
-        previousRoles.murderer = currentMurderer
-        previousRoles.sheriff = currentSheriff
-        previousRoles.hero = currentHero
+        previous1Roles.murderer = currentMurderer
+        previous1Roles.sheriff = currentSheriff
+        previous1Roles.hero = currentHero
     end
-end
-
--- Example usage in a loop
-while true do
-    checkRoles()
-    wait(1)  -- Adjust the wait time as needed
 end
 
 -- Orion Properties
