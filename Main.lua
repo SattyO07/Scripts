@@ -650,22 +650,24 @@ end
 
 local player1 = game.Players.LocalPlayer
 
--- Attempt to retrieve objects with error handling
-local roundTimerPart = Workspace:WaitForChild("RoundTimerPart", 10)  -- Wait up to 10 seconds
+-- Attempt to retrieve the RoundTimerPart
+local roundTimerPart = Workspace:FindFirstChild("RoundTimerPart")
 if not roundTimerPart then
     warn("RoundTimerPart not found in Workspace")
     return
 end
 
-local surfaceGui = roundTimerPart:WaitForChild("SurfaceGui", 10)
+-- Attempt to retrieve the SurfaceGui
+local surfaceGui = roundTimerPart:FindFirstChild("SurfaceGui")
 if not surfaceGui then
     warn("SurfaceGui not found in RoundTimerPart")
     return
 end
 
-local surfaceGuiTextLabel = surfaceGui:WaitForChild("Timer", 10)
+-- Attempt to retrieve the Timer TextLabel
+local surfaceGuiTextLabel = surfaceGui:FindFirstChild("Timer")
 if not surfaceGuiTextLabel then
-    warn("Timer not found in SurfaceGui")
+    warn("Timer TextLabel not found in SurfaceGui")
     return
 end
 
