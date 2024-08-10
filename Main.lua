@@ -964,6 +964,8 @@ local function isMapPresent()
     return false
 end
 
+isMapPresent()
+
 RunService.Heartbeat:Connect(function()
     UpdatePlayerESP()
     isMapPresent()
