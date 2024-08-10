@@ -961,19 +961,30 @@ local function UpdatePlayerESP()
 end
 
 local hasUpdatedESP = false
+local previousRoles = {murderer = nil, sheriff = nil, hero = nil}
 
 local function checkRoles()
-    local murderer1 = GetMurderer()
-    local sheriff1 = GetSheriff()
-    local hero1 = GetHero()
+    local currentMurderer = GetMurderer()
+    local currentSheriff = GetSheriff()
+    local currentHero = GetHero()
 
-    if murderer1 or sheriff1 or hero1 then
-        if not hasUpdatedESP then
+    -- Check if roles have changed since the last update
+    if currentMurderer ~= previousRoles.murderer or 
+       currentSheriff ~= previousRoles.sheriff or 
+       currentHero ~= previousRoles.hero then
+
+        -- Update ESP if any role has changed
+        if currentMurderer or currentSheriff or currentHero then
             UpdatePlayerESP()
             hasUpdatedESP = true
+        else
+            hasUpdatedESP = false
         end
-    else
-        hasUpdatedESP = false
+
+        -- Store the current roles as the previous roles
+        previousRoles.murderer = currentMurderer
+        previousRoles.sheriff = currentSheriff
+        previousRoles.hero = currentHero
     end
 end
 
