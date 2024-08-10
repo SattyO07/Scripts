@@ -1079,9 +1079,7 @@ InfoT:AddButton({
 OrionLib:Init()
 
 RunService.RenderStepped:Connect(function()
-    if isMapPresent() then
-        checkRoles()
-		end
+    checkRoles()
     updateTimer()	
     isMapPresent()
     updateGunDropHighlights()
