@@ -1077,13 +1077,11 @@ InfoT:AddButton({
 	Callback = function() OrionLib:Destroy()end})
 
 OrionLib:Init()
-resetUpdatePending()
 
 RunService.RenderStepped:Connect(function()
     if isMapPresent() then
-        checkPlayerRoles()
-    end
-    checkRoles()
+        checkRoles()
+		end
     updateTimer()	
     isMapPresent()
     updateGunDropHighlights()
