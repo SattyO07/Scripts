@@ -649,7 +649,6 @@ local function shoot()
 end
 
 --[[ Idk What happen its bugging me out
-local player = Players.LocalPlayer
 local surfaceGuiTextLabel = Workspace:WaitForChild("RoundTimerPart"):WaitForChild("SurfaceGui"):WaitForChild("Timer")
 
 -- Create TimerGui
@@ -685,6 +684,7 @@ local function updateTimer()
     end
 end
 ]]
+local player = Players.LocalPlayer
 
 -- Floating Button UI
 local playerGui = player:WaitForChild("PlayerGui")
