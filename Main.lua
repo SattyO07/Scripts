@@ -966,6 +966,7 @@ end
 
 RunService.Heartbeat:Connect(function()
     UpdatePlayerESP()
+    isMapPresent()
 end)
 
 -- Orion Properties
