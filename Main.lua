@@ -960,50 +960,21 @@ local function UpdatePlayerESP()
     end
 end
 
-local playerRoles = {}
-local updatePending = false
+local hasUpdatedESP = false
 
-local function checkPlayerRoles()
-    local roleChanged = false
+local function checkRoles()
+    local murderer1 = GetMurderer()
+    local sheriff1 = GetSheriff()
+    local hero1 = GetHero()
 
-    for _, player in ipairs(Players:GetPlayers()) do
-        local previousRole = playerRoles[player.Name]
-        local currentRole = nil  -- Default role
-
-        if player.Name == GetMurderer() then
-            currentRole = "Murderer"
-        elseif player.Name == GetSheriff() then
-            currentRole = "Sheriff"
-        elseif player.Name == GetHero() then
-            currentRole = "Hero"
+    if murderer1 or sheriff1 or hero1 then
+        if not hasUpdatedESP then
+            UpdatePlayerESP()
+            hasUpdatedESP = true
         end
-
-        -- Only update the role if it's one of the specified roles
-        if currentRole then
-            -- Detect if role has changed
-            if previousRole ~= currentRole then
-                playerRoles[player.Name] = currentRole
-                roleChanged = true
-            end
-        else
-            -- Remove the role if the player is not one of the specified roles
-            if previousRole then
-                playerRoles[player.Name] = nil
-                roleChanged = true
-            end
-        end
+    else
+        hasUpdatedESP = false
     end
-
-    -- Trigger UpdatePlayerESP if any role has changed and no update is pending
-    if roleChanged and not updatePending then
-        UpdatePlayerESP()
-        updatePending = true
-    end
-end
-
--- Reset the updatePending flag after a delay to allow for a single update
-local function resetUpdatePending()
-    updatePending = false
 end
 
 -- Orion Properties
@@ -1112,6 +1083,7 @@ RunService.RenderStepped:Connect(function()
     if isMapPresent() then
         checkPlayerRoles()
     end
+    checkRoles()
     updateTimer()	
     isMapPresent()
     updateGunDropHighlights()
