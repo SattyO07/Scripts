@@ -970,7 +970,29 @@ local function checkRoles()
 
     -- Check if there's any change in the roles
     if currentMurderer ~= lastMurderer or currentSheriff ~= lastSheriff or currentHero ~= lastHero then
-        -- Update ESP if any role has changed
+        -- Remove ESP from previous roles that are no longer valid
+        if lastMurderer and lastMurderer ~= currentMurderer then
+            local lastMurdererPlayer = Players:FindFirstChild(lastMurderer)
+            if lastMurdererPlayer and lastMurdererPlayer.Character then
+                removeESP(lastMurdererPlayer.Character)
+            end
+        end
+
+        if lastSheriff and lastSheriff ~= currentSheriff then
+            local lastSheriffPlayer = Players:FindFirstChild(lastSheriff)
+            if lastSheriffPlayer and lastSheriffPlayer.Character then
+                removeESP(lastSheriffPlayer.Character)
+            end
+        end
+
+        if lastHero and lastHero ~= currentHero then
+            local lastHeroPlayer = Players:FindFirstChild(lastHero)
+            if lastHeroPlayer and lastHeroPlayer.Character then
+                removeESP(lastHeroPlayer.Character)
+            end
+        end
+
+        -- Update ESP for new roles
         UpdatePlayerESP()
         
         -- Update the last known roles
@@ -1083,7 +1105,6 @@ OrionLib:Init()
 
 RunService.RenderStepped:Connect(function()
     checkRoles()
-    wait(roleCheckInterval)
     updateTimer()	
     isMapPresent()
     updateGunDropHighlights()
