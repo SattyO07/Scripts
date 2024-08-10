@@ -960,15 +960,6 @@ local function UpdatePlayerESP()
     end
 end
 
-local previousMapState = isMapPresent()
-local function checkMapPresence()
-    local currentMapState = isNormalMapPresent()
-    if currentMapState ~= previousMapState then
-        previousMapState = currentMapState
-        UpdatePlayerESP()
-    end
-end
-
 local hasUpdatedESP = false
 local function checkRoles()
     local murderer1 = GetMurderer()
@@ -983,7 +974,6 @@ local function checkRoles()
     end
 end
 
-checkMapPresence()
 checkRoles()
 
 -- Orion Properties
@@ -1088,7 +1078,6 @@ InfoT:AddButton({
 OrionLib:Init()
 
 RunService.RenderStepped:Connect(function()
-    checkMapPresence()
     checkRoles()
     updateTimer()	
     isMapPresent()
