@@ -671,7 +671,7 @@ Timer.Parent = TimeGUI
 
 -- Function to update Timer
 local function updateTimer()
-    if TimeGUI and Timer then
+    if surfaceGuiTextLabel then
         local surfaceGui = surfaceGuiTextLabel.Parent
         if surfaceGui and surfaceGui:IsA("SurfaceGui") and surfaceGui.Enabled then
             Timer.Text = surfaceGuiTextLabel.Text
@@ -679,6 +679,8 @@ local function updateTimer()
         else
             TimeGUI.Enabled = false
         end
+    else
+        TimeGUI.Enabled = false
     end
 end
 
@@ -977,7 +979,13 @@ local function checkRoles()
     updateTimer = updateTimer - 0.01 -- decrement timer by 0.01 seconds
 end
 
-checkRoles()
+-- Continuously update the timer
+game:GetService("RunService").Heartbeat:Connect(function()
+    updateTimer()
+    checkRoles()	
+    isMapPresent()
+    updateGunDropHighlights()
+end)
 
 -- Orion Properties
 local Tab3 = Window:MakeTab({Name = "MM2", Icon = "rbxassetid://7733954760", PremiumOnly = false})
@@ -1082,11 +1090,6 @@ InfoT:AddButton({
 OrionLib:Init()
 
 RunService.RenderStepped:Connect(function()
-               -- mm2
-    checkRoles()
-    updateTimer()	
-    isMapPresent()
-    updateGunDropHighlights()
 		--Other
     UpdateFps = math.floor(1 / RunService.RenderStepped:Wait(5))
     playerCountLabel:Set("Player Count: " .. #game.Players:GetPlayers() .. "/" .. game.Players.MaxPlayers)
