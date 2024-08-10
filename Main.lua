@@ -1082,7 +1082,12 @@ InfoT:AddButton({
 OrionLib:Init()
 
 RunService.RenderStepped:Connect(function()
-    Mm2Updater()
+               -- mm2
+    checkRoles()
+    updateTimer()	
+    isMapPresent()
+    updateGunDropHighlights()
+		--Other
     UpdateFps = math.floor(1 / RunService.RenderStepped:Wait(5))
     playerCountLabel:Set("Player Count: " .. #game.Players:GetPlayers() .. "/" .. game.Players.MaxPlayers)
     fpsLabel:Set("Current FPS: " .. UpdateFps)
