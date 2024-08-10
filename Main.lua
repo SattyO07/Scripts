@@ -965,11 +965,7 @@ local function isMapPresent()
 end
 
 isMapPresent()
-
-RunService.Heartbeat:Connect(function()
-    UpdatePlayerESP()
-    isMapPresent()
-end)
+UpdatePlayerESP()
 
 -- Orion Properties
 local Tab3 = Window:MakeTab({Name = "MM2", Icon = "rbxassetid://7733954760", PremiumOnly = false})
