@@ -648,14 +648,14 @@ local function shoot()
     localPlayer.Character.Gun.KnifeLocal.CreateBeam.RemoteFunction:InvokeServer(unpack(args))
 end
 
-local player = game.Players.LocalPlayer
-local surfaceGuiTextLabel = workspace:WaitForChild("RoundTimerPart"):WaitForChild("SurfaceGui"):WaitForChild("Timer")
+local player1 = Players.LocalPlayer
+local surfaceGuiTextLabel = Workspace:WaitForChild("RoundTimerPart"):WaitForChild("SurfaceGui"):WaitForChild("Timer")
 
 -- Create TimerGui
-local TimeGUI = Instance.new("ScreenGui")
-TimeGUI.Name = "TimerGui"
-TimeGUI.Parent = player:WaitForChild("PlayerGui")
-TimeGUI.ResetOnSpawn = false
+local TimGui = Instance.new("ScreenGui")
+TimGui.Name = "TimerGui"
+TimGui.Parent = player1:WaitForChild("PlayerGui")
+TimGui.ResetOnSpawn = false
 
 local Timer = Instance.new("TextLabel")
 Timer.Size = UDim2.new(0, 200, 0, 50)
@@ -667,20 +667,20 @@ Timer.Text = "Loading..."
 Timer.Font = Enum.Font.SourceSans
 Timer.TextStrokeTransparency = 0.5
 Timer.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-Timer.Parent = TimeGUI
+Timer.Parent = TimGui
 
 -- Function to update Timer
 local function updateTimer()
-    if surfaceGuiTextLabel then
+    if TimeGUI then
         local surfaceGui = surfaceGuiTextLabel.Parent
         if surfaceGui and surfaceGui:IsA("SurfaceGui") and surfaceGui.Enabled then
             Timer.Text = surfaceGuiTextLabel.Text
-            TimeGUI.Enabled = true
+            TimGui.Enabled = true
         else
-            TimeGUI.Enabled = false
+            TimGui.Enabled = false
         end
     else
-        TimeGUI.Enabled = false
+        TimGui.Enabled = false
     end
 end
 
