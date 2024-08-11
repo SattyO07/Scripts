@@ -995,10 +995,8 @@ for _, player in ipairs(Players:GetPlayers()) do
 end
 
 Players.PlayerAdded:Connect(checkPlayerGunInventory)
-Players.PlayerAdded:Connect(checkPlayerGunInventory)
 
 local hasUpdatedESP = false
-
 local function checkRoles()
     local murderer1 = GetMurderer()
     local sheriff1 = GetSheriff()
