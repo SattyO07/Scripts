@@ -852,7 +852,7 @@ local function updateGunDropHighlights()
 end
 
 -- ESP Player Functions
-local function addHighlight(character, color)
+local function addPlayerESP(character, roleName, color)
     if EspPlayer and character then
         local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
         if humanoidRootPart then
@@ -867,14 +867,44 @@ local function addHighlight(character, color)
             highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
             highlight.FillColor = color
             highlight.Name = "Highlight"
+
+            if not humanoidRootPart:FindFirstChild("BillboardGui") then
+                local billboard = Instance.new("BillboardGui")
+                billboard.Parent = humanoidRootPart
+                billboard.Adornee = humanoidRootPart
+                billboard.StudsOffset = Vector3.new(0, 3, 0)
+                billboard.Size = UDim2.new(0, 100, 0, 50)
+                billboard.AlwaysOnTop = true
+                billboard.LightInfluence = 0
+
+                local frame = Instance.new("Frame")
+                frame.Parent = billboard
+                frame.Size = UDim2.new(1, 0, 1, 0)
+                frame.BackgroundTransparency = 1
+
+                local textLabel = Instance.new("TextLabel")
+                textLabel.Parent = frame
+                textLabel.Size = UDim2.new(1, 0, 1, 0)
+                textLabel.BackgroundTransparency = 1
+                textLabel.TextColor3 = color
+                textLabel.Font = Enum.Font.PermanentMarker
+                textLabel.TextSize = 24
+                textLabel.Text = roleName
+                textLabel.TextStrokeTransparency = 0
+                textLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+            end
         end
     end
 end
 
-local function removeHighlight(character)
+local function removePlayerESP(character)
     if character then
         local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
         if humanoidRootPart then
+            local billboard = humanoidRootPart:FindFirstChild("BillboardGui")
+            if billboard then
+                billboard:Destroy()
+            end
             local highlight = humanoidRootPart:FindFirstChild("Highlight")
             if highlight then
                 highlight:Destroy()
@@ -883,106 +913,35 @@ local function removeHighlight(character)
     end
 end
 
-local function addBillboard(character, roleName, color)
-    if EspPlayer and character then
-        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-        if humanoidRootPart and not humanoidRootPart:FindFirstChild("BillboardGui") then
-            local billboard = Instance.new("BillboardGui")
-            billboard.Parent = humanoidRootPart
-            billboard.Adornee = humanoidRootPart
-            billboard.StudsOffset = Vector3.new(0, 3, 0)
-            billboard.Size = UDim2.new(0, 100, 0, 50)
-            billboard.AlwaysOnTop = true
-            billboard.LightInfluence = 0
-
-            local frame = Instance.new("Frame")
-            frame.Parent = billboard
-            frame.Size = UDim2.new(1, 0, 1, 0)
-            frame.BackgroundTransparency = 1
-
-            local textLabel = Instance.new("TextLabel")
-            textLabel.Parent = frame
-            textLabel.Size = UDim2.new(1, 0, 1, 0)
-            textLabel.BackgroundTransparency = 1
-            textLabel.TextColor3 = color
-            textLabel.Font = Enum.Font.PermanentMarker
-            textLabel.TextSize = 24
-            textLabel.Text = roleName
-            textLabel.TextStrokeTransparency = 0
-            textLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
-        end
-    end
-end
-
-local function removeBillboard(character)
-    if character then
-        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-        if humanoidRootPart then
-            local billboard = humanoidRootPart:FindFirstChild("BillboardGui")
-            if billboard then
-                billboard:Destroy()
-            end
-        end
-    end
-end
-
-local function isNormalMapPresent()
-    for _, descendant in ipairs(Workspace:GetDescendants()) do
-        if descendant.Name == "Normal" then
-            return true
-        end
-    end
-    return false
-end
-
 local murderer = nil
 local sheriff = nil
 local hero = nil
-local PText1 = false
-local PText2 = true
-local gameAboutToStart = false
-local gameEnded = false
 
 local function UpdatePlayerESP()
-    if isNormalMapPresent() then
-        if gameAboutToStart then
-            OrionLib:MakeNotification({Name = "Esp",Content = "Enabling Esp",Image = "rbxassetid://7733771628",Time = 5})
-            PText2 = false
-        end
-
+    if isMapPresent() then
         murderer = GetMurderer()
         sheriff = GetSheriff()
         hero = GetHero()
 
         for _, player in ipairs(Players:GetPlayers()) do
             if player.Character then
-                removeHighlight(player.Character)
-                removeBillboard(player.Character)
+                removePlayerESP(player.Character)
                 if player.Name == murderer then
-                    addHighlight(player.Character, Color3.fromRGB(255, 0, 0))
-                    addBillboard(player.Character, "Murderer", Color3.fromRGB(255, 0, 0))
+                    addPlayerESP(player.Character, "Murderer", Color3.fromRGB(255, 0, 0))
                 elseif player.Name == sheriff then
-                    addHighlight(player.Character, Color3.fromRGB(0, 150, 255))
-                    addBillboard(player.Character, "Sheriff", Color3.fromRGB(0, 150, 255))
+                    addPlayerESP(player.Character, "Sheriff", Color3.fromRGB(0, 150, 255))
                 elseif player.Name == hero then
-                    addHighlight(player.Character, Color3.fromRGB(230, 230, 250))
-                    addBillboard(player.Character, "Hero", Color3.fromRGB(230, 230, 250))
+                    addPlayerESP(player.Character, "Hero", Color3.fromRGB(230, 230, 250))
                 else
-                    addHighlight(player.Character, Color3.fromRGB(0, 255, 0))
+                    addPlayerESP(player.Character, "Innocent", Color3.fromRGB(0, 255, 0))
                 end
             end
         end
     else
-        if not gameEnded then
-            for _, player in ipairs(Players:GetPlayers()) do
-                if player.Character then
-                    removeHighlight(player.Character)
-                    removeBillboard(player.Character)
-                end
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player.Character then
+                removePlayerESP(player.Character)
             end
-            OrionLib:MakeNotification({Name = "Player Esp",Content = "Game Ended Disabling the Esp",Image = "rbxassetid://7733771628",Time = 5})
-            PText1 = true
-            PText2 = true
         end
     end
 end
@@ -1018,29 +977,24 @@ local function checkPlayerGunInventory(player)
                 end
             end)
         end
-
         character.ChildAdded:Connect(function(child)
             if child.Name == "Gun" then
                 UpdatePlayerESP()
             end
         end)
     end
-
     player.CharacterAdded:Connect(function(character)
         checkForGun(character)
     end)
-
     if player.Character then
         checkForGun(player.Character)
     end
 end
-
 for _, player in ipairs(Players:GetPlayers()) do
     checkPlayerGunInventory(player)
 end
 
 Players.PlayerAdded:Connect(checkPlayerGunInventory)
-
 Players.PlayerAdded:Connect(checkPlayerGunInventory)
 
 local hasUpdatedESP = false
@@ -1069,7 +1023,6 @@ local function isMapPresent()
 end
 
 local previousMapState = isMapPresent()
-
 local function checkMapPresence()
     local currentMapState = isNormalMapPresent()
     if currentMapState ~= previousMapState then
