@@ -917,6 +917,10 @@ local murderer = nil
 local sheriff = nil
 local hero = nil
 
+local murderer = nil
+local sheriff = nil
+local hero = nil
+
 local function UpdatePlayerESP()
     if isMapPresent() then
         murderer = GetMurderer()
@@ -1019,6 +1023,8 @@ local function isMapPresent()
     end
     return false
 end
+
+isMapPresent()
 
 local previousMapState = isMapPresent()
 local function checkMapPresence()
