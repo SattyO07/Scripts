@@ -1024,7 +1024,7 @@ end
 
 local previousMapState = isMapPresent()
 local function checkMapPresence()
-    local currentMapState = isNormalMapPresent()
+    local currentMapState = isMapPresent()
     if currentMapState ~= previousMapState then
         previousMapState = currentMapState
         UpdatePlayerESP()
