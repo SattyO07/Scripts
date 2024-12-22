@@ -1,0 +1,571 @@
+-- Library
+local ArrayField = loadstring(game:HttpGet("https://raw.githubusercontent.com/Hosvile/Refinement/main/MC%3AArrayfield%20Library"))()
+
+-- Local Service
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+-- Local Variables
+local Billboard = false
+local DoorHighlight = false  
+local LeverHighlight = false 
+local fullBrightEnabled = false
+local moveBaseEnabled = false
+_G.kick = false
+_G.loopcheck = false
+
+-- Functions
+--[[ Hide Spot Esp]]--
+local function isValidHideSpot(part)
+    if not part:IsA("BasePart") then return false end
+    local attachments = part:GetChildren()
+    local particleCount = 0
+
+    for _, child in ipairs(attachments) do
+        if child:IsA("Attachment") then
+            for _, attachmentChild in ipairs(child:GetChildren()) do
+                if attachmentChild:IsA("ParticleEmitter") then
+                    particleCount += 1
+                end
+            end
+        end
+    end
+
+    return particleCount == 2
+end
+
+local function createEsp(part)
+    local espGui = Instance.new("BillboardGui")
+    espGui.Name = "EspHideSpot"
+    espGui.Adornee = part
+    espGui.Size = UDim2.new(4, 0, 2, 0)
+    espGui.StudsOffset = Vector3.new(0, 2, 0)
+    espGui.AlwaysOnTop = true
+    espGui.Enabled = Billboard -- Visibility based on the boolean
+
+    local nameLabel = Instance.new("TextLabel")
+    nameLabel.Name = "NameLabel"
+    nameLabel.Text = "Hide Spot"
+    nameLabel.Font = Enum.Font.Highway
+    nameLabel.TextColor3 = Color3.new(1, 1, 1)
+    nameLabel.TextScaled = true
+    nameLabel.BackgroundTransparency = 1
+    nameLabel.Size = UDim2.new(1, 0, 0.5, 0)
+    nameLabel.TextStrokeColor3 = Color3.new(0, 0, 0) -- Black outline
+    nameLabel.TextStrokeTransparency = 0 -- Fully visible outline
+    nameLabel.Parent = espGui
+
+    local distanceLabel = Instance.new("TextLabel")
+    distanceLabel.Name = "DistanceLabel"
+    distanceLabel.Text = ""
+    distanceLabel.Font = Enum.Font.Highway
+    distanceLabel.TextColor3 = Color3.new(1, 1, 1)
+    distanceLabel.TextScaled = true
+    distanceLabel.BackgroundTransparency = 1
+    distanceLabel.Position = UDim2.new(0, 0, 0.5, 0)
+    distanceLabel.Size = UDim2.new(1, 0, 0.5, 0)
+    distanceLabel.TextStrokeColor3 = Color3.new(0, 0, 0) -- Black outline
+    distanceLabel.TextStrokeTransparency = 0 -- Fully visible outline
+    distanceLabel.Parent = espGui
+
+    espGui.Parent = part
+end
+
+local function updateDistance(part)
+    local espGui = part:FindFirstChild("EspHideSpot")
+    if espGui and Billboard then
+        local distance = (humanoidRootPart.Position - part.Position).Magnitude
+        local distanceLabel = espGui:FindFirstChild("DistanceLabel")
+        if distanceLabel then
+            distanceLabel.Text = string.format("%.1f stuns", distance)
+        end
+    end
+end
+
+local function handleParts()
+    for _, room in Workspace.Rooms:GetChildren() do
+        for _, child in room:GetDescendants() do
+            if isValidHideSpot(child) then
+                if not child:FindFirstChild("EspHideSpot") then
+                    createEsp(child)
+                else
+                    local espGui = child:FindFirstChild("EspHideSpot")
+                    if espGui then
+                        espGui.Enabled = Billboard -- Update visibility dynamically
+                    end
+                end
+            elseif child:FindFirstChild("EspHideSpot") and child.Parent == nil then
+                child:FindFirstChild("EspHideSpot"):Destroy()
+            end
+        end
+    end
+end
+
+RunService.Heartbeat:Connect(function()
+    handleParts()
+    for _, room in Workspace.Rooms:GetChildren() do
+        for _, child in room:GetDescendants() do
+            if isValidHideSpot(child) then
+                updateDistance(child)
+            end
+        end
+    end
+end)
+
+--[[Door and Lever Esp]]--
+local doorHighlights = {}
+local leverHighlights = {}
+
+local function addOrRefreshLeverHighlight(part)
+    if not LeverHighlight then return end
+
+    local existingHighlight = part:FindFirstChild("LeverHighlight")
+    if not existingHighlight then
+        local highlight = Instance.new("Highlight")
+        highlight.Name = "LeverHighlight"
+        highlight.Adornee = part
+        highlight.FillColor = Color3.fromRGB(255, 255, 255) 
+        highlight.FillTransparency = 0.9
+        highlight.OutlineColor = Color3.fromRGB(255, 255, 255) 
+        highlight.OutlineTransparency = 0.5
+        highlight.Parent = part
+        leverHighlights[part] = highlight 
+    else
+        existingHighlight.FillColor = Color3.fromRGB(255, 255, 255)
+        existingHighlight.FillTransparency = 0.9
+        existingHighlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+        existingHighlight.OutlineTransparency = 0.5
+    end
+end
+
+local function removeLeverHighlights()
+    for _, highlight in pairs(leverHighlights) do
+        if highlight and highlight.Parent then
+            highlight:Destroy()
+        end
+    end
+    leverHighlights = {} 
+end
+
+local function addOrRefreshDoorHighlight(part)
+    if not DoorHighlight then return end
+
+    local existingHighlight = part:FindFirstChild("DoorHighlight") or part:FindFirstChild("VaultDoorHighlight")
+    if not existingHighlight then
+        local highlight = Instance.new("Highlight")
+        highlight.Name = part.Name == "Cylinder" and "VaultDoorHighlight" or "DoorHighlight"
+        highlight.Adornee = part
+        highlight.FillColor = part.Name == "Cylinder" and Color3.fromRGB(255, 215, 0) or Color3.fromRGB(0, 255, 0) 
+        highlight.FillTransparency = 0.9
+        highlight.OutlineColor = highlight.FillColor  
+        highlight.OutlineTransparency = 0.5
+        highlight.Parent = part
+        doorHighlights[part] = highlight  
+    else
+        existingHighlight.FillColor = part.Name == "Cylinder" and Color3.fromRGB(255, 215, 0) or Color3.fromRGB(0, 255, 0)
+        existingHighlight.FillTransparency = 0.9
+        existingHighlight.OutlineColor = existingHighlight.FillColor  -- Same color for outline
+        existingHighlight.OutlineTransparency = 0.5
+    end
+end
+
+local function removeAllDoorHighlights()
+    for _, highlight in pairs(doorHighlights) do
+        if highlight and highlight.Parent then
+            highlight:Destroy()
+        end
+    end
+    doorHighlights = {} 
+end
+
+local function highlightAllBreakers()
+    for _, room in pairs(workspace.Rooms:GetChildren()) do
+        for _, breaker in pairs(room:GetDescendants()) do
+            if breaker:IsA("Model") and breaker.Name == "Breaker" then
+                addOrRefreshLeverHighlight(breaker) 
+            end
+        end
+    end
+end
+
+local function highlightAllDoors()
+    for _, room in pairs(workspace.Rooms:GetChildren()) do
+        for _, door in pairs(room:GetDescendants()) do
+            if door:IsA("Model") and (door.Name == "Door" or door.Name == "Cylinder") then
+                addOrRefreshDoorHighlight(door)
+            end
+        end
+        
+        local vaultEntrance = room:FindFirstChild("SafeRoom") and room.SafeRoom:FindFirstChild("VaultEntrance")
+        if vaultEntrance and vaultEntrance:FindFirstChild("Hinged") then
+            addOrRefreshDoorHighlight(vaultEntrance.Hinged) 
+        end
+    end
+end
+
+local function updateAllHighlights()
+    removeLeverHighlights()  
+    removeAllDoorHighlights()  
+    highlightAllBreakers()  
+    highlightAllDoors()  
+end
+
+updateAllHighlights()
+
+workspace.Rooms.ChildAdded:Connect(function(newRoom)
+    highlightAllDoors()  
+    highlightAllBreakers() 
+end)
+
+--[[ FullBright ]]--
+local normalLightingSettings = {
+    Brightness = game:GetService("Lighting").Brightness,
+    ClockTime = game:GetService("Lighting").ClockTime,
+    FogEnd = game:GetService("Lighting").FogEnd,
+    GlobalShadows = game:GetService("Lighting").GlobalShadows,
+    Ambient = game:GetService("Lighting").Ambient
+}
+
+local function applyFullBright()
+    game:GetService("Lighting").Brightness = 1
+    game:GetService("Lighting").ClockTime = 12
+    game:GetService("Lighting").FogEnd = 100000
+    game:GetService("Lighting").GlobalShadows = false
+    game:GetService("Lighting").Ambient = Color3.fromRGB(178, 178, 178)
+end
+
+local function restoreNormalLighting()
+    game:GetService("Lighting").Brightness = normalLightingSettings.Brightness
+    game:GetService("Lighting").ClockTime = normalLightingSettings.ClockTime
+    game:GetService("Lighting").FogEnd = normalLightingSettings.FogEnd
+    game:GetService("Lighting").GlobalShadows = normalLightingSettings.GlobalShadows
+    game:GetService("Lighting").Ambient = normalLightingSettings.Ambient
+end
+
+restoreNormalLighting()
+
+spawn(function()
+    while true do
+        wait(0.1)  -- Check every 0.1 seconds
+        if fullBrightEnabled then
+            applyFullBright()
+        else
+            restoreNormalLighting()
+        end
+    end
+end)
+
+--[[ Anti Staff Functionality ]]--
+local groupId = 8532621
+local rolesToCheck = {
+    ["Owner"] = true,
+    ["Dev Access"] = true,
+    ["UGC Access"] = true,
+    ["Secret Tester"] = true
+}
+
+repeat
+    task.wait()
+until game:IsLoaded() and game.Players and game.Players.LocalPlayer and game.Players.LocalPlayer.Character
+
+local function kickPlayer(username)
+    game.Players.LocalPlayer:Kick("Admin Detected: " .. username)
+end
+
+local function notifyAdminDetected(username)
+    ArrayField:Notify({
+        Title = "Admin Detected",
+        Content = username .. " joined your game.",
+        Duration = 1,
+        Image = 4483362458,
+        Actions = {
+            Ignore = {
+                Name = "Leave?",
+                Callback = function()
+                    kickPlayer(username)
+                end
+            }
+        }
+    })
+end
+
+while _G.loopcheck do
+    task.wait(0.5)
+
+    for _, player in pairs(game.Players:GetChildren()) do
+        local rank = player:GetRoleInGroup(groupId)
+        if rolesToCheck[rank] then
+            if _G.kick then
+                kickPlayer(player.Name)
+            else
+                notifyAdminDetected(player.Name)
+            end
+        end
+    end
+end
+
+--[[ Open Door ]]--
+workspace.DescendantAdded:Connect(function(descendant)
+    if descendant.Name == "base" and descendant:IsA("BasePart") then
+        local player = game.Players.LocalPlayer
+        if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            if moveBaseEnabled then
+                descendant.CFrame = player.Character.HumanoidRootPart.CFrame
+                task.wait(1)
+                descendant.CFrame = player.Character.HumanoidRootPart.CFrame
+                task.wait(1)
+                descendant.CFrame = player.Character.HumanoidRootPart.CFrame
+            end
+        end
+    end
+end)
+
+-- Window
+local Window = ArrayField:CreateWindow({
+   Name = "ArrayField Example Window",
+   LoadingTitle = "ArrayField Interface Suite",
+   LoadingSubtitle = "by Arrays",
+   ConfigurationSaving = {
+      Enabled = true,
+      FolderName = nil,
+           FileName = "ArrayField"
+   },
+   Discord = {
+      Enabled = false,
+      Invite = "",
+      RememberJoins = false
+   },
+   KeySystem = false,
+   KeySettings = {
+      Title = "Untitled",
+      Subtitle = "Key System",
+      Note = "No method of obtaining the key is provided",
+      FileName = "Key",
+      SaveKey = true,
+      GrabKeyFromSite = false,
+      Actions = {
+         [1] = {
+            Text = ' Click here to copy the key link <--',
+            OnPress = function()
+               print('Pressed')
+            end,
+         },
+      },
+      Key = {"NewKey"}
+   }
+})
+
+-- Tab 1
+local Tab1 = Window:CreateTab("Main", 4483362458)
+
+local Button1 = Tab1:CreateButton({
+   Name = "Kill Monster/Entity",
+   Interact = 'Click',
+   Callback = function()
+       ArrayField:Notify({
+           Title = "Kill Entity",
+           Content = "Enable",
+           Duration = 6.5,
+           Image = 4483362458,
+           Actions = {
+               Ignore = {
+                   Name = "Ok!",
+                   Callback = function() end
+               }
+           }
+       })
+       
+       local players = game:GetService("Players")
+       local localPlayer = players.LocalPlayer
+       local RS = game:GetService("ReplicatedStorage")
+
+       local entitiesToDestroy = { "eye", "elkman", "Rush", "Worm", "eyePrime" }
+       local guiNamesToRemove = { "eyegui", "smilegui", "GOATPORT" }
+
+       local function removeGuiElement(guiName)
+           while true do
+               local gui = localPlayer:FindFirstChild("PlayerGui"):FindFirstChild(guiName)
+               if gui then
+                   gui:Destroy()
+               end
+               task.wait(0.1)
+           end
+       end
+
+       for _, guiName in ipairs(guiNamesToRemove) do
+           coroutine.wrap(removeGuiElement)(guiName)
+       end
+
+       local function destroyReplicatedItems()
+           local itemsToDestroy = {
+               "eyegui", "smilegui", "SendRush", "SendWorm", "SendSorrow", 
+               "SendGoatman", "Worm", "elkman", "QuickNotes.Eye", "QuickNotes.Rush",
+               "QuickNotes.Sorrow", "QuickNotes.elkman", "QuickNotes.EyePrime", 
+               "QuickNotes.SlugFish", "QuickNotes.FakeDoor", "QuickNotes.SleepyHead"
+           }
+
+           for _, itemName in ipairs(itemsToDestroy) do
+               local item = RS:FindFirstChild(itemName)
+               if item then
+                   item:Destroy()
+               end
+           end
+       end
+
+       task.wait(0.1)
+       destroyReplicatedItems()
+
+       workspace.DescendantAdded:Connect(function(descendant)
+           if descendant:IsA("ParticleEmitter") then
+               descendant.Rate = descendant.Rate * 10
+           elseif table.find(entitiesToDestroy, descendant.Name) then
+               descendant:Destroy()
+           end
+       end)
+
+       while true do
+           local SmileGui = localPlayer:FindFirstChild("PlayerGui"):FindFirstChild("smilegui")
+           if SmileGui then
+               SmileGui:Destroy()
+           end
+           task.wait(0.1)
+       end
+   end
+})
+
+-- DoorEsp Toggle (T1)
+local Toggle1 = Tab1:CreateToggle({
+    Name = "Esp Door",
+    CurrentValue = false,
+    Flag = "T1",
+    Callback = function(Value)
+        DoorHighlight = Value
+        if DoorHighlight then
+            highlightAllDoors()  -- Highlight all doors
+        else
+            removeAllDoorHighlights()  -- Remove highlights
+        end
+
+        ArrayField:Notify({
+            Title = "Esp Door",
+            Content = (DoorHighlight and "Enabled." or "Disabled.")})
+    end
+})
+
+-- LeverEsp Toggle (T2)
+local Toggle2 = Tab1:CreateToggle({
+    Name = "Esp Lever",
+    CurrentValue = false,
+    Flag = "T2",
+    Callback = function(Value)
+        LeverHighlight = Value
+        if LeverHighlight then
+            highlightAllBreakers() 
+        else
+            removeLeverHighlights() 
+        end
+
+        ArrayField:Notify({
+            Title = "Esp Lever",
+            Content = (LeverHighlight and "Enabled." or "Disabled.")})
+    end,
+})
+
+-- FullBright Toggle (T3)
+local Toggle3 = Tab1:CreateToggle({
+    Name = "FullBright",
+    CurrentValue = false,
+    Flag = "T3",
+    Callback = function(Value)
+        fullBrightEnabled = Value
+        if fullBrightEnabled then
+            applyFullBright() 
+        else
+            restoreNormalLighting()  
+        end
+
+        ArrayField:Notify({
+            Title = "FullBright",
+            Content = (fullBrightEnabled and "Enabled." or "Disabled.")})
+    end})
+
+-- Anti Staff Toggle (T4)
+local Toggle4 = Tab1:CreateToggle({
+    Name = "Anti Staff",
+    CurrentValue = false,
+    Flag = "T4",
+    Callback = function(Value)
+        _G.loopcheck = Value
+
+        ArrayField:Notify({
+            Title = "Anti Staff",
+            Content = "Was " .. (Value and "Enabled." or "Disabled.")})
+    end})
+
+-- Instant Kick Toggle (T5)
+local Toggle5 = Tab1:CreateToggle({
+    Name = "Instant Kick",
+    CurrentValue = false,
+    Flag = "T5",
+    Callback = function(Value)
+        _G.kick = Value
+
+        ArrayField:Notify({
+            Title = "Instant Kick",
+            Content = "Was " .. (Value and "Enabled." or "Disabled.")})
+end})
+
+-- Open Door Toggle (T6)
+local Toggle6 = Tab1:CreateToggle({
+    Name = "Open Door",
+    CurrentValue = false,
+    Flag = "T6",
+    Callback = function(Value)
+        moveBaseEnabled = Value
+
+        ArrayField:Notify({
+            Title = "Open Door",
+            Content = moveBaseEnabled and "Enabled." or "Disabled."})
+    end})
+
+-- Esp Hide Spot Toggle (T7)
+local Toggle6 = Tab1:CreateToggle({
+    Name = "Hide Spot Esp",
+    CurrentValue = false,
+    Flag = "T7",
+    Callback = function(Value)
+       Billboard  = Value
+
+        ArrayField:Notify({
+            Title = "Hide Spot",
+            Content = Billboard and "Enable." or "Disabled."})
+    end})
+
+local Button2 = Tab1:CreateButton({
+   Name = "Get all Badge",
+   Interact = 'Click',
+   Callback = function()
+game:GetService("ReplicatedStorage").BadgeGot:FireServer(3438445391730220)
+game:GetService("ReplicatedStorage").BadgeGot:FireServer(1102273464676850)
+game:GetService("ReplicatedStorage").BadgeGot:FireServer(1245157071611435)
+game:GetService("ReplicatedStorage").BadgeGot:FireServer(1257615017477905)
+game:GetService("ReplicatedStorage").BadgeGot:FireServer(764126720344552)
+game:GetService("ReplicatedStorage").BadgeGot:FireServer(1783264331315392)
+game:GetService("ReplicatedStorage").BadgeGot:FireServer(1577853136607350)
+game:GetService("ReplicatedStorage").BadgeGot:FireServer(2103017110352506)
+game:GetService("ReplicatedStorage").BadgeGot:FireServer(3948156977919257)
+game:GetService("ReplicatedStorage").BadgeGot:FireServer(357404882938639)
+game:GetService("ReplicatedStorage").BadgeGot:FireServer(3429384960682817)
+game:GetService("ReplicatedStorage").BadgeGot:FireServer(3164611355775879)
+game:GetService("ReplicatedStorage").BadgeGot:FireServer(1304842223798634)
+game:GetService("ReplicatedStorage").BadgeGot:FireServer(3525349095767364)
+game:GetService("ReplicatedStorage").BadgeGot:FireServer(1900477898605392)
+game:GetService("ReplicatedStorage").BadgeGot:FireServer(357844303001248)
+game:GetService("ReplicatedStorage").BadgeGot:FireServer(59892393420936)
+game:GetService("ReplicatedStorage").BadgeGot:FireServer(3755020953334282)
+   end,
+})
