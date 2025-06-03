@@ -27,6 +27,13 @@ local MM2Tab = Window:CreateTab({
 	ShowTitle = true
 })
 
+local SettingsTab = Window:CreateTab({
+	Name = "MM2",
+	Icon = "view_in_ar",
+	ImageSource = "Material",
+	ShowTitle = true
+})
+
 -- VARS
 local shootOffset = 2.8
 local EspPlayer = false
@@ -466,6 +473,15 @@ local Toggle4 = MM2Tab:CreateToggle({
 -- INIT
 createTimer()
 createMobileShootButton()
+
+Window:CreateHomeTab({
+	SupportedExecutors = {}, -- A Table Of Executors Your Script Supports. Add strings of the executor names for each executor.
+	DiscordInvite = "", -- The Discord Invite Link. Do Not Include discord.gg/ | Only Include the code.
+	Icon = 1, -- By Default, The Icon Is The Home Icon. If You would like to change it to dashboard, replace the interger with 2
+})
+
+SettingsTab:BuildThemeSection() -- Tab Should e the name of the tab you are adding this section to.
+SettingsTab:BuildConfigSection() -- Tab Should be the name of the tab you are adding this section to.
 
 task.spawn(function()
 	while true do
